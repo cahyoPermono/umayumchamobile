@@ -13,6 +13,7 @@ class ProductFormScreen extends StatelessWidget {
     final TextEditingController nameController = TextEditingController();
     final TextEditingController descriptionController = TextEditingController();
     final TextEditingController skuController = TextEditingController();
+    final TextEditingController priceController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Add New Product')),
@@ -35,6 +36,12 @@ class ProductFormScreen extends StatelessWidget {
               controller: skuController,
               decoration: const InputDecoration(labelText: 'SKU (Optional)'),
             ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: priceController,
+              decoration: const InputDecoration(labelText: 'Price (Optional)'),
+              keyboardType: TextInputType.numberWithOptions(decimal: true),
+            ),
             const SizedBox(height: 24),
             Obx(() {
               return controller.isLoading.value
@@ -47,6 +54,7 @@ class ProductFormScreen extends StatelessWidget {
                           description: descriptionController.text.trim(),
                           sku: skuController.text.trim(),
                           quantity: 0, // Initial quantity is 0, handled by transactions
+                          price: double.tryParse(priceController.text.trim()),
                           createdAt: DateTime.now(),
                         );
                         controller.addProduct(newProduct);

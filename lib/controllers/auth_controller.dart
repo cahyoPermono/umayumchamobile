@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha/screens/sign_in_screen.dart';
-import 'package:umayumcha/screens/home_screen.dart';
+import 'package:umayumcha/screens/dashboard_screen.dart';
 
 class AuthController extends GetxController {
   final SupabaseClient supabase = Supabase.instance.client;
@@ -25,7 +25,7 @@ class AuthController extends GetxController {
 
       if (session != null) {
         await _fetchUserRole(session.user.id);
-        Get.offAll(() => MyHomePage(title: 'Home'));
+        Get.offAll(() => DashboardScreen());
       } else {
         userRole.value = ''; // Clear role on sign out
         Get.offAll(() => const SignInScreen());

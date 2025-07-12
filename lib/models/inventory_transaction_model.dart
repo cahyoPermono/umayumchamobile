@@ -1,7 +1,7 @@
-
 class InventoryTransaction {
   final String id;
   final String productId;
+  final String? productName; // Added for display
   final String type;
   final int quantityChange;
   final String? reason;
@@ -11,6 +11,7 @@ class InventoryTransaction {
   InventoryTransaction({
     required this.id,
     required this.productId,
+    this.productName,
     required this.type,
     required this.quantityChange,
     this.reason,
@@ -22,6 +23,7 @@ class InventoryTransaction {
     return InventoryTransaction(
       id: json['id'] as String,
       productId: json['product_id'] as String,
+      productName: json['product_name'] as String?,
       type: json['type'] as String,
       quantityChange: json['quantity_change'] as int,
       reason: json['reason'] as String?,

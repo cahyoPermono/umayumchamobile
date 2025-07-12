@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha/controllers/inventory_controller.dart';
+import 'package:umayumcha/controllers/delivery_note_controller.dart';
 import 'package:umayumcha/screens/splash_screen.dart';
 import 'package:umayumcha/supabase_credentials.dart';
 
@@ -12,6 +13,7 @@ void main() async {
 
   // Initialize core controllers here
   Get.put(InventoryController());
+  Get.put(DeliveryNoteController());
 
   runApp(const MyApp());
 }

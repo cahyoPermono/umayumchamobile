@@ -89,7 +89,8 @@ class InventoryScreen extends StatelessWidget {
                   children: [
                     ListTile(
                       title: Text(product.name),
-                      subtitle: Text(product.sku ?? 'No SKU'),
+                      subtitle: Text(
+                          '${product.sku ?? 'No SKU'} | Price: ${product.price?.toStringAsFixed(2) ?? 'N/A'}'),
                       trailing: Text(
                         'Stock: ${product.quantity}',
                         style: Theme.of(context).textTheme.titleMedium,
