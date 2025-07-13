@@ -19,14 +19,18 @@ class TransactionLogController extends GetxController {
       isLoading.value = true;
       final response = await supabase
           .from('inventory_transactions')
-          .select('*, products(name)') // Select product name for display
+          .select(
+            '*, products(name), from_branch_id(name), to_branch_id(name)',
+          ) // Select product and branch names
           .order('created_at', ascending: false);
 
       transactions.value =
           (response as List).map((item) {
-            // Attach product name to the transaction for display
             final Map<String, dynamic> transactionData = Map.from(item);
-            transactionData['product_name'] = item['products']['name'];
+            transactionData['product_name'] = item['products']?['name'];
+            transactionData['from_branch_name'] =
+                item['from_branch_id']?['name'];
+            transactionData['to_branch_name'] = item['to_branch_id']?['name'];
             return InventoryTransaction.fromJson(transactionData);
           }).toList();
     } catch (e) {

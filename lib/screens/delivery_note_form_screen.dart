@@ -1,9 +1,10 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:umayumcha/controllers/delivery_note_controller.dart';
 import 'package:umayumcha/controllers/inventory_controller.dart';
-import 'package:umayumcha/models/product_model.dart';
+import 'package:umayumcha/controllers/branch_controller.dart'; // Import BranchController
+import 'package:umayumcha/models/branch_model.dart'; // Import Branch model
+import 'package:umayumcha/models/branch_product_model.dart'; // Import BranchProduct model
 
 class DeliveryNoteFormScreen extends StatefulWidget {
   const DeliveryNoteFormScreen({super.key});
@@ -15,12 +16,18 @@ class DeliveryNoteFormScreen extends StatefulWidget {
 class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
   final DeliveryNoteController deliveryNoteController = Get.find();
   final InventoryController inventoryController = Get.find();
+  final BranchController branchController = Get.find(); // Get BranchController
 
   final TextEditingController customerNameController = TextEditingController();
-  final TextEditingController destinationAddressController = TextEditingController();
+  final TextEditingController destinationAddressController =
+      TextEditingController();
   DateTime selectedDeliveryDate = DateTime.now();
 
-  final RxList<Map<String, dynamic>> selectedProducts = <Map<String, dynamic>>[].obs;
+  Branch? selectedFromBranch; // New: Selected source branch
+  Branch? selectedToBranch; // New: Selected destination branch
+
+  final RxList<Map<String, dynamic>> selectedProducts =
+      <Map<String, dynamic>>[].obs;
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -37,41 +44,63 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
   }
 
   void _addProductToNote() {
+    if (selectedFromBranch == null) {
+      Get.snackbar('Error', 'Please select a source branch first.');
+      return;
+    }
+
     Get.dialog(
       AlertDialog(
         title: const Text('Add Product to Delivery Note'),
         content: Obx(() {
-          if (inventoryController.products.isEmpty) {
-            return const Text('No products available.');
+          // Filter products by the selected source branch inside Obx
+          final availableProducts = inventoryController.branchProducts
+              .where((bp) => bp.branchId == selectedFromBranch!.id)
+              .toList();
+
+          if (availableProducts.isEmpty) {
+            return const Text('No products available in the selected source branch.');
           }
-          return DropdownButtonFormField<Product>(
+          return DropdownButtonFormField<BranchProduct>(
             decoration: const InputDecoration(labelText: 'Select Product'),
-            items: inventoryController.products.map((product) {
+            items: availableProducts.map((branchProduct) {
               return DropdownMenuItem(
-                value: product,
-                child: Text(product.name),
+                value: branchProduct,
+                child: Text(
+                  '${branchProduct.product?.name ?? 'N/A'} (Stock: ${branchProduct.quantity})',
+                ),
               );
             }).toList(),
-            onChanged: (Product? product) {
-              if (product != null) {
+            onChanged: (BranchProduct? branchProduct) {
+              if (branchProduct != null) {
                 Get.dialog(
                   AlertDialog(
-                    title: Text('Enter Quantity for ${product.name}'),
+                    title: Text(
+                      'Enter Quantity for ${branchProduct.product?.name ?? 'N/A'}',
+                    ),
                     content: TextField(
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(labelText: 'Quantity'),
+                      decoration: InputDecoration(
+                        labelText: 'Quantity (Max: ${branchProduct.quantity})',
+                      ),
                       onSubmitted: (value) {
                         final int? quantity = int.tryParse(value);
-                        if (quantity != null && quantity > 0) {
+                        if (quantity != null &&
+                            quantity > 0 &&
+                            quantity <= branchProduct.quantity) {
                           selectedProducts.add({
-                            'product_id': product.id,
-                            'product_name': product.name,
+                            'product_id': branchProduct.productId,
+                            'product_name':
+                                branchProduct.product?.name ?? 'N/A',
                             'quantity': quantity,
                           });
                           Get.back(); // Close quantity dialog
                           Get.back(); // Close product selection dialog
                         } else {
-                          Get.snackbar('Error', 'Please enter a valid quantity.');
+                          Get.snackbar(
+                            'Error',
+                            'Please enter a valid quantity within available stock.',
+                          );
                         }
                       },
                     ),
@@ -93,6 +122,64 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            // From Branch Selection
+            Obx(() {
+              if (branchController.isLoading.value) {
+                return const CircularProgressIndicator();
+              }
+              if (branchController.branches.isEmpty) {
+                return const Text(
+                  'No branches available. Please add branches first.',
+                );
+              }
+              return DropdownButtonFormField<Branch>(
+                decoration: const InputDecoration(labelText: 'From Branch'),
+                value: selectedFromBranch,
+                onChanged: (Branch? newValue) {
+                  setState(() {
+                    selectedFromBranch = newValue;
+                    // When from branch changes, clear selected products
+                    selectedProducts.clear();
+                  });
+                },
+                items:
+                    branchController.branches.map((branch) {
+                      return DropdownMenuItem<Branch>(
+                        value: branch,
+                        child: Text(branch.name),
+                      );
+                    }).toList(),
+              );
+            }),
+            const SizedBox(height: 16),
+
+            // To Branch Selection
+            Obx(() {
+              if (branchController.isLoading.value) {
+                return const CircularProgressIndicator();
+              }
+              if (branchController.branches.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return DropdownButtonFormField<Branch>(
+                decoration: const InputDecoration(labelText: 'To Branch'),
+                value: selectedToBranch,
+                onChanged: (Branch? newValue) {
+                  setState(() {
+                    selectedToBranch = newValue;
+                  });
+                },
+                items:
+                    branchController.branches.map((branch) {
+                      return DropdownMenuItem<Branch>(
+                        value: branch,
+                        child: Text(branch.name),
+                      );
+                    }).toList(),
+              );
+            }),
+            const SizedBox(height: 16),
+
             TextField(
               controller: customerNameController,
               decoration: const InputDecoration(labelText: 'Customer Name'),
@@ -100,31 +187,44 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
             const SizedBox(height: 16),
             TextField(
               controller: destinationAddressController,
-              decoration: const InputDecoration(labelText: 'Destination Address (Optional)'),
+              decoration: const InputDecoration(
+                labelText: 'Destination Address (Optional)',
+              ),
               maxLines: 2,
             ),
             const SizedBox(height: 16),
             ListTile(
-              title: Text('Delivery Date: ${selectedDeliveryDate.toLocal().toString().split(' ').first}'),
+              title: Text(
+                'Delivery Date: ${selectedDeliveryDate.toLocal().toString().split(' ').first}',
+              ),
               trailing: const Icon(Icons.calendar_today),
               onTap: () => _selectDate(context),
             ),
             const SizedBox(height: 16),
-            const Text('Products for Delivery:', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text(
+              'Products for Delivery:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             Obx(() {
+              // Access selectedProducts.length to ensure Obx reacts to changes
+              selectedProducts.length; 
               return Expanded(
                 child: ListView.builder(
                   itemCount: selectedProducts.length,
                   itemBuilder: (context, index) {
                     final item = selectedProducts[index];
                     return ListTile(
-                      title: Text(item['product_name']),
+                      title: Text(
+                        '${item['product_name']} (from ${selectedFromBranch?.name ?? 'N/A'})',
+                      ),
                       trailing: Text('x${item['quantity']}'),
                       onLongPress: () {
                         Get.dialog(
                           AlertDialog(
                             title: const Text('Remove Item?'),
-                            content: Text('Do you want to remove ${item['product_name']}?'),
+                            content: Text(
+                              'Do you want to remove ${item['product_name']}?',
+                            ),
                             actions: [
                               TextButton(
                                 onPressed: () => Get.back(),
@@ -156,24 +256,38 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
               return deliveryNoteController.isLoading.value
                   ? const CircularProgressIndicator()
                   : ElevatedButton(
-                      onPressed: () {
-                        if (customerNameController.text.isEmpty) {
-                          Get.snackbar('Error', 'Customer Name cannot be empty.');
-                          return;
-                        }
-                        if (selectedProducts.isEmpty) {
-                          Get.snackbar('Error', 'Please add at least one product to the delivery note.');
-                          return;
-                        }
-                        deliveryNoteController.createDeliveryNote(
-                          customerName: customerNameController.text.trim(),
-                          destinationAddress: destinationAddressController.text.trim(),
-                          deliveryDate: selectedDeliveryDate,
-                          items: selectedProducts.toList(),
+                    onPressed: () {
+                      if (customerNameController.text.isEmpty) {
+                        Get.snackbar('Error', 'Customer Name cannot be empty.');
+                        return;
+                      }
+                      if (selectedFromBranch == null) {
+                        Get.snackbar('Error', 'Please select a From Branch.');
+                        return;
+                      }
+                      if (selectedToBranch == null) {
+                        Get.snackbar('Error', 'Please select a To Branch.');
+                        return;
+                      }
+                      if (selectedProducts.isEmpty) {
+                        Get.snackbar(
+                          'Error',
+                          'Please add at least one product to the delivery note.',
                         );
-                      },
-                      child: const Text('Save Delivery Note'),
-                    );
+                        return;
+                      }
+                      deliveryNoteController.createDeliveryNote(
+                        customerName: customerNameController.text.trim(),
+                        destinationAddress:
+                            destinationAddressController.text.trim(),
+                        deliveryDate: selectedDeliveryDate,
+                        fromBranchId: selectedFromBranch!.id,
+                        toBranchId: selectedToBranch!.id,
+                        items: selectedProducts.toList(),
+                      );
+                    },
+                    child: const Text('Save Delivery Note'),
+                  );
             }),
           ],
         ),

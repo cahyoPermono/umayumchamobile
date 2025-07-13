@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:umayumcha/controllers/transaction_log_controller.dart';
+import 'package:umayumcha/models/inventory_transaction_model.dart'; // Explicitly import the model
 
 class TransactionLogScreen extends StatelessWidget {
   const TransactionLogScreen({super.key});
@@ -24,8 +25,9 @@ class TransactionLogScreen extends StatelessWidget {
         return ListView.builder(
           itemCount: controller.transactions.length,
           itemBuilder: (context, index) {
-            final transaction = controller.transactions[index];
-            final isIncoming = transaction.type == 'in';
+            final InventoryTransaction transaction =
+                controller.transactions[index];
+            final bool isIncoming = transaction.type == 'in';
             return Card(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: ListTile(
@@ -35,12 +37,16 @@ class TransactionLogScreen extends StatelessWidget {
                 ),
                 title: Text(
                   '${transaction.quantityChange} x ${transaction.productName ?? transaction.productId}',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Type: ${transaction.type.capitalizeFirst}'),
+                    if (transaction.fromBranchId != null)
+                      Text('From: ${transaction.fromBranchName ?? 'N/A'}'),
+                    if (transaction.toBranchId != null)
+                      Text('To: ${transaction.toBranchName ?? 'N/A'}'),
                     Text('Reason: ${transaction.reason ?? 'N/A'}'),
                     Text(
                       'Date: ${DateFormat('dd MMM yyyy, HH:mm').format(transaction.createdAt)}',

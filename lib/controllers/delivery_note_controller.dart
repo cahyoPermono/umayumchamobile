@@ -22,7 +22,7 @@ class DeliveryNoteController extends GetxController {
       final response = await supabase
           .from('delivery_notes')
           .select(
-            '*, inventory_transactions(product_id, quantity_change, products(name))',
+            '*, inventory_transactions(product_id, quantity_change, products(name)), from_branch_id(name), to_branch_id(name)',
           )
           .order('created_at', ascending: false);
 
@@ -41,6 +41,8 @@ class DeliveryNoteController extends GetxController {
     required String customerName,
     String? destinationAddress,
     required DateTime deliveryDate,
+    required String fromBranchId,
+    required String toBranchId,
     required List<Map<String, dynamic>> items, // {productId, quantity}
   }) async {
     try {
@@ -55,6 +57,8 @@ class DeliveryNoteController extends GetxController {
                 'destination_address': destinationAddress,
                 'delivery_date':
                     deliveryDate.toIso8601String().split('T').first,
+                'from_branch_id': fromBranchId,
+                'to_branch_id': toBranchId,
               })
               .select('id')
               .single();
@@ -69,6 +73,9 @@ class DeliveryNoteController extends GetxController {
           quantityChange: item['quantity'],
           reason: 'Delivery Note: $customerName',
           deliveryNoteId: deliveryNoteId,
+          fromBranchId: fromBranchId,
+          toBranchId:
+              toBranchId, // For inter-branch transfer, toBranchId is also relevant for the transaction
         );
       }
 

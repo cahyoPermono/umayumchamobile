@@ -4,7 +4,6 @@ class Product {
   final String name;
   final String? description;
   final String? sku;
-  final int quantity;
   final double? price;
   final DateTime createdAt;
 
@@ -13,7 +12,6 @@ class Product {
     required this.name,
     this.description,
     this.sku,
-    required this.quantity,
     this.price,
     required this.createdAt,
   });
@@ -24,7 +22,6 @@ class Product {
       name: json['name'] as String,
       description: json['description'] as String?,
       sku: json['sku'] as String?,
-      quantity: json['quantity'] as int,
       price: (json['price'] as num?)?.toDouble(),
       createdAt: DateTime.parse(json['created_at'] as String),
     );
@@ -36,7 +33,6 @@ class Product {
       'description': description,
       'sku': sku,
       'price': price,
-      // Quantity is handled by transactions, not direct updates.
     };
   }
 }

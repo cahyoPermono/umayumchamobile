@@ -31,7 +31,8 @@ class DeliveryNoteListScreen extends StatelessWidget {
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: ExpansionTile(
                 title: Text('${note.customerName} - ${DateFormat('dd/MM/yyyy').format(note.deliveryDate)}'),
-                subtitle: Text(note.destinationAddress ?? 'No Address'),
+                subtitle: Text(
+                    '${note.destinationAddress ?? 'No Address'} | From: ${note.fromBranchName ?? 'N/A'} | To: ${note.toBranchName ?? 'N/A'}'),
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(16.0),

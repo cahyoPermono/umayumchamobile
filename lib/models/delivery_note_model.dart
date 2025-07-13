@@ -5,6 +5,10 @@ class DeliveryNote {
   final String? destinationAddress;
   final DateTime deliveryDate;
   final String? userId;
+  final String? fromBranchId;
+  final String? toBranchId;
+  final String? fromBranchName;
+  final String? toBranchName;
   final List<Map<String, dynamic>>? items; // For displaying items in the note
 
   DeliveryNote({
@@ -14,6 +18,10 @@ class DeliveryNote {
     this.destinationAddress,
     required this.deliveryDate,
     this.userId,
+    this.fromBranchId,
+    this.toBranchId,
+    this.fromBranchName,
+    this.toBranchName,
     this.items,
   });
 
@@ -25,6 +33,11 @@ class DeliveryNote {
       destinationAddress: json['destination_address'] as String?,
       deliveryDate: DateTime.parse(json['delivery_date'] as String),
       userId: json['user_id'] as String?,
+      fromBranchId: json['from_branch_id'] as String?,
+      toBranchId: json['to_branch_id'] as String?,
+      fromBranchName:
+          (json['from_branch_id'] as Map<String, dynamic>?)?['name'],
+      toBranchName: (json['to_branch_id'] as Map<String, dynamic>?)?['name'],
       items:
           (json['inventory_transactions'] as List?)
               ?.map(
@@ -43,11 +56,9 @@ class DeliveryNote {
     return {
       'customer_name': customerName,
       'destination_address': destinationAddress,
-      'delivery_date':
-          deliveryDate
-              .toIso8601String()
-              .split('T')
-              .first, // Format for date only
+      'delivery_date': deliveryDate.toIso8601String().split('T').first,
+      'from_branch_id': fromBranchId,
+      'to_branch_id': toBranchId,
     };
   }
 }
