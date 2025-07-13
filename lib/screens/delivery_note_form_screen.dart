@@ -180,18 +180,6 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
             }),
             const SizedBox(height: 16),
 
-            TextField(
-              controller: customerNameController,
-              decoration: const InputDecoration(labelText: 'Customer Name'),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: destinationAddressController,
-              decoration: const InputDecoration(
-                labelText: 'Destination Address (Optional)',
-              ),
-              maxLines: 2,
-            ),
             const SizedBox(height: 16),
             ListTile(
               title: Text(
@@ -257,10 +245,6 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                   ? const CircularProgressIndicator()
                   : ElevatedButton(
                     onPressed: () {
-                      if (customerNameController.text.isEmpty) {
-                        Get.snackbar('Error', 'Customer Name cannot be empty.');
-                        return;
-                      }
                       if (selectedFromBranch == null) {
                         Get.snackbar('Error', 'Please select a From Branch.');
                         return;
@@ -277,9 +261,8 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                         return;
                       }
                       deliveryNoteController.createDeliveryNote(
-                        customerName: customerNameController.text.trim(),
-                        destinationAddress:
-                            destinationAddressController.text.trim(),
+                        customerName: 'Internal Transfer', // Default value
+                        destinationAddress: 'Internal Transfer', // Default value
                         deliveryDate: selectedDeliveryDate,
                         fromBranchId: selectedFromBranch!.id,
                         toBranchId: selectedToBranch!.id,

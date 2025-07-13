@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart'; // For debugPrint
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha/models/branch_product_model.dart';
@@ -37,7 +38,9 @@ class InventoryController extends GetxController {
           (response as List)
               .map((item) => BranchProduct.fromJson(item))
               .toList();
+      debugPrint('Branch products fetched: ${branchProducts.length}');
     } catch (e) {
+      debugPrint('Error fetching branch products: ${e.toString()}');
       Get.snackbar('Error', 'Failed to fetch branch products: ${e.toString()}');
     } finally {
       isLoading.value = false;
@@ -47,9 +50,16 @@ class InventoryController extends GetxController {
   Future<String?> addProductAndGetId(Product product) async {
     try {
       isLoading.value = true;
-      final response = await supabase.from('products').insert(product.toJson()).select('id').single();
+      final response =
+          await supabase
+              .from('products')
+              .insert(product.toJson())
+              .select('id')
+              .single();
+      debugPrint('Product added with ID: ${response['id']}');
       return response['id'] as String;
     } catch (e) {
+      debugPrint('Error adding product: ${e.toString()}');
       Get.snackbar('Error', 'Failed to add product: ${e.toString()}');
       return null;
     } finally {
@@ -77,9 +87,13 @@ class InventoryController extends GetxController {
         'from_branch_id': fromBranchId, // Pass new parameter
         'to_branch_id': toBranchId, // Pass new parameter
       });
+      debugPrint(
+        'Transaction added: type=$type, quantity=$quantityChange, product=$productId',
+      );
       fetchBranchProducts(); // Refresh product quantities for the selected branch
       Get.snackbar('Success', 'Stock updated successfully!');
     } catch (e) {
+      debugPrint('Error adding transaction: ${e.toString()}');
       Get.snackbar('Error', 'Failed to update stock: ${e.toString()}');
     } finally {
       isLoading.value = false;

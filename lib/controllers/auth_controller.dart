@@ -1,7 +1,9 @@
+import 'package:flutter/material.dart'; // For debugPrint
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha/screens/sign_in_screen.dart';
 import 'package:umayumcha/screens/dashboard_screen.dart';
+import 'package:flutter/foundation.dart'; // For debugPrint
 
 class AuthController extends GetxController {
   final SupabaseClient supabase = Supabase.instance.client;
@@ -45,7 +47,7 @@ class AuthController extends GetxController {
 
       userRole.value = response['role'] ?? 'user';
     } catch (e) {
-      // Handle cases where the profile might not exist yet or other errors
+      debugPrint('Error fetching user role: ${e.toString()}');
       userRole.value = 'user'; // Default to 'user' on error
       Get.snackbar('Role Error', 'Could not fetch user role.');
     }
@@ -60,16 +62,20 @@ class AuthController extends GetxController {
       );
       // The onAuthStateChange listener will handle redirection.
       if (response.user != null) {
+        debugPrint('Sign up successful: ${response.user?.email}');
         Get.snackbar(
           'Success',
           'Sign up successful! Please check your email for verification.',
         );
       } else if (response.session == null) {
+        debugPrint('Sign up failed: No user or session');
         Get.snackbar('Error', 'Sign up failed. Please try again.');
       }
     } on AuthException catch (e) {
+      debugPrint('AuthException during sign up: ${e.message}');
       Get.snackbar('Auth Error', e.message);
     } catch (e) {
+      debugPrint('Unexpected error during sign up: ${e.toString()}');
       Get.snackbar('Error', 'An unexpected error occurred.');
     } finally {
       isLoading.value = false;
@@ -80,10 +86,13 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
       await supabase.auth.signInWithPassword(email: email, password: password);
+      debugPrint('Sign in successful for: $email');
       // The onAuthStateChange listener will handle redirection and role fetching.
     } on AuthException catch (e) {
+      debugPrint('AuthException during sign in: ${e.message}');
       Get.snackbar('Auth Error', e.message);
     } catch (e) {
+      debugPrint('Unexpected error during sign in: ${e.toString()}');
       Get.snackbar('Error', 'An unexpected error occurred.');
     } finally {
       isLoading.value = false;
@@ -94,10 +103,13 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
       await supabase.auth.signOut();
+      debugPrint('Sign out successful');
       // The onAuthStateChange listener will handle redirection.
     } on AuthException catch (e) {
+      debugPrint('AuthException during sign out: ${e.message}');
       Get.snackbar('Auth Error', e.message);
     } catch (e) {
+      debugPrint('Unexpected error during sign out: ${e.toString()}');
       Get.snackbar('Error', 'An unexpected error occurred.');
     } finally {
       isLoading.value = false;

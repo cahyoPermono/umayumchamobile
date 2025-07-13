@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart'; // For debugPrint
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha/controllers/inventory_controller.dart';
@@ -30,7 +31,9 @@ class DeliveryNoteController extends GetxController {
           (response as List)
               .map((item) => DeliveryNote.fromJson(item))
               .toList();
+      debugPrint('Delivery notes fetched: ${deliveryNotes.length}');
     } catch (e) {
+      debugPrint('Error fetching delivery notes: ${e.toString()}');
       Get.snackbar('Error', 'Failed to fetch delivery notes: ${e.toString()}');
     } finally {
       isLoading.value = false;
@@ -38,7 +41,7 @@ class DeliveryNoteController extends GetxController {
   }
 
   Future<void> createDeliveryNote({
-    required String customerName,
+    String? customerName,
     String? destinationAddress,
     required DateTime deliveryDate,
     required String fromBranchId,
@@ -53,8 +56,8 @@ class DeliveryNoteController extends GetxController {
           await supabase
               .from('delivery_notes')
               .insert({
-                'customer_name': customerName,
-                'destination_address': destinationAddress,
+                'customer_name': customerName ?? 'Internal Transfer',
+                'destination_address': destinationAddress ?? 'Internal Transfer',
                 'delivery_date':
                     deliveryDate.toIso8601String().split('T').first,
                 'from_branch_id': fromBranchId,
@@ -64,6 +67,7 @@ class DeliveryNoteController extends GetxController {
               .single();
 
       final String deliveryNoteId = response['id'];
+      debugPrint('Delivery note created with ID: $deliveryNoteId');
 
       // 2. Create inventory transactions for each item in the delivery note
       for (var item in items) {
@@ -77,12 +81,14 @@ class DeliveryNoteController extends GetxController {
           toBranchId:
               toBranchId, // For inter-branch transfer, toBranchId is also relevant for the transaction
         );
+        debugPrint('Transaction added for product ${item['product_id']}');
       }
 
       fetchDeliveryNotes(); // Refresh the list
       Get.back(); // Close the form screen
       Get.snackbar('Success', 'Delivery note created successfully!');
     } catch (e) {
+      debugPrint('Error creating delivery note: ${e.toString()}');
       Get.snackbar('Error', 'Failed to create delivery note: ${e.toString()}');
     } finally {
       isLoading.value = false;

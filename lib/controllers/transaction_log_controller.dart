@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart'; // For debugPrint
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha/models/inventory_transaction_model.dart';
@@ -33,7 +34,9 @@ class TransactionLogController extends GetxController {
             transactionData['to_branch_name'] = item['to_branch_id']?['name'];
             return InventoryTransaction.fromJson(transactionData);
           }).toList();
+      debugPrint('Transactions fetched: ${transactions.length}');
     } catch (e) {
+      debugPrint('Error fetching transactions: ${e.toString()}');
       Get.snackbar('Error', 'Failed to fetch transactions: ${e.toString()}');
     } finally {
       isLoading.value = false;

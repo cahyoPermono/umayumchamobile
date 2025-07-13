@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart'; // For debugPrint
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha/models/branch_model.dart';
@@ -24,7 +25,9 @@ class BranchController extends GetxController {
 
       branches.value =
           (response as List).map((item) => Branch.fromJson(item)).toList();
+      debugPrint('Branches fetched: ${branches.length}');
     } catch (e) {
+      debugPrint('Error fetching branches: ${e.toString()}');
       Get.snackbar('Error', 'Failed to fetch branches: ${e.toString()}');
     } finally {
       isLoading.value = false;

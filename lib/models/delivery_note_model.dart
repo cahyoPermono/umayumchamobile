@@ -1,7 +1,7 @@
 class DeliveryNote {
   final String id;
   final DateTime createdAt;
-  final String customerName;
+  final String? customerName;
   final String? destinationAddress;
   final DateTime deliveryDate;
   final String? userId;
@@ -14,7 +14,7 @@ class DeliveryNote {
   DeliveryNote({
     required this.id,
     required this.createdAt,
-    required this.customerName,
+    this.customerName,
     this.destinationAddress,
     required this.deliveryDate,
     this.userId,
@@ -29,12 +29,14 @@ class DeliveryNote {
     return DeliveryNote(
       id: json['id'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
-      customerName: json['customer_name'] as String,
+      customerName: json['customer_name'] as String?,
       destinationAddress: json['destination_address'] as String?,
       deliveryDate: DateTime.parse(json['delivery_date'] as String),
       userId: json['user_id'] as String?,
-      fromBranchId: json['from_branch_id'] as String?,
-      toBranchId: json['to_branch_id'] as String?,
+      fromBranchId:
+          (json['from_branch_id'] as Map<String, dynamic>?)?['id'] as String?,
+      toBranchId:
+          (json['to_branch_id'] as Map<String, dynamic>?)?['id'] as String?,
       fromBranchName:
           (json['from_branch_id'] as Map<String, dynamic>?)?['name'],
       toBranchName: (json['to_branch_id'] as Map<String, dynamic>?)?['name'],
