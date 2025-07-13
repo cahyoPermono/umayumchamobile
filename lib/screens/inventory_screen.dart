@@ -7,63 +7,63 @@ import 'package:umayumcha/models/branch_model.dart'; // Import Branch model
 import 'package:umayumcha/models/branch_product_model.dart';
 import 'package:umayumcha/screens/product_form_screen.dart';
 
-class InventoryScreen extends StatelessWidget {
-  const InventoryScreen({super.key});
+void _showTransactionDialog(
+  BuildContext context,
+  BranchProduct branchProduct,
+  String type,
+) {
+  final InventoryController controller = Get.find();
+  final TextEditingController quantityController = TextEditingController();
+  final TextEditingController reasonController = TextEditingController();
 
-  void _showTransactionDialog(
-    BuildContext context,
-    BranchProduct branchProduct,
-    String type,
-  ) {
-    final InventoryController controller = Get.find();
-    final TextEditingController quantityController = TextEditingController();
-    final TextEditingController reasonController = TextEditingController();
-
-    Get.dialog(
-      AlertDialog(
-        title: Text(
-          '${type == 'in' ? 'Add' : 'Remove'} Stock for ${branchProduct.product?.name ?? 'N/A'}',
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: quantityController,
-              decoration: const InputDecoration(labelText: 'Quantity'),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: reasonController,
-              decoration: const InputDecoration(labelText: 'Reason (Optional)'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () {
-              final int? quantity = int.tryParse(quantityController.text);
-              if (quantity != null && quantity > 0) {
-                controller.addTransaction(
-                  productId: branchProduct.productId,
-                  type: type,
-                  quantityChange: quantity,
-                  reason: reasonController.text.trim(),
-                  fromBranchId: type == 'out' ? branchProduct.branchId : null,
-                  toBranchId: type == 'in' ? branchProduct.branchId : null,
-                );
-                Get.back(); // Close dialog
-              } else {
-                Get.snackbar('Error', 'Please enter a valid quantity.');
-              }
-            },
-            child: Text(type == 'in' ? 'Add' : 'Remove'),
+  Get.dialog(
+    AlertDialog(
+      title: Text(
+        '${type == 'in' ? 'Add' : 'Remove'} Stock for ${branchProduct.product?.name ?? 'N/A'}',
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: quantityController,
+            decoration: const InputDecoration(labelText: 'Quantity'),
+            keyboardType: TextInputType.number,
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: reasonController,
+            decoration: const InputDecoration(labelText: 'Reason (Optional)'),
           ),
         ],
       ),
-    );
-  }
+      actions: [
+        TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+        ElevatedButton(
+          onPressed: () {
+            final int? quantity = int.tryParse(quantityController.text);
+            if (quantity != null && quantity > 0) {
+              controller.addTransaction(
+                productId: branchProduct.productId,
+                type: type,
+                quantityChange: quantity,
+                reason: reasonController.text.trim(),
+                fromBranchId: type == 'out' ? branchProduct.branchId : null,
+                toBranchId: type == 'in' ? branchProduct.branchId : null,
+              );
+              Get.back(); // Close dialog
+            } else {
+              Get.snackbar('Error', 'Please enter a valid quantity.');
+            }
+          },
+          child: Text(type == 'in' ? 'Add' : 'Remove'),
+        ),
+      ],
+    ),
+  );
+}
+
+class InventoryScreen extends StatelessWidget {
+  const InventoryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +137,7 @@ class InventoryScreen extends StatelessWidget {
                           ListTile(
                             title: Text(product?.name ?? 'N/A'),
                             subtitle: Text(
-                              "${product?.sku ?? 'No SKU'} | Price: \${product?.price?.toStringAsFixed(2) ?? 'N/A'}",
+                              "${product?.sku ?? 'No SKU'} | Price: ${product?.price?.toStringAsFixed(2) ?? 'N/A'}",
                             ),
                             trailing: Text(
                               'Stock: ${branchProduct.quantity}',

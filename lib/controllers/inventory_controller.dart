@@ -34,6 +34,8 @@ class InventoryController extends GetxController {
           .eq('branch_id', selectedBranch.value!.id)
           .order('created_at', ascending: true);
 
+      debugPrint('Raw response from Supabase: $response');
+
       branchProducts.value =
           (response as List)
               .map((item) => BranchProduct.fromJson(item))
