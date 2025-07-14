@@ -48,6 +48,11 @@ class InventoryController extends GetxController {
     }
   }
 
+  Future<void> refreshDashboardData() async {
+    await fetchGlobalLowStockProducts();
+    // Add other dashboard-related data fetches here if needed
+  }
+
   Future<void> fetchBranchProducts() async {
     if (selectedBranch.value == null) {
       branchProducts.clear();

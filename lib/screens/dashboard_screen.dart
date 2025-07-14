@@ -8,12 +8,23 @@ import 'package:umayumcha/screens/product_form_screen.dart';
 import 'package:umayumcha/screens/delivery_note_form_screen.dart';
 import 'package:umayumcha/screens/transaction_log_screen.dart';
 
-class DashboardScreen extends StatelessWidget {
-  DashboardScreen({super.key});
+class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({super.key});
 
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
   final AuthController authController = Get.find();
-  final InventoryController inventoryController =
-      Get.find(); // Get InventoryController
+  final InventoryController inventoryController = Get.find();
+
+  @override
+  void initState() {
+    super.initState();
+    // Ensure data is fetched when the screen is initialized or re-entered
+    inventoryController.refreshDashboardData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,212 +110,218 @@ class DashboardScreen extends StatelessWidget {
           ],
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 32.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            // Welcome Section
-            Obx(() {
-              final user = authController.currentUser.value;
-              final role = authController.userRole.value;
-              return Card(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: SizedBox(
-                    width: double.infinity,
+      body: RefreshIndicator(
+        onRefresh: () => inventoryController.refreshDashboardData(),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 32.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              // Welcome Section
+              Obx(() {
+                final user = authController.currentUser.value;
+                final role = authController.userRole.value;
+                return Card(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Hello, ${user?.email?.split('@').first ?? 'User'}!',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.headlineSmall?.copyWith(
+                              color:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimaryContainer,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Your role: $role',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleMedium?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer
+                                  .withValues(alpha: 0.8),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Manage your dimsum business efficiently.',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyLarge?.copyWith(
+                              color:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimaryContainer,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }),
+              const SizedBox(height: 24),
+
+              // Low Stock Warning Section
+              Obx(() {
+                if (inventoryController.globalLowStockProducts.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                return Card(
+                  color: Theme.of(context).colorScheme.errorContainer,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Hello, ${user?.email?.split('@').first ?? 'User'}!',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.headlineSmall?.copyWith(
-                            color:
-                                Theme.of(
-                                  context,
-                                ).colorScheme.onPrimaryContainer,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.warning_rounded,
+                              color:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.onErrorContainer,
+                              size: 28,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Low Stock Alert!',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.onErrorContainer,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Your role: $role',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onPrimaryContainer
-                                .withValues(alpha: 0.8),
+                        const SizedBox(height: 12),
+                        const Divider(
+                          height: 1,
+                          thickness: 1,
+                        ), // Visual separator
+                        const SizedBox(height: 12),
+                        ...inventoryController.globalLowStockProducts.map(
+                          (bp) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4.0),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.circle,
+                                  size: 10,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onErrorContainer
+                                      .withValues(alpha: 0.7),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    '${bp.product?.name ?? 'N/A'} (${bp.branchName ?? 'N/A'}): ${bp.quantity} left',
+                                    style: TextStyle(
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).colorScheme.onErrorContainer,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Manage your dimsum business efficiently.',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodyLarge?.copyWith(
-                            color:
-                                Theme.of(
-                                  context,
-                                ).colorScheme.onPrimaryContainer,
+                          'Please restock these items soon.',
+                          style: TextStyle(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onErrorContainer
+                                .withValues(alpha: 0.8),
+                            fontStyle: FontStyle.italic,
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
-              );
-            }),
-            const SizedBox(height: 24),
+                );
+              }),
+              const SizedBox(height: 24),
 
-            // Low Stock Warning Section
-            Obx(() {
-              if (inventoryController.globalLowStockProducts.isEmpty) {
-                return const SizedBox.shrink();
-              }
-              return Card(
-                color: Theme.of(context).colorScheme.errorContainer,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.warning_rounded,
-                            color:
-                                Theme.of(context).colorScheme.onErrorContainer,
-                            size: 28,
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Low Stock Alert!',
-                            style: Theme.of(
-                              context,
-                            ).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color:
-                                  Theme.of(
-                                    context,
-                                  ).colorScheme.onErrorContainer,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      const Divider(
-                        height: 1,
-                        thickness: 1,
-                      ), // Visual separator
-                      const SizedBox(height: 12),
-                      ...inventoryController.globalLowStockProducts.map(
-                        (bp) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.circle,
-                                size: 10,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onErrorContainer
-                                    .withValues(alpha: 0.7),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  '${bp.product?.name ?? 'N/A'} (${bp.branchName ?? 'N/A'}): ${bp.quantity} left',
-                                  style: TextStyle(
-                                    color:
-                                        Theme.of(
-                                          context,
-                                        ).colorScheme.onErrorContainer,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Please restock these items soon.',
-                        style: TextStyle(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onErrorContainer.withValues(alpha: 0.8),
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ],
-                  ),
+              // Quick Actions Section
+              Text(
+                'Quick Actions',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
-              );
-            }),
-            const SizedBox(height: 24),
-
-            // Quick Actions Section
-            Text(
-              'Quick Actions',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
               ),
-            ),
-            const SizedBox(height: 16),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              children: [
-                _buildDashboardCard(
-                  context,
-                  icon: Icons.inventory,
-                  title: 'Inventory',
-                  subtitle: 'Manage products',
-                  onTap: () => Get.to(() => const InventoryScreen()),
-                ),
-                _buildDashboardCard(
-                  context,
-                  icon: Icons.local_shipping,
-                  title: 'Delivery Notes',
-                  subtitle: 'Track shipments',
-                  onTap: () => Get.to(() => const DeliveryNoteListScreen()),
-                ),
-                _buildDashboardCard(
-                  context,
-                  icon: Icons.add_box,
-                  title: 'Add New Product',
-                  subtitle: 'For admins only',
-                  onTap: () {
-                    if (authController.userRole.value == 'admin') {
-                      Get.to(() => const ProductFormScreen());
-                    } else {
-                      Get.snackbar(
-                        'Access Denied',
-                        'Only admins can add products.',
-                      );
-                    }
-                  },
-                ),
-                _buildDashboardCard(
-                  context,
-                  icon: Icons.receipt,
-                  title: 'New Delivery Note',
-                  subtitle: 'Create a new order',
-                  onTap: () => Get.to(() => const DeliveryNoteFormScreen()),
-                ),
-              ],
-            ),
-          ],
+              const SizedBox(height: 16),
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                children: [
+                  _buildDashboardCard(
+                    context,
+                    icon: Icons.inventory,
+                    title: 'Inventory',
+                    subtitle: 'Manage products',
+                    onTap: () => Get.to(() => const InventoryScreen()),
+                  ),
+                  _buildDashboardCard(
+                    context,
+                    icon: Icons.local_shipping,
+                    title: 'Delivery Notes',
+                    subtitle: 'Track shipments',
+                    onTap: () => Get.to(() => const DeliveryNoteListScreen()),
+                  ),
+                  _buildDashboardCard(
+                    context,
+                    icon: Icons.add_box,
+                    title: 'Add New Product',
+                    subtitle: 'For admins only',
+                    onTap: () {
+                      if (authController.userRole.value == 'admin') {
+                        Get.to(() => const ProductFormScreen());
+                      } else {
+                        Get.snackbar(
+                          'Access Denied',
+                          'Only admins can add products.',
+                        );
+                      }
+                    },
+                  ),
+                  _buildDashboardCard(
+                    context,
+                    icon: Icons.receipt,
+                    title: 'New Delivery Note',
+                    subtitle: 'Create a new order',
+                    onTap: () => Get.to(() => const DeliveryNoteFormScreen()),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
