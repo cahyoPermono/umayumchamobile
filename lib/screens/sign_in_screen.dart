@@ -23,11 +23,10 @@ class SignInScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Logo or App Icon (Placeholder)
-              Icon(
-                Icons.fastfood,
-                size: 80,
-                color: Theme.of(context).colorScheme.primary,
+              // Logo or App Icon
+              Image.asset(
+                'assets/images/logo.png',
+                height: 120, // Adjust size as needed
               ),
               const SizedBox(height: 16),
               Text(
