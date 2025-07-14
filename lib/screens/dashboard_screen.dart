@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:umayumcha/controllers/auth_controller.dart';
 import 'package:umayumcha/screens/inventory_screen.dart';
+import 'package:umayumcha/controllers/inventory_controller.dart'; // Import InventoryController
 import 'package:umayumcha/screens/delivery_note_list_screen.dart';
 import 'package:umayumcha/screens/product_form_screen.dart';
 import 'package:umayumcha/screens/delivery_note_form_screen.dart';
@@ -11,6 +12,8 @@ class DashboardScreen extends StatelessWidget {
   DashboardScreen({super.key});
 
   final AuthController authController = Get.find();
+  final InventoryController inventoryController =
+      Get.find(); // Get InventoryController
 
   @override
   Widget build(BuildContext context) {
@@ -158,6 +161,51 @@ class DashboardScreen extends StatelessWidget {
             }),
             const SizedBox(height: 24),
 
+            // Low Stock Warning Section
+            Obx(() {
+              if (inventoryController.globalLowStockProducts.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return Card(
+                color: Theme.of(context).colorScheme.errorContainer,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Low Stock Alert!',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onErrorContainer,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      ...inventoryController.globalLowStockProducts.map(
+                        (bp) => Text(
+                          '- ${bp.product?.name ?? 'N/A'} in ${bp.branchName ?? 'N/A'}: ${bp.quantity} left',
+                          style: TextStyle(
+                            color:
+                                Theme.of(context).colorScheme.onErrorContainer,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Please restock these items soon.',
+                        style: TextStyle(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onErrorContainer.withValues(alpha: 0.8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+            const SizedBox(height: 24),
+
             // Quick Actions Section
             Text(
               'Quick Actions',
@@ -213,7 +261,6 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ],
             ),
-            
           ],
         ),
       ),

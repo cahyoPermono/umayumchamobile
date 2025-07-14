@@ -11,12 +11,41 @@ class InventoryController extends GetxController {
   var branchProducts = <BranchProduct>[].obs;
   var isLoading = false.obs;
   var selectedBranch = Rx<Branch?>(null);
+  var globalLowStockProducts = <BranchProduct>[].obs; // Renamed and now global
+
+  static const int lowStockThreshold = 50; // Define your threshold here
 
   @override
   void onInit() {
     // Listen for changes in selectedBranch and refetch products
     ever(selectedBranch, (_) => fetchBranchProducts());
+    fetchGlobalLowStockProducts(); // Fetch global low stock on init
     super.onInit();
+  }
+
+  Future<void> fetchGlobalLowStockProducts() async {
+    try {
+      final response = await supabase
+          .from('branch_products')
+          .select(
+            '*, products(*), branches(name)',
+          ) // Join products and branches
+          .lt('quantity', lowStockThreshold); // Filter for low stock
+
+      globalLowStockProducts.value =
+          (response as List).map((item) {
+            // Manually attach branch name for display
+            final Map<String, dynamic> bpData = Map.from(item);
+            bpData['branches'] =
+                item['branches']; // Ensure branch data is passed
+            return BranchProduct.fromJson(bpData);
+          }).toList();
+      debugPrint(
+        'Global low stock products fetched: ${globalLowStockProducts.length}',
+      );
+    } catch (e) {
+      debugPrint('Error fetching global low stock products: ${e.toString()}');
+    }
   }
 
   Future<void> fetchBranchProducts() async {
@@ -41,6 +70,8 @@ class InventoryController extends GetxController {
               .map((item) => BranchProduct.fromJson(item))
               .toList();
       debugPrint('Branch products fetched: ${branchProducts.length}');
+
+      // No longer update lowStockProducts here, as it's now global
     } catch (e) {
       debugPrint('Error fetching branch products: ${e.toString()}');
       Get.snackbar('Error', 'Failed to fetch branch products: ${e.toString()}');
@@ -93,6 +124,7 @@ class InventoryController extends GetxController {
         'Transaction added: type=$type, quantity=$quantityChange, product=$productId',
       );
       fetchBranchProducts(); // Refresh product quantities for the selected branch
+      fetchGlobalLowStockProducts(); // Also refresh global low stock
       Get.snackbar('Success', 'Stock updated successfully!');
     } catch (e) {
       debugPrint('Error adding transaction: ${e.toString()}');

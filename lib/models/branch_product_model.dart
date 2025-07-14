@@ -8,6 +8,7 @@ class BranchProduct {
   final int quantity;
   final DateTime createdAt;
   final Product? product; // To hold product details
+  final String? branchName; // New: To hold branch name for display
 
   BranchProduct({
     required this.id,
@@ -16,6 +17,7 @@ class BranchProduct {
     required this.quantity,
     required this.createdAt,
     this.product,
+    this.branchName,
   });
 
   factory BranchProduct.fromJson(Map<String, dynamic> json) {
@@ -28,6 +30,7 @@ class BranchProduct {
       product: json['products'] != null
           ? Product.fromJson(json['products'] as Map<String, dynamic>)
           : null,
+      branchName: (json['branches'] as Map<String, dynamic>?)?['name'],
     );
   }
 
