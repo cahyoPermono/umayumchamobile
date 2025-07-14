@@ -173,30 +173,73 @@ class DashboardScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Low Stock Alert!',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onErrorContainer,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      ...inventoryController.globalLowStockProducts.map(
-                        (bp) => Text(
-                          '- ${bp.product?.name ?? 'N/A'} in ${bp.branchName ?? 'N/A'}: ${bp.quantity} left',
-                          style: TextStyle(
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.warning_rounded,
                             color:
                                 Theme.of(context).colorScheme.onErrorContainer,
+                            size: 28,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Low Stock Alert!',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.onErrorContainer,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      const Divider(
+                        height: 1,
+                        thickness: 1,
+                      ), // Visual separator
+                      const SizedBox(height: 12),
+                      ...inventoryController.globalLowStockProducts.map(
+                        (bp) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.circle,
+                                size: 10,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onErrorContainer
+                                    .withValues(alpha: 0.7),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  '${bp.product?.name ?? 'N/A'} (${bp.branchName ?? 'N/A'}): ${bp.quantity} left',
+                                  style: TextStyle(
+                                    color:
+                                        Theme.of(
+                                          context,
+                                        ).colorScheme.onErrorContainer,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 16),
                       Text(
                         'Please restock these items soon.',
                         style: TextStyle(
                           color: Theme.of(
                             context,
                           ).colorScheme.onErrorContainer.withValues(alpha: 0.8),
+                          fontStyle: FontStyle.italic,
                         ),
                       ),
                     ],
