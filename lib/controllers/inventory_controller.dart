@@ -80,6 +80,32 @@ class InventoryController extends GetxController {
     }
   }
 
+  Future<List<BranchProduct>> fetchBranchProductsById(String branchId) async {
+    try {
+      final response = await supabase
+          .from('branch_products')
+          .select(
+            '*, products(*)',
+          ) // Select branch_product and join product details
+          .eq('branch_id', branchId)
+          .order('created_at', ascending: true);
+
+      final List<BranchProduct> products =
+          (response as List)
+              .map((item) => BranchProduct.fromJson(item))
+              .toList();
+      debugPrint(
+        'Branch products fetched by ID ($branchId): ${products.length}',
+      );
+      return products;
+    } catch (e) {
+      debugPrint(
+        'Error fetching branch products by ID ($branchId): ${e.toString()}',
+      );
+      return [];
+    }
+  }
+
   Future<String?> addProductAndGetId(Product product) async {
     try {
       isLoading.value = true;

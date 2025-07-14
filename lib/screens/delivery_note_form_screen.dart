@@ -43,73 +43,74 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
     }
   }
 
-  void _addProductToNote() {
+  void _addProductToNote() async { // Made async
     if (selectedFromBranch == null) {
       Get.snackbar('Error', 'Please select a source branch first.');
+      return;
+    }
+
+    // Fetch products for the selected source branch
+    final List<BranchProduct> availableProducts = await inventoryController.fetchBranchProductsById(selectedFromBranch!.id);
+
+    if (availableProducts.isEmpty) {
+      Get.snackbar(
+        'Info',
+        'No products available in the selected source branch.',
+      );
       return;
     }
 
     Get.dialog(
       AlertDialog(
         title: const Text('Add Product to Delivery Note'),
-        content: Obx(() {
-          // Filter products by the selected source branch inside Obx
-          final availableProducts = inventoryController.branchProducts
-              .where((bp) => bp.branchId == selectedFromBranch!.id)
-              .toList();
-
-          if (availableProducts.isEmpty) {
-            return const Text('No products available in the selected source branch.');
-          }
-          return DropdownButtonFormField<BranchProduct>(
-            decoration: const InputDecoration(labelText: 'Select Product'),
-            items: availableProducts.map((branchProduct) {
-              return DropdownMenuItem(
-                value: branchProduct,
-                child: Text(
-                  '${branchProduct.product?.name ?? 'N/A'} (Stock: ${branchProduct.quantity})',
+        content: DropdownButtonFormField<BranchProduct>( // Removed Obx here
+          decoration: const InputDecoration(labelText: 'Select Product'),
+          items: availableProducts.map((branchProduct) {
+            return DropdownMenuItem(
+              value: branchProduct,
+              child: Text(
+                '${branchProduct.product?.name ?? 'N/A'} (Stock: ${branchProduct.quantity})',
+              ),
+            );
+          }).toList(),
+          onChanged: (BranchProduct? branchProduct) {
+            if (branchProduct != null) {
+              Get.dialog(
+                AlertDialog(
+                  title: Text(
+                    'Enter Quantity for ${branchProduct.product?.name ?? 'N/A'}',
+                  ),
+                  content: TextField(
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Quantity (Max: ${branchProduct.quantity})',
+                    ),
+                    onSubmitted: (value) {
+                      final int? quantity = int.tryParse(value);
+                      if (quantity != null &&
+                          quantity > 0 &&
+                          quantity <= branchProduct.quantity) {
+                        selectedProducts.add({
+                          'product_id': branchProduct.productId,
+                          'product_name':
+                              branchProduct.product?.name ?? 'N/A',
+                          'quantity': quantity,
+                        });
+                        Get.back(); // Close quantity dialog
+                        Get.back(); // Close product selection dialog
+                      } else {
+                        Get.snackbar(
+                          'Error',
+                          'Please enter a valid quantity within available stock.',
+                        );
+                      }
+                    },
+                  ),
                 ),
               );
-            }).toList(),
-            onChanged: (BranchProduct? branchProduct) {
-              if (branchProduct != null) {
-                Get.dialog(
-                  AlertDialog(
-                    title: Text(
-                      'Enter Quantity for ${branchProduct.product?.name ?? 'N/A'}',
-                    ),
-                    content: TextField(
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Quantity (Max: ${branchProduct.quantity})',
-                      ),
-                      onSubmitted: (value) {
-                        final int? quantity = int.tryParse(value);
-                        if (quantity != null &&
-                            quantity > 0 &&
-                            quantity <= branchProduct.quantity) {
-                          selectedProducts.add({
-                            'product_id': branchProduct.productId,
-                            'product_name':
-                                branchProduct.product?.name ?? 'N/A',
-                            'quantity': quantity,
-                          });
-                          Get.back(); // Close quantity dialog
-                          Get.back(); // Close product selection dialog
-                        } else {
-                          Get.snackbar(
-                            'Error',
-                            'Please enter a valid quantity within available stock.',
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                );
-              }
-            },
-          );
-        }),
+            }
+          },
+        ),
       ),
     );
   }
