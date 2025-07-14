@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:umayumcha/controllers/auth_controller.dart';
+import 'package:umayumcha/controllers/branch_controller.dart'; // Import BranchController
+import 'package:umayumcha/models/branch_model.dart'; // Import Branch model
 
-class SignUpScreen extends StatelessWidget {
+class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final AuthController authController = Get.find();
-    final TextEditingController emailController = TextEditingController();
-    final TextEditingController passwordController = TextEditingController();
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
 
+class _SignUpScreenState extends State<SignUpScreen> {
+  final AuthController authController = Get.find();
+  final BranchController branchController = Get.find();
+
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  Branch? selectedBranch; // To hold the selected branch for signup
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Center(
@@ -36,9 +47,7 @@ class SignUpScreen extends StatelessWidget {
               Text(
                 'Create your account to get started',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.7),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
               ),
               const SizedBox(height: 48),
@@ -71,6 +80,31 @@ class SignUpScreen extends StatelessWidget {
                         ),
                         obscureText: true,
                       ),
+                      const SizedBox(height: 16),
+                      // Branch Selection for Signup
+                      Obx(() {
+                        if (branchController.isLoading.value) {
+                          return const CircularProgressIndicator();
+                        }
+                        if (branchController.branches.isEmpty) {
+                          return const Text('No branches available. Please add a branch first.');
+                        }
+                        return DropdownButtonFormField<Branch>(
+                          decoration: const InputDecoration(labelText: 'Assign to Branch'),
+                          value: selectedBranch,
+                          onChanged: (Branch? newValue) {
+                            setState(() {
+                              selectedBranch = newValue;
+                            });
+                          },
+                          items: branchController.branches.map((branch) {
+                            return DropdownMenuItem<Branch>(
+                              value: branch,
+                              child: Text(branch.name),
+                            );
+                          }).toList(),
+                        );
+                      }),
                       const SizedBox(height: 24),
                       Obx(() {
                         return authController.isLoading.value
@@ -79,9 +113,14 @@ class SignUpScreen extends StatelessWidget {
                               width: double.infinity,
                               child: ElevatedButton(
                                 onPressed: () {
+                                  if (selectedBranch == null) {
+                                    Get.snackbar('Error', 'Please select a branch.');
+                                    return;
+                                  }
                                   authController.signUp(
                                     email: emailController.text.trim(),
                                     password: passwordController.text.trim(),
+                                    branchId: selectedBranch!.id, // Pass selected branch ID
                                   );
                                 },
                                 child: const Text('Sign Up'),
@@ -104,9 +143,7 @@ class SignUpScreen extends StatelessWidget {
                   TextSpan(
                     text: "Already have an account? ",
                     style: TextStyle(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.7),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                     children: [
                       TextSpan(

@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart'; // For debugPrint
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:umayumcha/screens/sign_in_screen.dart';
+import 'package:umayumcha/controllers/branch_controller.dart';
 import 'package:umayumcha/screens/dashboard_screen.dart';
-import 'package:flutter/foundation.dart'; // For debugPrint
+import 'package:umayumcha/screens/sign_in_screen.dart'; // For debugPrint
 
 class AuthController extends GetxController {
   final SupabaseClient supabase = Supabase.instance.client;
   var isLoading = false.obs;
   var currentUser = Rx<User?>(null);
   var userRole = ''.obs; // To store the user's role
+  var userBranchId = Rx<String?>(
+    null,
+  ); // New: To store the user's assigned branch ID
 
   @override
   void onInit() {
@@ -17,48 +20,72 @@ class AuthController extends GetxController {
     final initialUser = supabase.auth.currentUser;
     if (initialUser != null) {
       currentUser.value = initialUser;
-      _fetchUserRole(initialUser.id);
+      _fetchUserProfile(initialUser.id);
     }
 
     // Listen to auth state changes
     supabase.auth.onAuthStateChange.listen((data) async {
+      debugPrint('Auth state changed: ${data.event}');
       final Session? session = data.session;
       currentUser.value = session?.user;
 
       if (session != null) {
-        await _fetchUserRole(session.user.id);
-        Get.offAll(() => DashboardScreen());
+        debugPrint('User session found. Fetching profile...');
+        await _fetchUserProfile(session.user.id);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          debugPrint('AuthController: Navigating to Dashboard.');
+          Get.offAll(() => DashboardScreen());
+        });
       } else {
+        debugPrint(
+          'No user session found. Clearing profile and navigating to sign in.',
+        );
         userRole.value = ''; // Clear role on sign out
-        Get.offAll(() => const SignInScreen());
+        userBranchId.value = null; // Clear branch ID on sign out
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          debugPrint('AuthController: Navigating to Sign In.');
+          Get.offAll(() => const SignInScreen());
+        });
       }
     });
     super.onInit();
   }
 
-  Future<void> _fetchUserRole(String userId) async {
+  Future<void> _fetchUserProfile(String userId) async {
     try {
       final response =
           await supabase
               .from('profiles')
-              .select('role')
+              .select('role, branch_id') // Select both role and branch_id
               .eq('id', userId)
               .single();
 
       userRole.value = response['role'] ?? 'user';
+      userBranchId.value = response['branch_id'] as String?;
+      debugPrint(
+        'User profile fetched: Role=${userRole.value}, BranchID=${userBranchId.value}',
+      );
+      // Explicitly fetch branches after user profile is loaded
+      Get.find<BranchController>().fetchBranches();
     } catch (e) {
-      debugPrint('Error fetching user role: ${e.toString()}');
+      debugPrint('Error fetching user profile: ${e.toString()}');
       userRole.value = 'user'; // Default to 'user' on error
-      Get.snackbar('Role Error', 'Could not fetch user role.');
+      userBranchId.value = null; // Default to null on error
+      Get.snackbar('Profile Error', 'Could not fetch user profile.');
     }
   }
 
-  Future<void> signUp({required String email, required String password}) async {
+  Future<void> signUp({
+    required String email,
+    required String password,
+    String? branchId,
+  }) async {
     try {
       isLoading.value = true;
       final response = await supabase.auth.signUp(
         email: email,
         password: password,
+        data: {'branch_id': branchId}, // Pass branchId in user metadata
       );
       // The onAuthStateChange listener will handle redirection.
       if (response.user != null) {

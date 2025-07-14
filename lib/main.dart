@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:umayumcha/controllers/auth_controller.dart';
 import 'package:umayumcha/controllers/inventory_controller.dart';
 import 'package:umayumcha/controllers/delivery_note_controller.dart';
 import 'package:umayumcha/controllers/branch_controller.dart';
@@ -13,6 +14,7 @@ void main() async {
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
 
   // Initialize core controllers here
+  Get.put(AuthController()); // Initialize AuthController first
   Get.put(InventoryController());
   Get.put(DeliveryNoteController());
   Get.put(BranchController());

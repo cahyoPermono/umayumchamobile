@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart'; // For debugPrint
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:umayumcha/controllers/auth_controller.dart';
 import 'package:umayumcha/models/branch_product_model.dart';
 import 'package:umayumcha/models/branch_model.dart';
 import 'package:umayumcha/models/product_model.dart';
@@ -25,12 +26,24 @@ class InventoryController extends GetxController {
 
   Future<void> fetchGlobalLowStockProducts() async {
     try {
-      final response = await supabase
+      var query = supabase
           .from('branch_products')
           .select(
             '*, products(*), branches(name)',
           ) // Join products and branches
-          .lt('quantity', lowStockThreshold); // Filter for low stock
+          .lt('quantity', lowStockThreshold);
+
+      // Filter by user's branch if not admin
+      final authController = Get.find<AuthController>();
+      if (authController.userRole.value != 'admin' &&
+          authController.userBranchId.value != null) {
+        query = query.eq(
+          'branch_id',
+          authController.userBranchId.value!,
+        ); // Filter by user's branch
+      }
+
+      final response = await query;
 
       globalLowStockProducts.value =
           (response as List).map((item) {
@@ -60,13 +73,27 @@ class InventoryController extends GetxController {
     }
     try {
       isLoading.value = true;
-      final response = await supabase
+      var query = supabase
           .from('branch_products')
-          .select(
-            '*, products(*)',
-          ) // Select branch_product and join product details
+          .select('*, products(*)')
           .eq('branch_id', selectedBranch.value!.id)
           .order('created_at', ascending: true);
+
+      // Filter by user's branch if not admin and selected branch is not user's branch
+      final authController = Get.find<AuthController>();
+      if (authController.userRole.value != 'admin' &&
+          authController.userBranchId.value != selectedBranch.value!.id) {
+        // If a non-admin user tries to select a branch that is not theirs, clear products and show error
+        branchProducts.clear();
+        Get.snackbar(
+          'Access Denied',
+          'You can only view products for your assigned branch.',
+        );
+        isLoading.value = false;
+        return;
+      }
+
+      final response = await query;
 
       debugPrint('Raw response from Supabase: $response');
 
@@ -87,6 +114,16 @@ class InventoryController extends GetxController {
 
   Future<List<BranchProduct>> fetchBranchProductsById(String branchId) async {
     try {
+      final authController = Get.find<AuthController>();
+      // Non-admin users can only fetch products for their assigned branch
+      if (authController.userRole.value != 'admin' &&
+          authController.userBranchId.value != branchId) {
+        debugPrint(
+          'Access Denied: Non-admin user trying to fetch products for unassigned branch.',
+        );
+        return [];
+      }
+
       final response = await supabase
           .from('branch_products')
           .select(

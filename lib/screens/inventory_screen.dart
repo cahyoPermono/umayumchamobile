@@ -91,16 +91,45 @@ class InventoryScreen extends StatelessWidget {
               return DropdownButtonFormField<Branch>(
                 decoration: const InputDecoration(labelText: 'Select Branch'),
                 value: inventoryController.selectedBranch.value,
-                onChanged: (Branch? newValue) {
-                  inventoryController.selectedBranch.value = newValue;
+                onChanged: authController.userRole.value == 'admin'
+                    ? (Branch? newValue) {
+                        inventoryController.selectedBranch.value = newValue;
+                      }
+                    : null, // Disable for non-admins
+                items: branchController.branches.map((branch) {
+                  return DropdownMenuItem<Branch>(
+                    value: branch,
+                    child: Text(branch.name),
+                  );
+                }).toList(),
+                // Set initial selected branch for non-admins
+                hint: authController.userRole.value != 'admin' &&
+                        authController.userBranchId.value != null &&
+                        inventoryController.selectedBranch.value == null
+                    ? Text(
+                        branchController.branches
+                            .firstWhere(
+                                (b) => b.id == authController.userBranchId.value)
+                            .name,
+                      )
+                    : null,
+                // Ensure selected branch is set for non-admins on first load
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                validator: (value) {
+                  if (authController.userRole.value != 'admin' &&
+                      authController.userBranchId.value != null &&
+                      inventoryController.selectedBranch.value == null) {
+                    // Set the selected branch to the user's branch if not already set
+                    final userBranch = branchController.branches.firstWhereOrNull(
+                        (b) => b.id == authController.userBranchId.value);
+                    if (userBranch != null) {
+                      inventoryController.selectedBranch.value = userBranch;
+                    }
+                  }
+                  return null;
                 },
-                items:
-                    branchController.branches.map((branch) {
-                      return DropdownMenuItem<Branch>(
-                        value: branch,
-                        child: Text(branch.name),
-                      );
-                    }).toList(),
+                // If not admin, ensure only their branch is in the list
+                // This is handled by BranchController.fetchBranches()
               );
             }),
           ),

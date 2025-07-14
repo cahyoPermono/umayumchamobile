@@ -1,3 +1,4 @@
+import 'package:umayumcha/controllers/auth_controller.dart'; // Import AuthController
 import 'package:flutter/foundation.dart'; // For debugPrint
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -11,16 +12,42 @@ class BranchController extends GetxController {
 
   @override
   void onInit() {
-    fetchBranches();
+    final AuthController authController = Get.find();
+
+    // Listen to changes in user role or branch ID to refetch branches with debounce
+    debounce(
+      authController.userRole,
+      (_) => fetchBranches(),
+      time: const Duration(milliseconds: 300),
+    );
+    debounce(
+      authController.userBranchId,
+      (_) => fetchBranches(),
+      time: const Duration(milliseconds: 300),
+    );
+
     super.onInit();
   }
 
   Future<void> fetchBranches() async {
     try {
       isLoading.value = true;
+      String selectQuery = '*';
+      List<String> conditions = [];
+
+      final authController = Get.find<AuthController>();
+      if (authController.userRole.value != 'admin' &&
+          authController.userBranchId.value != null) {
+        conditions.add('id.eq.${authController.userBranchId.value!}');
+      }
+
+      if (conditions.isNotEmpty) {
+        selectQuery += '.filter(${conditions.join(',')})';
+      }
+
       final response = await supabase
           .from('branches')
-          .select()
+          .select(selectQuery)
           .order('name', ascending: true);
 
       branches.value =
