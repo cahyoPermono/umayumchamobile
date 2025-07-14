@@ -22,6 +22,11 @@ class TransactionLogScreen extends StatelessWidget {
             onPressed: () => controller.exportTransactionsToPdf(),
             tooltip: 'Export to PDF',
           ),
+          IconButton(
+            icon: const Icon(Icons.table_chart),
+            onPressed: () => controller.exportTransactionsToExcel(),
+            tooltip: 'Export to Excel',
+          ),
         ],
       ),
       body: Column(

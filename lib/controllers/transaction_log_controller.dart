@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha/models/inventory_transaction_model.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
+import 'package:excel/excel.dart'; // Import excel package
 import 'dart:io';
 import 'package:intl/intl.dart';
 
@@ -132,7 +133,12 @@ class TransactionLogController extends GetxController {
         ),
       );
 
-      final directory = await getApplicationDocumentsDirectory();
+      final directory = await getDownloadsDirectory(); // Use getDownloadsDirectory()
+      if (directory == null) {
+        Get.snackbar('Error', 'Could not find downloads directory.');
+        isLoading.value = false;
+        return;
+      }
       final filePath =
           '${directory.path}/transaction_log_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.pdf';
       final file = File(filePath);
@@ -143,6 +149,61 @@ class TransactionLogController extends GetxController {
     } catch (e) {
       debugPrint('Error exporting PDF: ${e.toString()}');
       Get.snackbar('Error', 'Failed to export PDF: ${e.toString()}');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> exportTransactionsToExcel() async {
+    if (transactions.isEmpty) {
+      Get.snackbar('Info', 'No transactions to export.');
+      return;
+    }
+
+    isLoading.value = true;
+    try {
+      final excel = Excel.createExcel();
+      final sheet = excel['Transaction Log'];
+
+      // Add headers
+      sheet.appendRow([
+        'Date',
+        'Product',
+        'Type',
+        'Qty',
+        'From',
+        'To',
+        'Reason',
+      ]);
+
+      // Add data
+      for (var t in transactions) {
+        sheet.appendRow([
+          DateFormat('dd/MM/yyyy HH:mm').format(t.createdAt),
+          t.productName ?? t.productId,
+          t.type.capitalizeFirst,
+          t.quantityChange.toString(),
+          t.fromBranchName ?? '-',
+          t.toBranchName ?? '-',
+          t.reason ?? '-',
+        ]);
+      }
+
+      final directory = await getDownloadsDirectory();
+      if (directory == null) {
+        Get.snackbar('Error', 'Could not find downloads directory.');
+        isLoading.value = false;
+        return;
+      }
+      final filePath = '${directory.path}/transaction_log_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.xlsx';
+      final file = File(filePath);
+      await file.writeAsBytes(excel.encode()!); // Use excel.encode() to get bytes
+
+      Get.snackbar('Success', 'Excel exported to $filePath');
+      debugPrint('Excel exported to: $filePath');
+    } catch (e) {
+      debugPrint('Error exporting Excel: ${e.toString()}');
+      Get.snackbar('Error', 'Failed to export Excel: ${e.toString()}');
     } finally {
       isLoading.value = false;
     }
