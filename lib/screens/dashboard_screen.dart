@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:umayumcha/controllers/auth_controller.dart';
+import 'package:umayumcha/screens/consumable_list_screen.dart';
 import 'package:umayumcha/screens/inventory_screen.dart';
 import 'package:umayumcha/controllers/inventory_controller.dart'; // Import InventoryController
+import 'package:umayumcha/controllers/consumable_controller.dart';
 import 'package:umayumcha/screens/delivery_note_list_screen.dart';
 import 'package:umayumcha/screens/product_form_screen.dart';
 import 'package:umayumcha/screens/delivery_note_form_screen.dart';
 import 'package:umayumcha/screens/transaction_log_screen.dart';
+import 'package:umayumcha/screens/consumable_transaction_log_screen.dart';
+import 'package:intl/intl.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -17,13 +21,17 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   final AuthController authController = Get.find();
-  final InventoryController inventoryController = Get.find();
+  late final InventoryController inventoryController;
+  late final ConsumableController consumableController;
 
   @override
   void initState() {
     super.initState();
+    inventoryController = Get.find<InventoryController>();
+    consumableController = Get.find<ConsumableController>();
     // Ensure data is fetched when the screen is initialized or re-entered
     inventoryController.refreshDashboardData();
+    consumableController.fetchConsumables();
   }
 
   @override
@@ -96,6 +104,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
               onTap: () {
                 Get.back(); // Close the drawer
                 Get.to(() => const TransactionLogScreen());
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.local_drink),
+              title: const Text('Master Consumable'),
+              onTap: () {
+                Get.back(); // Close the drawer
+                Get.to(() => ConsumableListScreen());
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.receipt_long),
+              title: const Text('Consumable Transaction Log'),
+              onTap: () {
+                Get.back(); // Close the drawer
+                Get.to(() => ConsumableTransactionLogScreen());
               },
             ),
             const Divider(),
@@ -217,8 +241,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           thickness: 1,
                         ), // Visual separator
                         const SizedBox(height: 12),
-                        ...inventoryController.globalLowStockProducts.map(
-                          (bp) => Padding(
+                        ...inventoryController.globalLowStockProducts.map((bp) {
+                          return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 4.0),
                             child: Row(
                               children: [
@@ -245,8 +269,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ),
                               ],
                             ),
-                          ),
-                        ),
+                          );
+                        }),
                         const SizedBox(height: 16),
                         Text(
                           'Please restock these items soon.',
@@ -254,6 +278,97 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             color: Theme.of(context)
                                 .colorScheme
                                 .onErrorContainer
+                                .withValues(alpha: 0.8),
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+              const SizedBox(height: 24),
+
+              // Expiring Consumables Warning Section
+              Obx(() {
+                if (consumableController.expiringConsumables.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                return Card(
+                  color: Theme.of(context).colorScheme.tertiaryContainer,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today,
+                              color:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.onTertiaryContainer,
+                              size: 28,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Expiring Consumables!',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.onTertiaryContainer,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        const Divider(
+                          height: 1,
+                          thickness: 1,
+                        ), // Visual separator
+                        const SizedBox(height: 12),
+                        ...consumableController.expiringConsumables.map((c) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4.0),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.circle,
+                                  size: 10,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onTertiaryContainer
+                                      .withValues(alpha: 0.7),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    '${c.name} (Expires: ${c.expiredDate == null ? 'N/A' : DateFormat.yMd().format(c.expiredDate!)})',
+                                    style: TextStyle(
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).colorScheme.onTertiaryContainer,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                        const SizedBox(height: 16),
+                        Text(
+                          'These consumables will expire soon.',
+                          style: TextStyle(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onTertiaryContainer
                                 .withValues(alpha: 0.8),
                             fontStyle: FontStyle.italic,
                           ),
@@ -317,6 +432,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     title: 'New Delivery Note',
                     subtitle: 'Create a new order',
                     onTap: () => Get.to(() => const DeliveryNoteFormScreen()),
+                  ),
+                  _buildDashboardCard(
+                    context,
+                    icon: Icons.local_drink,
+                    title: 'Consumables',
+                    subtitle: 'Manage consumables',
+                    onTap: () => Get.to(() => ConsumableListScreen()),
+                  ),
+                  _buildDashboardCard(
+                    context,
+                    icon: Icons.receipt_long,
+                    title: 'Consumable Log',
+                    subtitle: 'View consumable transactions',
+                    onTap: () => Get.to(() => ConsumableTransactionLogScreen()),
                   ),
                 ],
               ),

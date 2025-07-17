@@ -2,22 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha/controllers/auth_controller.dart';
-import 'package:umayumcha/controllers/inventory_controller.dart';
-import 'package:umayumcha/controllers/delivery_note_controller.dart';
-import 'package:umayumcha/controllers/branch_controller.dart';
 import 'package:umayumcha/screens/splash_screen.dart';
+import 'package:umayumcha/screens/dashboard_screen.dart';
+import 'package:umayumcha/screens/sign_in_screen.dart';
+import 'package:umayumcha/screens/sign_up_screen.dart';
+import 'package:umayumcha/bindings/dashboard_binding.dart';
 import 'package:umayumcha/supabase_credentials.dart';
+import 'package:umayumcha/controllers/inventory_controller.dart';
+import 'package:umayumcha/controllers/consumable_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
 
-  // Initialize core controllers here
-  Get.put(AuthController()); // Initialize AuthController first
+  // Initialize AuthController, InventoryController, dan ConsumableController secara global
+  Get.put(AuthController());
   Get.put(InventoryController());
-  Get.put(DeliveryNoteController());
-  Get.put(BranchController());
+  Get.put(ConsumableController());
 
   runApp(const MyApp());
 }
@@ -105,7 +107,17 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const SplashScreen(),
+      initialRoute: '/',
+      getPages: [
+        GetPage(name: '/', page: () => const SplashScreen()),
+        GetPage(
+          name: '/dashboard',
+          page: () => const DashboardScreen(),
+          binding: DashboardBinding(),
+        ),
+        GetPage(name: '/sign_in', page: () => const SignInScreen()),
+        GetPage(name: '/sign_up', page: () => const SignUpScreen()),
+      ],
     );
   }
 }
