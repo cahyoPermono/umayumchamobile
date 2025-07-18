@@ -11,6 +11,7 @@ import 'package:umayumcha/bindings/dashboard_binding.dart';
 import 'package:umayumcha/supabase_credentials.dart';
 import 'package:umayumcha/controllers/inventory_controller.dart';
 import 'package:umayumcha/controllers/consumable_controller.dart';
+import 'package:umayumcha/controllers/user_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +23,7 @@ void main() async {
   Get.put(InventoryController());
   Get.put(ConsumableController());
   Get.put(BranchController());
+  Get.put(UserController());
 
   runApp(const MyApp());
 }

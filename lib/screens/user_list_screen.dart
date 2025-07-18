@@ -5,8 +5,32 @@ import 'package:umayumcha/controllers/user_controller.dart';
 import 'package:umayumcha/controllers/auth_controller.dart';
 import 'package:umayumcha/screens/user_form_screen.dart';
 
+void _showDeleteConfirmationDialog(BuildContext context, UserController controller, String userId, String userEmail) {
+  Get.dialog(
+    AlertDialog(
+      title: const Text('Confirm Deletion'),
+      content: Text('Are you sure you want to delete user \'$userEmail\'?'),
+      actions: [
+        TextButton(
+          onPressed: () => Get.back(),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            controller.deleteUser(userId);
+            Get.back(); // Close the dialog
+          },
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+          child: const Text('Delete'),
+        ),
+      ],
+    ),
+  );
+}
+
 class UserListScreen extends StatelessWidget {
-  final UserController userController = Get.put(UserController());
+
+  final UserController userController = Get.find();
   final AuthController authController = Get.find();
 
   UserListScreen({super.key});
@@ -26,12 +50,6 @@ class UserListScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Master User'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person_add),
-            onPressed: () => Get.to(() => const UserFormScreen()),
-          ),
-        ],
       ),
       body: Obx(() {
         if (userController.isLoading.value) {
@@ -46,19 +64,38 @@ class UserListScreen extends StatelessWidget {
             final user = userController.users[index];
             return Card(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: ListTile(
-                title: Text(user.email),
-                subtitle: Text('Role: ${user.role}'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
+              elevation: 2,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () => Get.to(() => UserFormScreen(user: user)),
+                    ListTile(
+                      title: Text(user.email,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      subtitle: Text('Role: ${user.role}',
+                          style: Theme.of(context).textTheme.bodyMedium),
+                      onTap: () => Get.to(() => UserFormScreen(user: user)),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () => userController.deleteUser(user.id),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            tooltip: 'Edit User',
+                            onPressed: () => Get.to(() => UserFormScreen(user: user)),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            tooltip: 'Delete User',
+                            onPressed: () => _showDeleteConfirmationDialog(
+                                context, userController, user.id, user.email),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -66,6 +103,16 @@ class UserListScreen extends StatelessWidget {
             );
           },
         );
+      }),
+      floatingActionButton: Obx(() {
+        if (authController.userRole.value == 'admin') {
+          return FloatingActionButton(
+            onPressed: () => Get.to(() => const UserFormScreen()),
+            tooltip: 'Add New User',
+            child: const Icon(Icons.person_add),
+          );
+        }
+        return const SizedBox.shrink();
       }),
     );
   }

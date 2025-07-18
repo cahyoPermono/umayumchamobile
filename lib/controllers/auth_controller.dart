@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha/controllers/branch_controller.dart';
 import 'package:umayumcha/screens/dashboard_screen.dart';
 import 'package:umayumcha/screens/sign_in_screen.dart'; // For debugPrint
+import 'package:umayumcha/controllers/user_controller.dart';
 
 class AuthController extends GetxController {
   final SupabaseClient supabase = Supabase.instance.client;
@@ -32,10 +33,13 @@ class AuthController extends GetxController {
       if (session != null) {
         debugPrint('User session found. Fetching profile...');
         await _fetchUserProfile(session.user.id);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          debugPrint('AuthController: Navigating to Dashboard.');
-          Get.offAll(() => DashboardScreen());
-        });
+        // Only navigate if not creating user by admin
+        if (!Get.find<UserController>().isCreatingUserByAdmin.value) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            debugPrint('AuthController: Navigating to Dashboard.');
+            Get.offAll(() => DashboardScreen());
+          });
+        }
       } else {
         debugPrint(
           'No user session found. Clearing profile and navigating to sign in.',
@@ -75,10 +79,7 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> signUp({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> signUp({required String email, required String password}) async {
     try {
       isLoading.value = true;
       final response = await supabase.auth.signUp(

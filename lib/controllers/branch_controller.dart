@@ -1,5 +1,6 @@
 import 'package:umayumcha/controllers/auth_controller.dart'; // Import AuthController
 import 'package:flutter/foundation.dart'; // For debugPrint
+import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha/models/branch_model.dart';
@@ -54,12 +55,57 @@ class BranchController extends GetxController {
           (response as List).map((item) => Branch.fromJson(item)).toList();
       debugPrint('Branches fetched: ${branches.length}');
     } catch (e) {
-      debugPrint('Error fetching branches: ${e.toString()}');
+      log('Error fetching branches: ${e.toString()}');
       Get.snackbar('Error', 'Failed to fetch branches: ${e.toString()}');
     } finally {
       isLoading.value = false;
     }
   }
 
-  // You might add methods for adding/editing branches here later
+  Future<void> addBranch(Branch branch) async {
+    try {
+      isLoading.value = true;
+      await supabase.from('branches').insert(branch.toJson());
+      fetchBranches();
+      Get.back();
+      Get.snackbar('Success', 'Branch added successfully!');
+    } catch (e) {
+      log('Error adding branch: ${e.toString()}');
+      Get.snackbar('Error', 'Failed to add branch: ${e.toString()}');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> updateBranch(Branch branch) async {
+    try {
+      isLoading.value = true;
+      await supabase
+          .from('branches')
+          .update(branch.toJson())
+          .eq('id', branch.id);
+      fetchBranches();
+      Get.back();
+      Get.snackbar('Success', 'Branch updated successfully!');
+    } catch (e) {
+      log('Error updating branch: ${e.toString()}');
+      Get.snackbar('Error', 'Failed to update branch: ${e.toString()}');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> deleteBranch(String id) async {
+    try {
+      isLoading.value = true;
+      await supabase.from('branches').delete().eq('id', id);
+      fetchBranches();
+      Get.snackbar('Success', 'Branch deleted successfully!');
+    } catch (e) {
+      log('Error deleting branch: ${e.toString()}');
+      Get.snackbar('Error', 'Failed to delete branch: ${e.toString()}');
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

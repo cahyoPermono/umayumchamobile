@@ -8,6 +8,7 @@ class UserController extends GetxController {
   final _supabase = Supabase.instance.client;
   var users = <Profile>[].obs;
   var isLoading = false.obs;
+  var isCreatingUserByAdmin = false.obs;
 
   @override
   void onInit() {
@@ -39,6 +40,8 @@ class UserController extends GetxController {
   }) async {
     try {
       isLoading.value = true;
+      isCreatingUserByAdmin.value = true; // Set flag before signup
+
       // 1. Sign up user in Supabase Auth
       final AuthResponse res = await _supabase.auth.signUp(
         email: email,
@@ -71,6 +74,7 @@ class UserController extends GetxController {
       Get.snackbar('Error', 'Failed to create user: ${e.toString()}');
     } finally {
       isLoading.value = false;
+      isCreatingUserByAdmin.value = false; // Reset flag
     }
   }
 
@@ -100,11 +104,7 @@ class UserController extends GetxController {
   Future<void> deleteUser(String userId) async {
     try {
       isLoading.value = true;
-      // Note: Deleting from auth.users is complex and often requires admin privileges
-      // or specific RLS policies. For simplicity, we'll just delete the profile.
-      // If you need to delete the auth user, you'd typically do it via Supabase dashboard
-      // or a secure backend function.
-      await _supabase.from('profiles').delete().eq('id', userId);
+      await _supabase.rpc('delete_auth_user', params: {'user_id': userId});
 
       fetchUsers(); // Refresh the list
       Get.snackbar('Success', 'User deleted successfully!');

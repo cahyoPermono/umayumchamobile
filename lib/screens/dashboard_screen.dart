@@ -11,6 +11,7 @@ import 'package:umayumcha/screens/delivery_note_form_screen.dart';
 import 'package:umayumcha/screens/transaction_log_screen.dart';
 import 'package:umayumcha/screens/consumable_transaction_log_screen.dart';
 import 'package:umayumcha/screens/user_list_screen.dart';
+import 'package:umayumcha/screens/branch_list_screen.dart';
 import 'package:intl/intl.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -129,13 +130,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
               () =>
                   authController.userRole.value == 'admin'
                       ? ListTile(
-                        leading: const Icon(Icons.people),
-                        title: const Text('Master User'),
-                        onTap: () {
-                          Get.back(); // Close the drawer
-                          Get.to(() => UserListScreen());
-                        },
-                      )
+                          leading: const Icon(Icons.people),
+                          title: const Text('Master User'),
+                          onTap: () {
+                            Get.back(); // Close the drawer
+                            Get.to(() => UserListScreen());
+                          },
+                        )
+                      : const SizedBox.shrink(),
+            ),
+            Obx(
+              () =>
+                  authController.userRole.value == 'admin'
+                      ? ListTile(
+                          leading: const Icon(Icons.store),
+                          title: const Text('Master Cabang'),
+                          onTap: () {
+                            Get.back(); // Close the drawer
+                            Get.to(() => BranchListScreen());
+                          },
+                        )
                       : const SizedBox.shrink(),
             ),
             const Divider(),
