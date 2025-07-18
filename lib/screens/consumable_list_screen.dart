@@ -13,39 +13,59 @@ void _showConsumableTransactionDialog(
   final ConsumableController controller = Get.find();
   final TextEditingController quantityController = TextEditingController();
   final TextEditingController reasonController = TextEditingController();
+  final formKey = GlobalKey<FormState>(); // Declare GlobalKey here
 
   Get.dialog(
     AlertDialog(
       title: Text(
         '${type == 'in' ? 'Add' : 'Remove'} Stock for ${consumable.name}',
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: quantityController,
-            decoration: const InputDecoration(
-              labelText: 'Quantity',
-              border: OutlineInputBorder(),
+      content: Form(
+        key: formKey, // Assign the key to the Form
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: quantityController,
+              decoration: const InputDecoration(
+                labelText: 'Quantity',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+              validator: (value) {
+                if (value == null ||
+                    int.tryParse(value) == null ||
+                    int.parse(value) <= 0) {
+                  return 'Please enter a valid quantity.';
+                }
+                return null;
+              },
             ),
-            keyboardType: TextInputType.number,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: reasonController,
-            decoration: const InputDecoration(
-              labelText: 'Reason (Optional)',
-              border: OutlineInputBorder(),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: reasonController,
+              decoration: InputDecoration(
+                labelText:
+                    'Reason ${type == 'out' ? '(Required)' : '(Optional)'}',
+                border: const OutlineInputBorder(),
+              ),
+              validator: (value) {
+                if (type == 'out' && (value == null || value.isEmpty)) {
+                  return 'Reason is required for OUT transactions.';
+                }
+                return null;
+              },
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       actions: [
         TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
         ElevatedButton(
           onPressed: () {
-            final int? quantity = int.tryParse(quantityController.text);
-            if (quantity != null && quantity > 0) {
+            if (formKey.currentState!.validate()) {
+              // Use the key to validate
+              final int quantity = int.parse(quantityController.text);
               if (type == 'in') {
                 controller.addConsumableQuantity(
                   consumable.id!,
@@ -60,8 +80,6 @@ void _showConsumableTransactionDialog(
                 );
               }
               Get.back(); // Close dialog
-            } else {
-              Get.snackbar('Error', 'Please enter a valid quantity.');
             }
           },
           child: Text(type == 'in' ? 'Add' : 'Remove'),
