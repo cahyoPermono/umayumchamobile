@@ -4,29 +4,7 @@ import 'package:get/get.dart';
 import 'package:umayumcha/controllers/user_controller.dart';
 import 'package:umayumcha/controllers/auth_controller.dart';
 import 'package:umayumcha/screens/user_form_screen.dart';
-
-void _showDeleteConfirmationDialog(BuildContext context, UserController controller, String userId, String userEmail) {
-  Get.dialog(
-    AlertDialog(
-      title: const Text('Confirm Deletion'),
-      content: Text('Are you sure you want to delete user \'$userEmail\'?'),
-      actions: [
-        TextButton(
-          onPressed: () => Get.back(),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            controller.deleteUser(userId);
-            Get.back(); // Close the dialog
-          },
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-          child: const Text('Delete'),
-        ),
-      ],
-    ),
-  );
-}
+import 'package:umayumcha/widgets/delete_confirmation_dialog.dart'; // Import the new dialog
 
 class UserListScreen extends StatelessWidget {
 
@@ -91,8 +69,13 @@ class UserListScreen extends StatelessWidget {
                           IconButton(
                             icon: const Icon(Icons.delete),
                             tooltip: 'Delete User',
-                            onPressed: () => _showDeleteConfirmationDialog(
-                                context, userController, user.id, user.email),
+                            onPressed: () => showDeleteConfirmationDialog(
+                                  title: "Delete User",
+                                  content: "Are you sure you want to delete user '${user.email}'?",
+                                  onConfirm: () {
+                                    userController.deleteUser(user.id);
+                                  },
+                                ),
                           ),
                         ],
                       ),

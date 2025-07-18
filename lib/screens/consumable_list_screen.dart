@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:umayumcha/controllers/consumable_controller.dart';
 import 'package:umayumcha/models/consumable_model.dart';
 import 'package:umayumcha/screens/consumable_form_screen.dart';
+import 'package:umayumcha/widgets/delete_confirmation_dialog.dart';
 
 void _showConsumableTransactionDialog(
   BuildContext context,
@@ -119,34 +120,58 @@ class _ConsumableListScreenState extends State<ConsumableListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: _isSearching ? Colors.white : Theme.of(context).primaryColor, // Dynamic background color
-        iconTheme: IconThemeData(color: _isSearching ? Colors.black : Colors.white), // Dynamic icon color
+        backgroundColor:
+            _isSearching
+                ? Colors.white
+                : Theme.of(context).primaryColor, // Dynamic background color
+        iconTheme: IconThemeData(
+          color: _isSearching ? Colors.black : Colors.white,
+        ), // Dynamic icon color
         title:
             _isSearching
                 ? Container(
-                    height: 40, // Adjust height as needed
-                    decoration: BoxDecoration(
-                      color: Colors.white, // Solid white background for clear visibility
-                      borderRadius: BorderRadius.circular(8.0),
+                  height: 40, // Adjust height as needed
+                  decoration: BoxDecoration(
+                    color:
+                        Colors
+                            .white, // Solid white background for clear visibility
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: const InputDecoration(
+                      hintText: 'Search consumables...',
+                      hintStyle: TextStyle(
+                        color: Colors.grey,
+                      ), // Grey hint text
+                      border: InputBorder.none, // Remove default border
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: Colors.grey,
+                      ), // Grey search icon
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8.0,
+                        horizontal: 10.0,
+                      ), // Adjust padding
                     ),
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: const InputDecoration(
-                        hintText: 'Search consumables...',
-                        hintStyle: TextStyle(color: Colors.grey), // Grey hint text
-                        border: InputBorder.none, // Remove default border
-                        prefixIcon: Icon(Icons.search, color: Colors.grey), // Grey search icon
-                        contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 10.0), // Adjust padding
-                      ),
-                      style: const TextStyle(color: Colors.black, fontSize: 16), // Black text for contrast
-                      cursorColor: Colors.black,
-                    ),
-                  )
-                : const Text('Consumables', style: TextStyle(color: Colors.white)), // Ensure title is white when not searching
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                    ), // Black text for contrast
+                    cursorColor: Colors.black,
+                  ),
+                )
+                : const Text(
+                  'Consumables',
+                  style: TextStyle(color: Colors.white),
+                ), // Ensure title is white when not searching
         elevation: 4,
         actions: [
           IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search, color: _isSearching ? Colors.black : Colors.white), // Dynamic icon color
+            icon: Icon(
+              _isSearching ? Icons.close : Icons.search,
+              color: _isSearching ? Colors.black : Colors.white,
+            ), // Dynamic icon color
             onPressed: () {
               setState(() {
                 _isSearching = !_isSearching;
@@ -268,24 +293,16 @@ class _ConsumableListScreenState extends State<ConsumableListScreen> {
                                 Icons.delete,
                                 color: Colors.redAccent,
                               ),
-                              onPressed:
-                                  () => controller.deleteConsumable(
-                                    consumable.id!,
-                                  ),
-                            ),
-                            const SizedBox(width: 8),
-                            ElevatedButton.icon(
-                              onPressed:
-                                  () => _showConsumableTransactionDialog(
-                                    context,
-                                    consumable,
-                                    'out',
-                                  ),
-                              icon: const Icon(Icons.remove),
-                              label: const Text('Out'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.orange,
-                              ),
+                              onPressed: () {
+                                showDeleteConfirmationDialog(
+                                  title: "Delete Consumable",
+                                  content:
+                                      "Are you sure you want to delete ${consumable.name}? This action cannot be undone.",
+                                  onConfirm: () {
+                                    controller.deleteConsumable(consumable.id!);
+                                  },
+                                );
+                              },
                             ),
                             const SizedBox(width: 8),
                             ElevatedButton.icon(
@@ -299,6 +316,20 @@ class _ConsumableListScreenState extends State<ConsumableListScreen> {
                               label: const Text('In'),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.green,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            ElevatedButton.icon(
+                              onPressed:
+                                  () => _showConsumableTransactionDialog(
+                                    context,
+                                    consumable,
+                                    'out',
+                                  ),
+                              icon: const Icon(Icons.remove),
+                              label: const Text('Out'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.orange,
                               ),
                             ),
                           ],

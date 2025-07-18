@@ -3,39 +3,13 @@ import 'package:get/get.dart';
 import 'package:umayumcha/controllers/auth_controller.dart';
 import 'package:umayumcha/controllers/branch_controller.dart';
 import 'package:umayumcha/screens/branch_form_screen.dart';
+import 'package:umayumcha/widgets/delete_confirmation_dialog.dart'; // Import the new dialog
 
 class BranchListScreen extends StatelessWidget {
   final BranchController controller = Get.find();
   final AuthController authController = Get.find();
 
   BranchListScreen({super.key});
-
-  void _showDeleteConfirmation(BuildContext context, String branchId) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Konfirmasi Hapus'),
-          content: const Text('Apakah Anda yakin ingin menghapus cabang ini?'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Batal'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Hapus'),
-              onPressed: () {
-                controller.deleteBranch(branchId);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +89,13 @@ class BranchListScreen extends StatelessWidget {
                                 icon: Icon(Icons.delete, color: Colors.red[400]),
                                 onPressed: () {
                                   if (branch.id != null) {
-                                    _showDeleteConfirmation(context, branch.id!);
+                                    showDeleteConfirmationDialog(
+                                      title: "Delete Branch",
+                                      content: "Are you sure you want to delete branch '${branch.name}'?",
+                                      onConfirm: () {
+                                        controller.deleteBranch(branch.id!); 
+                                      },
+                                    );
                                   } else {
                                     Get.snackbar('Error', 'Branch ID is missing.');
                                   }
