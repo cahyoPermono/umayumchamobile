@@ -278,39 +278,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           thickness: 1,
                         ), // Visual separator
                         const SizedBox(height: 12),
-                        ...inventoryController.globalLowStockProducts.map((bp) {
-                          debugPrint(
-                            'Processing low stock product: ${bp.product?.name}',
-                          ); // Changed from SizedBox.shrink()
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.circle,
-                                  size: 10,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onErrorContainer
-                                      .withValues(alpha: 0.7),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    '${bp.product?.name ?? 'N/A'} (${bp.branchName ?? 'N/A'}): ${bp.quantity} left',
-                                    style: TextStyle(
-                                      color:
-                                          Theme.of(
-                                            context,
-                                          ).colorScheme.onErrorContainer,
-                                      fontSize: 15,
+                        SizedBox(
+                          height: 120, // Fixed height for scrollable content
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            physics: const ClampingScrollPhysics(),
+                            itemCount: inventoryController.globalLowStockProducts.length,
+                            itemBuilder: (context, index) {
+                              final bp = inventoryController.globalLowStockProducts[index];
+                              debugPrint(
+                                'Processing low stock product: ${bp.product?.name}',
+                              ); // Changed from SizedBox.shrink()
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.circle,
+                                      size: 10,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onErrorContainer
+                                          .withValues(alpha: 0.7),
                                     ),
-                                  ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        '${bp.product?.name ?? 'N/A'} (${bp.branchName ?? 'N/A'}): ${bp.quantity} left',
+                                        style: TextStyle(
+                                          color:
+                                              Theme.of(
+                                                context,
+                                              ).colorScheme.onErrorContainer,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          );
-                        }),
+                              );
+                            },
+                          ),
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           'Please restock these items soon.',
@@ -379,39 +388,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           thickness: 1,
                         ), // Visual separator
                         const SizedBox(height: 12),
-                        ...consumableController.expiringConsumables.map((c) {
-                          debugPrint(
-                            'Processing expiring consumable: ${c.name}',
-                          ); // Changed from SizedBox.shrink()
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.circle,
-                                  size: 10,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onTertiaryContainer
-                                      .withValues(alpha: 0.7),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    '${c.name} (Expires: ${c.expiredDate == null ? 'N/A' : DateFormat.yMd().format(c.expiredDate!)})',
-                                    style: TextStyle(
-                                      color:
-                                          Theme.of(
-                                            context,
-                                          ).colorScheme.onTertiaryContainer,
-                                      fontSize: 15,
+                        SizedBox(
+                          height: 120, // Fixed height for scrollable content
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            physics: const ClampingScrollPhysics(),
+                            itemCount: consumableController.expiringConsumables.length,
+                            itemBuilder: (context, index) {
+                              final c = consumableController.expiringConsumables[index];
+                              debugPrint(
+                                'Processing expiring consumable: ${c.name}',
+                              ); // Changed from SizedBox.shrink()
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.circle,
+                                      size: 10,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onTertiaryContainer
+                                          .withValues(alpha: 0.7),
                                     ),
-                                  ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        '${c.name} (Expires: ${c.expiredDate == null ? 'N/A' : DateFormat.yMd().format(c.expiredDate!)})',
+                                        style: TextStyle(
+                                          color:
+                                              Theme.of(
+                                                context,
+                                              ).colorScheme.onTertiaryContainer,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          );
-                        }),
+                              );
+                            },
+                          ),
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           'These consumables will expire soon.',
