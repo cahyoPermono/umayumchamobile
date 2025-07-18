@@ -4,6 +4,7 @@ class Consumable {
   final String code;
   final String name;
   final int quantity;
+  final String? description; // Optional description
   final DateTime? expiredDate;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -13,6 +14,7 @@ class Consumable {
     required this.code,
     required this.name,
     required this.quantity,
+    this.description,
     this.expiredDate,
     this.createdAt,
     this.updatedAt,
@@ -24,6 +26,7 @@ class Consumable {
       code: json['code'],
       name: json['name'],
       quantity: json['quantity'],
+      description: json['description'],
       expiredDate: json['expired_date'] != null
           ? DateTime.parse(json['expired_date'])
           : null,
@@ -41,6 +44,7 @@ class Consumable {
       'code': code,
       'name': name,
       'quantity': quantity,
+      'description': description,
       'expired_date': expiredDate?.toIso8601String(),
     };
     if (id != null) {

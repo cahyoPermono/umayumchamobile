@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -25,13 +24,19 @@ void _showConsumableTransactionDialog(
         children: [
           TextField(
             controller: quantityController,
-            decoration: const InputDecoration(labelText: 'Quantity'),
+            decoration: const InputDecoration(
+              labelText: 'Quantity',
+              border: OutlineInputBorder(),
+            ),
             keyboardType: TextInputType.number,
           ),
           const SizedBox(height: 16),
           TextField(
             controller: reasonController,
-            decoration: const InputDecoration(labelText: 'Reason (Optional)'),
+            decoration: const InputDecoration(
+              labelText: 'Reason (Optional)',
+              border: OutlineInputBorder(),
+            ),
           ),
         ],
       ),
@@ -66,99 +71,216 @@ void _showConsumableTransactionDialog(
   );
 }
 
-class ConsumableListScreen extends StatelessWidget {
-  final ConsumableController controller = Get.put(ConsumableController());
+class ConsumableListScreen extends StatefulWidget {
+  const ConsumableListScreen({super.key});
 
-  ConsumableListScreen({super.key});
+  @override
+  State<ConsumableListScreen> createState() => _ConsumableListScreenState();
+}
+
+class _ConsumableListScreenState extends State<ConsumableListScreen> {
+  final ConsumableController controller = Get.put(ConsumableController());
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      controller.searchQuery.value = _searchController.text;
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Consumables'),
+        title:
+            _isSearching
+                ? TextField(
+                  controller: _searchController,
+                  decoration: const InputDecoration(
+                    hintText: 'Search consumables...',
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(color: Colors.white70),
+                  ),
+                  style: const TextStyle(color: Colors.white, fontSize: 18),
+                  cursorColor: Colors.white,
+                )
+                : const Text('Consumables'),
+        elevation: 4,
         actions: [
           IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => Get.to(() => const ConsumableFormScreen()),
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            onPressed: () {
+              setState(() {
+                _isSearching = !_isSearching;
+                if (!_isSearching) {
+                  _searchController.clear();
+                  controller.searchQuery.value = '';
+                }
+              });
+            },
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Get.to(() => const ConsumableFormScreen()),
+        child: const Icon(Icons.add),
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
-        if (controller.consumables.isEmpty) {
-          return const Center(child: Text('No consumables found.'));
+        if (controller.filteredConsumables.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.inbox, size: 80, color: Colors.grey),
+                SizedBox(height: 20),
+                Text(
+                  controller.searchQuery.isEmpty
+                      ? 'No consumables found.'
+                      : 'No matching consumables found.',
+                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                ),
+              ],
+            ),
+          );
         }
-        return ListView.builder(
-          itemCount: controller.consumables.length,
-          itemBuilder: (context, index) {
-            final consumable = controller.consumables[index];
-            return Card(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ListTile(
-                      title: Text(consumable.name),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Code: ${consumable.code}'),
-                          if (consumable.expiredDate != null)
-                            Text(
-                                'Expired: ${DateFormat.yMd().format(consumable.expiredDate!)}'),
-                        ],
+        return RefreshIndicator(
+          onRefresh: () => controller.fetchConsumables(),
+          child: ListView.builder(
+            itemCount: controller.filteredConsumables.length,
+            itemBuilder: (context, index) {
+              final consumable = controller.filteredConsumables[index];
+              return Card(
+                elevation: 2,
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: InkWell(
+                  onTap:
+                      () => Get.to(
+                        () => ConsumableFormScreen(consumable: consumable),
                       ),
-                      trailing: Text(
-                        'Qty: ${consumable.quantity}',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      onTap: () => Get.to(
-                          () => ConsumableFormScreen(consumable: consumable)),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () => Get.to(
-                              () => ConsumableFormScreen(consumable: consumable)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                consumable.name,
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            Text(
+                              'Qty: ${consumable.quantity}',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleMedium?.copyWith(
+                                color: Theme.of(context).primaryColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () =>
-                              controller.deleteConsumable(consumable.id!),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Code: ${consumable.code}',
+                          style: Theme.of(context).textTheme.bodyMedium,
                         ),
-                        const SizedBox(width: 8),
-                        ElevatedButton.icon(
-                          onPressed: () => _showConsumableTransactionDialog(
-                            context,
-                            consumable,
-                            'out',
+                        if (consumable.description != null &&
+                            consumable.description!.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: Text(
+                              'Description: ${consumable.description}',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
                           ),
-                          icon: const Icon(Icons.remove),
-                          label: const Text('Out'),
-                        ),
-                        const SizedBox(width: 8),
-                        ElevatedButton.icon(
-                          onPressed: () => _showConsumableTransactionDialog(
-                            context,
-                            consumable,
-                            'in',
+                        if (consumable.expiredDate != null)
+                          Text(
+                            'Expired: ${DateFormat.yMd().format(consumable.expiredDate!)}',
+                            style: Theme.of(context).textTheme.bodyMedium,
                           ),
-                          icon: const Icon(Icons.add),
-                          label: const Text('In'),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.edit,
+                                color: Colors.blueGrey,
+                              ),
+                              onPressed:
+                                  () => Get.to(
+                                    () => ConsumableFormScreen(
+                                      consumable: consumable,
+                                    ),
+                                  ),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.delete,
+                                color: Colors.redAccent,
+                              ),
+                              onPressed:
+                                  () => controller.deleteConsumable(
+                                    consumable.id!,
+                                  ),
+                            ),
+                            const SizedBox(width: 8),
+                            ElevatedButton.icon(
+                              onPressed:
+                                  () => _showConsumableTransactionDialog(
+                                    context,
+                                    consumable,
+                                    'out',
+                                  ),
+                              icon: const Icon(Icons.remove),
+                              label: const Text('Out'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.orange,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            ElevatedButton.icon(
+                              onPressed:
+                                  () => _showConsumableTransactionDialog(
+                                    context,
+                                    consumable,
+                                    'in',
+                                  ),
+                              icon: const Icon(Icons.add),
+                              label: const Text('In'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         );
       }),
     );

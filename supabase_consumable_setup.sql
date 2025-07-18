@@ -4,6 +4,7 @@ CREATE TABLE consumables (
   code TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL,
   quantity INTEGER NOT NULL DEFAULT 0,
+  description TEXT, -- Optional description
   expired_date DATE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

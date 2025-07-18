@@ -7,8 +7,21 @@ import 'package:umayumcha/models/consumable_model.dart';
 class ConsumableController extends GetxController {
   final _supabase = Supabase.instance.client;
   var consumables = <Consumable>[].obs;
-  var expiringConsumables = <Consumable>[].obs; // New: List for expiring consumables
+  var expiringConsumables = <Consumable>[].obs;
   var isLoading = false.obs;
+  var searchQuery = ''.obs; // New: Search query observable
+
+  // New: Filtered consumables list
+  RxList<Consumable> get filteredConsumables => consumables.where((consumable) {
+        if (searchQuery.isEmpty) {
+          return true;
+        }
+        final lowerCaseQuery = searchQuery.toLowerCase();
+        return consumable.name.toLowerCase().contains(lowerCaseQuery) ||
+            consumable.code.toLowerCase().contains(lowerCaseQuery) ||
+            (consumable.description != null &&
+                consumable.description!.toLowerCase().contains(lowerCaseQuery));
+      }).toList().obs;
 
   @override
   void onInit() {
@@ -23,6 +36,9 @@ class ConsumableController extends GetxController {
       consumables.value = (response as List)
           .map((item) => Consumable.fromJson(item))
           .toList();
+
+      // Sort consumables by name
+      consumables.sort((a, b) => a.name.compareTo(b.name));
 
       // Filter expiring consumables
       final now = DateTime.now();
