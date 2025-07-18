@@ -29,7 +29,7 @@ class ConsumableController extends GetxController {
       expiringConsumables.value = consumables.where((c) {
         if (c.expiredDate == null) return false;
         final difference = c.expiredDate!.difference(now).inDays;
-        return difference >= 0 && difference <= 30;
+        return difference >= 0 && difference <= 60;
       }).toList();
     } catch (e) {
       Get.snackbar('Error', 'Failed to fetch consumables: ${e.toString()}');
