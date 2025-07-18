@@ -1,15 +1,15 @@
 
 class Branch {
-  final String id;
+  final String? id;
   final String name;
   final String? address;
-  final DateTime createdAt;
+  final DateTime? createdAt;
 
   Branch({
-    required this.id,
+    this.id,
     required this.name,
     this.address,
-    required this.createdAt,
+    this.createdAt,
   });
 
   factory Branch.fromJson(Map<String, dynamic> json) {

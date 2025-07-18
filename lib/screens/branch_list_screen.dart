@@ -1,58 +1,130 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:umayumcha/controllers/auth_controller.dart';
 import 'package:umayumcha/controllers/branch_controller.dart';
 import 'package:umayumcha/screens/branch_form_screen.dart';
 
 class BranchListScreen extends StatelessWidget {
   final BranchController controller = Get.find();
+  final AuthController authController = Get.find();
 
   BranchListScreen({super.key});
+
+  void _showDeleteConfirmation(BuildContext context, String branchId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Konfirmasi Hapus'),
+          content: const Text('Apakah Anda yakin ingin menghapus cabang ini?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Batal'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Hapus'),
+              onPressed: () {
+                controller.deleteBranch(branchId);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Master Cabang'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => Get.to(() => const BranchFormScreen()),
-          ),
-        ],
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
+      floatingActionButton: Obx(() {
+        return authController.userRole.value == 'admin'
+            ? FloatingActionButton(
+                onPressed: () => Get.to(() => const BranchFormScreen()),
+                child: const Icon(Icons.add),
+              )
+            : const SizedBox.shrink();
+      }),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
         if (controller.branches.isEmpty) {
-          return const Center(child: Text('No branches found.'));
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.store_mall_directory, size: 80, color: Colors.grey),
+                SizedBox(height: 16),
+                Text('Belum ada cabang', style: TextStyle(fontSize: 18, color: Colors.grey)),
+                Text('Silakan tambahkan cabang baru', style: TextStyle(color: Colors.grey)),
+              ],
+            ),
+          );
         }
         return ListView.builder(
+          padding: const EdgeInsets.all(8.0),
           itemCount: controller.branches.length,
           itemBuilder: (context, index) {
             final branch = controller.branches[index];
             return Card(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              elevation: 2,
+              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              elevation: 3,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(15),
               ),
-              child: ListTile(
-                title: Text(branch.name),
-                subtitle: Text(branch.address ?? 'No Address'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed:
-                          () => Get.to(() => BranchFormScreen(branch: branch)),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () => controller.deleteBranch(branch.id),
-                    ),
-                  ],
+              child: InkWell(
+                onTap: () => Get.to(() => BranchFormScreen(branch: branch)),
+                borderRadius: BorderRadius.circular(15),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      Icon(Icons.store, color: Theme.of(context).colorScheme.primary, size: 40),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              branch.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              branch.address ?? 'No Address',
+                              style: TextStyle(color: Colors.grey[600]),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Obx(() {
+                        return authController.userRole.value == 'admin'
+                            ? IconButton(
+                                icon: Icon(Icons.delete, color: Colors.red[400]),
+                                onPressed: () {
+                                  if (branch.id != null) {
+                                    _showDeleteConfirmation(context, branch.id!);
+                                  } else {
+                                    Get.snackbar('Error', 'Branch ID is missing.');
+                                  }
+                                },
+                              )
+                            : const SizedBox.shrink();
+                      }),
+                    ],
+                  ),
                 ),
               ),
             );

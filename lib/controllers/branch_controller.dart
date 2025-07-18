@@ -78,13 +78,26 @@ class BranchController extends GetxController {
   }
 
   Future<void> updateBranch(Branch branch) async {
+    if (branch.id == null) {
+      Get.snackbar('Error', 'Cannot update branch without an ID.');
+      return;
+    }
     try {
       isLoading.value = true;
       await supabase
           .from('branches')
           .update(branch.toJson())
-          .eq('id', branch.id);
-      fetchBranches();
+          .eq('id', branch.id!);
+
+      // Find the index of the updated branch and replace it in the local list
+      int index = branches.indexWhere((b) => b.id == branch.id);
+      if (index != -1) {
+        branches[index] = branch;
+        branches.refresh(); // Notify listeners of the change
+      } else {
+        fetchBranches(); // Fallback to fetching all if not found
+      }
+
       Get.back();
       Get.snackbar('Success', 'Branch updated successfully!');
     } catch (e) {
@@ -95,11 +108,15 @@ class BranchController extends GetxController {
     }
   }
 
-  Future<void> deleteBranch(String id) async {
+  Future<void> deleteBranch(String? id) async {
+    if (id == null) {
+      Get.snackbar('Error', 'Cannot delete branch without an ID.');
+      return;
+    }
     try {
       isLoading.value = true;
       await supabase.from('branches').delete().eq('id', id);
-      fetchBranches();
+      branches.removeWhere((b) => b.id == id);
       Get.snackbar('Success', 'Branch deleted successfully!');
     } catch (e) {
       log('Error deleting branch: ${e.toString()}');

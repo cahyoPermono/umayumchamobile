@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:umayumcha/controllers/auth_controller.dart';
 import 'package:umayumcha/controllers/branch_controller.dart';
 import 'package:umayumcha/models/branch_model.dart';
 
@@ -14,14 +15,17 @@ class BranchFormScreen extends StatefulWidget {
 
 class _BranchFormScreenState extends State<BranchFormScreen> {
   final BranchController branchController = Get.find();
+  final AuthController authController = Get.find();
   final _formKey = GlobalKey<FormState>();
 
   late TextEditingController _nameController;
   late TextEditingController _addressController;
+  late bool _isReadOnly;
 
   @override
   void initState() {
     super.initState();
+    _isReadOnly = authController.userRole.value != 'admin';
     _nameController = TextEditingController(text: widget.branch?.name ?? '');
     _addressController = TextEditingController(
       text: widget.branch?.address ?? '',
@@ -32,7 +36,11 @@ class _BranchFormScreenState extends State<BranchFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.branch == null ? 'Add Branch' : 'Edit Branch'),
+        title: Text(widget.branch == null
+            ? 'Add Branch'
+            : _isReadOnly
+                ? 'Branch Details'
+                : 'Edit Branch'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -42,6 +50,7 @@ class _BranchFormScreenState extends State<BranchFormScreen> {
             children: [
               TextFormField(
                 controller: _nameController,
+                readOnly: _isReadOnly,
                 decoration: const InputDecoration(labelText: 'Branch Name'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -53,28 +62,37 @@ class _BranchFormScreenState extends State<BranchFormScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _addressController,
+                readOnly: _isReadOnly,
                 decoration: const InputDecoration(labelText: 'Address'),
                 maxLines: 3,
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    final newBranch = Branch(
-                      createdAt: DateTime.now(),
-                      id: widget.branch!.id,
-                      name: _nameController.text,
-                      address: _addressController.text,
-                    );
-                    if (widget.branch == null) {
-                      branchController.addBranch(newBranch);
-                    } else {
-                      branchController.updateBranch(newBranch);
+              if (!_isReadOnly)
+                ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      if (widget.branch == null) {
+                        // Create new branch without an ID
+                        final newBranch = Branch(
+                          name: _nameController.text,
+                          address: _addressController.text,
+                          createdAt: DateTime.now(),
+                        );
+                        branchController.addBranch(newBranch);
+                      } else {
+                        // Update existing branch with its ID
+                        final updatedBranch = Branch(
+                          id: widget.branch!.id,
+                          name: _nameController.text,
+                          address: _addressController.text,
+                          createdAt: widget.branch!.createdAt,
+                        );
+                        branchController.updateBranch(updatedBranch);
+                      }
                     }
-                  }
-                },
-                child: Text(widget.branch == null ? 'Add' : 'Update'),
-              ),
+                  },
+                  child: Text(widget.branch == null ? 'Add' : 'Update'),
+                ),
             ],
           ),
         ),

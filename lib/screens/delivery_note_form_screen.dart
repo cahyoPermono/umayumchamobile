@@ -50,7 +50,11 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
     }
 
     // Fetch products for the selected source branch
-    final List<BranchProduct> availableProducts = await inventoryController.fetchBranchProductsById(selectedFromBranch!.id);
+    if (selectedFromBranch!.id == null) {
+      Get.snackbar('Error', 'Source branch ID is missing.');
+      return;
+    }
+    final List<BranchProduct> availableProducts = await inventoryController.fetchBranchProductsById(selectedFromBranch!.id!);
 
     if (availableProducts.isEmpty) {
       Get.snackbar(
@@ -261,12 +265,20 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                         );
                         return;
                       }
+                      if (selectedFromBranch!.id == null) {
+                        Get.snackbar('Error', 'From Branch ID is missing.');
+                        return;
+                      }
+                      if (selectedToBranch!.id == null) {
+                        Get.snackbar('Error', 'To Branch ID is missing.');
+                        return;
+                      }
                       deliveryNoteController.createDeliveryNote(
                         customerName: 'Internal Transfer', // Default value
                         destinationAddress: 'Internal Transfer', // Default value
                         deliveryDate: selectedDeliveryDate,
-                        fromBranchId: selectedFromBranch!.id,
-                        toBranchId: selectedToBranch!.id,
+                        fromBranchId: selectedFromBranch!.id!,
+                        toBranchId: selectedToBranch!.id!,
                         items: selectedProducts.toList(),
                       );
                     },

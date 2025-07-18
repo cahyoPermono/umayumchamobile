@@ -67,16 +67,16 @@ class InventoryController extends GetxController {
   }
 
   Future<void> fetchBranchProducts() async {
-    if (selectedBranch.value == null) {
+    if (selectedBranch.value == null || selectedBranch.value!.id == null) {
       branchProducts.clear();
-      return; // No branch selected, clear products
+      return; // No branch selected or branch ID is null, clear products
     }
     try {
       isLoading.value = true;
       var query = supabase
           .from('branch_products')
           .select('*, products(*)')
-          .eq('branch_id', selectedBranch.value!.id)
+          .eq('branch_id', selectedBranch.value!.id!)
           .order('created_at', ascending: true);
 
       // Filter by user's branch if not admin and selected branch is not user's branch
