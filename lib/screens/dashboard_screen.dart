@@ -139,18 +139,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         )
                       : const SizedBox.shrink(),
             ),
-            Obx(
-              () =>
-                  authController.userRole.value == 'admin'
-                      ? ListTile(
-                          leading: const Icon(Icons.store),
-                          title: const Text('Master Cabang'),
-                          onTap: () {
-                            Get.back(); // Close the drawer
-                            Get.to(() => BranchListScreen());
-                          },
-                        )
-                      : const SizedBox.shrink(),
+            ListTile(
+              leading: const Icon(Icons.store),
+              title: const Text('Master Cabang'),
+              onTap: () {
+                Get.back(); // Close the drawer
+                Get.to(() => BranchListScreen());
+              },
             ),
             const Divider(),
             ListTile(
