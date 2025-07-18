@@ -10,6 +10,7 @@ import 'package:umayumcha/screens/product_form_screen.dart';
 import 'package:umayumcha/screens/delivery_note_form_screen.dart';
 import 'package:umayumcha/screens/transaction_log_screen.dart';
 import 'package:umayumcha/screens/consumable_transaction_log_screen.dart';
+import 'package:umayumcha/screens/user_list_screen.dart';
 import 'package:intl/intl.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -29,9 +30,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.initState();
     inventoryController = Get.find<InventoryController>();
     consumableController = Get.find<ConsumableController>();
-    // Ensure data is fetched when the screen is initialized or re-entered
-    inventoryController.refreshDashboardData();
-    consumableController.fetchConsumables();
+    // Ensure data is fetched after the first frame is rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      inventoryController.refreshDashboardData();
+      consumableController.fetchConsumables();
+    });
   }
 
   @override
@@ -122,6 +125,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Get.to(() => ConsumableTransactionLogScreen());
               },
             ),
+            Obx(
+              () =>
+                  authController.userRole.value == 'admin'
+                      ? ListTile(
+                        leading: const Icon(Icons.people),
+                        title: const Text('Master User'),
+                        onTap: () {
+                          Get.back(); // Close the drawer
+                          Get.to(() => UserListScreen());
+                        },
+                      )
+                      : const SizedBox.shrink(),
+            ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.logout),
@@ -200,9 +216,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               // Low Stock Warning Section
               Obx(() {
-                if (inventoryController.globalLowStockProducts.isEmpty) {
-                  return const SizedBox.shrink();
+                if (inventoryController.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
                 }
+                if (inventoryController.globalLowStockProducts.isEmpty) {
+                  debugPrint('No low stock products.');
+                  return Container(); // Changed from SizedBox.shrink()
+                }
+                debugPrint(
+                  'Low stock products: ${inventoryController.globalLowStockProducts.length}',
+                );
                 return Card(
                   color: Theme.of(context).colorScheme.errorContainer,
                   child: Padding(
@@ -242,6 +265,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ), // Visual separator
                         const SizedBox(height: 12),
                         ...inventoryController.globalLowStockProducts.map((bp) {
+                          debugPrint(
+                            'Processing low stock product: ${bp.product?.name}',
+                          ); // Changed from SizedBox.shrink()
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 4.0),
                             child: Row(
@@ -291,9 +317,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               // Expiring Consumables Warning Section
               Obx(() {
-                if (consumableController.expiringConsumables.isEmpty) {
-                  return const SizedBox.shrink();
+                if (consumableController.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
                 }
+                if (consumableController.expiringConsumables.isEmpty) {
+                  debugPrint('No expiring consumables.');
+                  return Container(); // Changed from SizedBox.shrink()
+                }
+                debugPrint(
+                  'Expiring consumables: ${consumableController.expiringConsumables.length}',
+                );
                 return Card(
                   color: Theme.of(context).colorScheme.tertiaryContainer,
                   child: Padding(
@@ -333,6 +366,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ), // Visual separator
                         const SizedBox(height: 12),
                         ...consumableController.expiringConsumables.map((c) {
+                          debugPrint(
+                            'Processing expiring consumable: ${c.name}',
+                          ); // Changed from SizedBox.shrink()
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 4.0),
                             child: Row(

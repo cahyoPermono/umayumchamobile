@@ -78,14 +78,12 @@ class AuthController extends GetxController {
   Future<void> signUp({
     required String email,
     required String password,
-    String? branchId,
   }) async {
     try {
       isLoading.value = true;
       final response = await supabase.auth.signUp(
         email: email,
         password: password,
-        data: {'branch_id': branchId}, // Pass branchId in user metadata
       );
       // The onAuthStateChange listener will handle redirection.
       if (response.user != null) {

@@ -120,7 +120,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   authController.signUp(
                                     email: emailController.text.trim(),
                                     password: passwordController.text.trim(),
-                                    branchId: selectedBranch!.id, // Pass selected branch ID
                                   );
                                 },
                                 child: const Text('Sign Up'),

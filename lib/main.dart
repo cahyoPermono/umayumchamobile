@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha/controllers/auth_controller.dart';
+import 'package:umayumcha/controllers/branch_controller.dart';
 import 'package:umayumcha/screens/splash_screen.dart';
 import 'package:umayumcha/screens/dashboard_screen.dart';
 import 'package:umayumcha/screens/sign_in_screen.dart';
@@ -20,6 +21,7 @@ void main() async {
   Get.put(AuthController());
   Get.put(InventoryController());
   Get.put(ConsumableController());
+  Get.put(BranchController());
 
   runApp(const MyApp());
 }
