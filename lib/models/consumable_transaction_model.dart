@@ -1,7 +1,7 @@
 
 class ConsumableTransaction {
   final int id;
-  final int consumableId;
+  final int? consumableId;
   final String? consumableName;
   final int quantityChange;
   final String type;
@@ -12,7 +12,7 @@ class ConsumableTransaction {
 
   ConsumableTransaction({
     required this.id,
-    required this.consumableId,
+    this.consumableId,
     this.consumableName,
     required this.quantityChange,
     required this.type,
@@ -25,7 +25,7 @@ class ConsumableTransaction {
   factory ConsumableTransaction.fromJson(Map<String, dynamic> json) {
     return ConsumableTransaction(
       id: json['id'] as int,
-      consumableId: json['consumable_id'] as int,
+      consumableId: json['consumable_id'] as int?,
       consumableName: json['consumables']?['name'] as String?,
       quantityChange: json['quantity_change'] as int,
       type: json['type'] as String,
