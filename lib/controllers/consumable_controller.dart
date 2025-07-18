@@ -60,6 +60,7 @@ class ConsumableController extends GetxController {
       await _supabase.from('consumables').insert([consumable.toJson()]);
       fetchConsumables(); // Refresh the list
       Get.back(); // Close the form screen
+      Get.snackbar('Success', 'Consumable added successfully!'); // Success snackbar
     } catch (e) {
       log('Error adding consumable: $e'); // Add this line
       Get.snackbar('Error', 'Failed to add consumable: ${e.toString()}');
@@ -77,6 +78,7 @@ class ConsumableController extends GetxController {
           .eq('id', consumable.id!);
       fetchConsumables(); // Refresh the list
       Get.back(); // Close the form screen
+      Get.snackbar('Success', 'Consumable updated successfully!'); // Success snackbar
     } catch (e) {
       log('Error updating consumable: $e');
       Get.snackbar('Error', 'Failed to update consumable: ${e.toString()}');
@@ -90,6 +92,7 @@ class ConsumableController extends GetxController {
       isLoading.value = true;
       await _supabase.from('consumables').delete().eq('id', id);
       fetchConsumables(); // Refresh the list
+      Get.snackbar('Success', 'Consumable deleted successfully!'); // Success snackbar
     } catch (e) {
       log('Error deleting consumable: $e');
       Get.snackbar('Error', 'Failed to delete consumable: ${e.toString()}');
@@ -121,6 +124,7 @@ class ConsumableController extends GetxController {
     try {
       await _logTransaction(consumableId: id, quantityChange: quantity, type: 'in', reason: reason);
       fetchConsumables();
+      Get.snackbar('Success', 'Consumable quantity added successfully!');
     } catch (e) {
       log('Error adding consumable quantity: $e');
       Get.snackbar('Error', 'Failed to add consumable quantity: ${e.toString()}');
@@ -131,6 +135,7 @@ class ConsumableController extends GetxController {
     try {
       await _logTransaction(consumableId: id, quantityChange: -quantity, type: 'out', reason: reason);
       fetchConsumables();
+      Get.snackbar('Success', 'Consumable quantity removed successfully!');
     } catch (e) {
       log('Error removing consumable quantity: $e');
       Get.snackbar('Error', 'Failed to remove consumable quantity: ${e.toString()}');

@@ -22,8 +22,9 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
   late TextEditingController _nameController;
   late TextEditingController _quantityController;
   late TextEditingController _descriptionController;
-  final TextEditingController _locationController = TextEditingController(text: 'UmayumchaHQ'); // New: Location controller
+  final TextEditingController _locationController = TextEditingController(text: 'UmayumchaHQ');
   DateTime? _expiredDate;
+  bool _isSubmitting = false; // New: State variable for submission status
 
   @override
   void initState() {
@@ -43,7 +44,7 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
     _nameController.dispose();
     _quantityController.dispose();
     _descriptionController.dispose();
-    _locationController.dispose(); // Dispose new controller
+    _locationController.dispose();
     super.dispose();
   }
 
@@ -175,21 +176,30 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: _isSubmitting ? null : () async { // Disable button when submitting
                     if (_formKey.currentState!.validate()) {
-                      final newConsumable = Consumable(
-                        id: widget.consumable?.id,
-                        code: _codeController.text,
-                        name: _nameController.text,
-                        quantity: widget.consumable?.quantity ??
-                            int.parse(_quantityController.text),
-                        description: _descriptionController.text,
-                        expiredDate: _expiredDate,
-                      );
-                      if (widget.consumable == null) {
-                        controller.addConsumable(newConsumable);
-                      } else {
-                        controller.updateConsumable(newConsumable);
+                      setState(() {
+                        _isSubmitting = true; // Set submitting state to true
+                      });
+                      try {
+                        final newConsumable = Consumable(
+                          id: widget.consumable?.id,
+                          code: _codeController.text,
+                          name: _nameController.text,
+                          quantity: widget.consumable?.quantity ??
+                              int.parse(_quantityController.text),
+                          description: _descriptionController.text,
+                          expiredDate: _expiredDate,
+                        );
+                        if (widget.consumable == null) {
+                          await controller.addConsumable(newConsumable);
+                        } else {
+                          await controller.updateConsumable(newConsumable);
+                        }
+                      } finally {
+                        setState(() {
+                          _isSubmitting = false; // Reset submitting state
+                        });
                       }
                     }
                   },
@@ -199,10 +209,16 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: Text(
-                    widget.consumable == null ? 'Add' : 'Update',
-                    style: const TextStyle(fontSize: 18),
-                  ),
+                  child: _isSubmitting
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : Text(
+                          widget.consumable == null ? 'Add' : 'Update',
+                          style: const TextStyle(fontSize: 18),
+                        ),
                 ),
               ],
             ),
