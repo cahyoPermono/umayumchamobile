@@ -119,23 +119,34 @@ class _ConsumableListScreenState extends State<ConsumableListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: _isSearching ? Colors.white : Theme.of(context).primaryColor, // Dynamic background color
+        iconTheme: IconThemeData(color: _isSearching ? Colors.black : Colors.white), // Dynamic icon color
         title:
             _isSearching
-                ? TextField(
-                  controller: _searchController,
-                  decoration: const InputDecoration(
-                    hintText: 'Search consumables...',
-                    border: InputBorder.none,
-                    hintStyle: TextStyle(color: Colors.white70),
-                  ),
-                  style: const TextStyle(color: Colors.white, fontSize: 18),
-                  cursorColor: Colors.white,
-                )
-                : const Text('Consumables'),
+                ? Container(
+                    height: 40, // Adjust height as needed
+                    decoration: BoxDecoration(
+                      color: Colors.white, // Solid white background for clear visibility
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: const InputDecoration(
+                        hintText: 'Search consumables...',
+                        hintStyle: TextStyle(color: Colors.grey), // Grey hint text
+                        border: InputBorder.none, // Remove default border
+                        prefixIcon: Icon(Icons.search, color: Colors.grey), // Grey search icon
+                        contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 10.0), // Adjust padding
+                      ),
+                      style: const TextStyle(color: Colors.black, fontSize: 16), // Black text for contrast
+                      cursorColor: Colors.black,
+                    ),
+                  )
+                : const Text('Consumables', style: TextStyle(color: Colors.white)), // Ensure title is white when not searching
         elevation: 4,
         actions: [
           IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            icon: Icon(_isSearching ? Icons.close : Icons.search, color: _isSearching ? Colors.black : Colors.white), // Dynamic icon color
             onPressed: () {
               setState(() {
                 _isSearching = !_isSearching;
