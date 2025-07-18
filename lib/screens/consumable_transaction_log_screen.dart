@@ -51,6 +51,11 @@ class ConsumableTransactionLogScreen extends StatelessWidget {
                       'Date: ${DateFormat('yyyy-MM-dd HH:mm').format(transaction.createdAt)}',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
+                    if (transaction.userEmail != null && transaction.userEmail!.isNotEmpty)
+                      Text(
+                        'By: ${transaction.userEmail}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                   ],
                 ),
               ),

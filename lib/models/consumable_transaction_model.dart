@@ -8,6 +8,7 @@ class ConsumableTransaction {
   final String? reason;
   final DateTime createdAt;
   final String? userId;
+  final String? userEmail; // New: User email
 
   ConsumableTransaction({
     required this.id,
@@ -18,6 +19,7 @@ class ConsumableTransaction {
     this.reason,
     required this.createdAt,
     this.userId,
+    this.userEmail,
   });
 
   factory ConsumableTransaction.fromJson(Map<String, dynamic> json) {
@@ -30,6 +32,7 @@ class ConsumableTransaction {
       reason: json['reason'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       userId: json['user_id'] as String?,
+      userEmail: json['user_email'] as String?, // Parse user email directly from the view
     );
   }
 

@@ -18,8 +18,8 @@ class ConsumableTransactionLogController extends GetxController {
     try {
       isLoading.value = true;
       final response = await _supabase
-          .from('consumable_transactions')
-          .select('*, consumables(name)') // Select consumable name
+          .from('consumable_transactions_with_user_email_view')
+          .select('*, consumables(name)')
           .order('created_at', ascending: false);
 
       transactions.value = (response as List)
