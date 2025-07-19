@@ -278,7 +278,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'SKU: ${product?.sku ?? 'No SKU'}',
+                                'Code: ${product?.code ?? 'No Code'}',
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
                               Text(

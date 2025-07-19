@@ -15,6 +15,9 @@ class BranchController extends GetxController {
   void onInit() {
     final AuthController authController = Get.find();
 
+    // Fetch branches immediately on init
+    fetchBranches();
+
     // Listen to changes in user role or branch ID to refetch branches with debounce
     debounce(
       authController.userRole,
@@ -33,27 +36,15 @@ class BranchController extends GetxController {
   Future<void> fetchBranches() async {
     try {
       isLoading.value = true;
-      String selectQuery = '*';
-      List<String> conditions = [];
-
-      final authController = Get.find<AuthController>();
-      if (authController.userRole.value != 'admin' &&
-          authController.userBranchId.value != null) {
-        conditions.add('id.eq.${authController.userBranchId.value!}');
-      }
-
-      if (conditions.isNotEmpty) {
-        selectQuery += '.filter(${conditions.join(',')})';
-      }
-
       final response = await supabase
           .from('branches')
-          .select(selectQuery)
+          .select('*')
           .order('name', ascending: true);
 
       branches.value =
           (response as List).map((item) => Branch.fromJson(item)).toList();
       debugPrint('Branches fetched: ${branches.length}');
+      debugPrint('Fetched branch names: ${branches.map((b) => b.name).toList()}');
     } catch (e) {
       log('Error fetching branches: ${e.toString()}');
       Get.snackbar('Error', 'Failed to fetch branches: ${e.toString()}');

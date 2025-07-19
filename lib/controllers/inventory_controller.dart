@@ -21,7 +21,7 @@ class InventoryController extends GetxController {
           .where((product) {
             final query = searchQuery.value.toLowerCase();
             return product.product!.name.toLowerCase().contains(query) ||
-                product.product!.sku!.toLowerCase().contains(query);
+                product.product!.code.toLowerCase().contains(query);
           })
           .toList()
           .obs;
