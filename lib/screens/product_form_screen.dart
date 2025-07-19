@@ -124,16 +124,22 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           widget.product == null ? 'Add New Product' : 'Edit Product',
           style: const TextStyle(color: Colors.white), // Ensure title is white
         ),
-        backgroundColor: Theme.of(context).primaryColor, // Use primary color for app bar
-        iconTheme: const IconThemeData(color: Colors.white), // White back button
+        backgroundColor:
+            Theme.of(context).primaryColor, // Use primary color for app bar
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ), // White back button
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0), // Increased padding for more breathing room
+        padding: const EdgeInsets.all(
+          20.0,
+        ), // Increased padding for more breathing room
         child: Form(
           key: _formKey,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch, // Stretch fields horizontally
+            crossAxisAlignment:
+                CrossAxisAlignment.stretch, // Stretch fields horizontally
             children: [
               TextFormField(
                 controller: nameController,
@@ -141,7 +147,10 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   labelText: 'Product Name',
                   hintText: 'e.g., Dimsum Ayam',
                   border: OutlineInputBorder(), // Clean outline border
-                  contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 12.0,
+                    horizontal: 15.0,
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -157,7 +166,10 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   labelText: 'Code (Required)',
                   hintText: 'e.g., DM001',
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 12.0,
+                    horizontal: 15.0,
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -168,14 +180,22 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               ),
               const SizedBox(height: 16),
               TextFormField(
-                controller: descriptionController,
+                controller: kondisiController,
                 decoration: const InputDecoration(
-                  labelText: 'Description (Optional)',
-                  hintText: 'e.g., Dimsum dengan isian daging ayam cincang',
+                  labelText: 'Kondisi (Required)',
+                  hintText: 'e.g., Baik, Rusak',
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 12.0,
+                    horizontal: 15.0,
+                  ),
                 ),
-                maxLines: 3,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a condition';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
               SwitchListTile(
@@ -195,18 +215,25 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     labelText: 'Merk (Optional)',
                     hintText: 'e.g., ABC Food',
                     border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 12.0,
+                      horizontal: 15.0,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
-                  controller: kondisiController,
+                  controller: descriptionController,
                   decoration: const InputDecoration(
-                    labelText: 'Kondisi (Optional)',
-                    hintText: 'e.g., Baik, Rusak',
+                    labelText: 'Description (Optional)',
+                    hintText: 'e.g., Dimsum dengan isian daging ayam cincang',
                     border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 12.0,
+                      horizontal: 15.0,
+                    ),
                   ),
+                  maxLines: 3,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -215,7 +242,10 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     labelText: 'Tahun Perolehan (Optional)',
                     hintText: 'e.g., 2023',
                     border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 12.0,
+                      horizontal: 15.0,
+                    ),
                   ),
                   keyboardType: TextInputType.number,
                 ),
@@ -226,7 +256,10 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     labelText: 'Nilai Residu (Optional)',
                     hintText: 'e.g., 50000',
                     border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 12.0,
+                      horizontal: 15.0,
+                    ),
                   ),
                   keyboardType: TextInputType.numberWithOptions(decimal: true),
                 ),
@@ -237,7 +270,10 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     labelText: 'Pengguna (Optional)',
                     hintText: 'e.g., Departemen Produksi',
                     border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 12.0,
+                      horizontal: 15.0,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -247,25 +283,36 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     labelText: 'Price (Optional)',
                     hintText: 'e.g., 15000.00',
                     border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 12.0,
+                      horizontal: 15.0,
+                    ),
                   ),
                   keyboardType: TextInputType.numberWithOptions(decimal: true),
                 ),
               ],
               const SizedBox(height: 16),
               if (widget.product == null) ...[
-                const SizedBox(height: 24), // More space before initial quantity section
+                const SizedBox(
+                  height: 24,
+                ), // More space before initial quantity section
                 Obx(() {
                   if (branchController.isLoading.value) {
-                    return const Center(child: CircularProgressIndicator()); // Center loading indicator
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    ); // Center loading indicator
                   }
-                  final branchName = umayumchaHQBranch.value?.name ?? 'Loading...';
+                  final branchName =
+                      umayumchaHQBranch.value?.name ?? 'Loading...';
                   return AbsorbPointer(
                     child: TextFormField(
                       decoration: InputDecoration(
                         labelText: 'Initial Stock Branch',
                         border: const OutlineInputBorder(),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 12.0,
+                          horizontal: 15.0,
+                        ),
                       ),
                       controller: TextEditingController(text: branchName),
                       enabled: false,
@@ -279,7 +326,10 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     labelText: 'Initial Quantity',
                     hintText: 'e.g., 100',
                     border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 12.0,
+                      horizontal: 15.0,
+                    ),
                   ),
                   keyboardType: TextInputType.number,
                   validator: (value) {
@@ -298,113 +348,139 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               const SizedBox(height: 30), // More space before the button
               Obx(() {
                 return inventoryController.isLoading.value
-                    ? const Center(child: CircularProgressIndicator()) // Center loading indicator
+                    ? const Center(
+                      child: CircularProgressIndicator(),
+                    ) // Center loading indicator
                     : ElevatedButton(
-                        onPressed: () async {
-                          final isValid = _formKey.currentState!.validate();
-                          debugPrint('Form validation result: $isValid');
-                          debugPrint('Name: ${nameController.text}');
-                          debugPrint('Code: ${codeController.text}');
-                          debugPrint('Description: ${descriptionController.text}');
-                          debugPrint('Merk: ${merkController.text}');
-                          debugPrint('Kondisi: ${kondisiController.text}');
-                          debugPrint('Tahun Perolehan: ${tahunPerolehanController.text}');
-                          debugPrint('Nilai Residu: ${nilaiResiduController.text}');
-                          debugPrint('Pengguna: ${penggunaController.text}');
-                          debugPrint('Price: ${priceController.text}');
+                      onPressed: () async {
+                        final isValid = _formKey.currentState!.validate();
+                        debugPrint('Form validation result: $isValid');
+                        debugPrint('Name: ${nameController.text}');
+                        debugPrint('Code: ${codeController.text}');
+                        debugPrint(
+                          'Description: ${descriptionController.text}',
+                        );
+                        debugPrint('Merk: ${merkController.text}');
+                        debugPrint('Kondisi: ${kondisiController.text}');
+                        debugPrint(
+                          'Tahun Perolehan: ${tahunPerolehanController.text}',
+                        );
+                        debugPrint(
+                          'Nilai Residu: ${nilaiResiduController.text}',
+                        );
+                        debugPrint('Pengguna: ${penggunaController.text}');
+                        debugPrint('Price: ${priceController.text}');
 
-                          if (isValid) {
-                            final product = Product(
-                              id: widget.product?.id ?? '',
-                              name: nameController.text.trim(),
-                              code: codeController.text.trim(),
-                              description:
-                                  descriptionController.text.trim().isEmpty
-                                      ? null
-                                      : descriptionController.text.trim(),
-                              merk: merkController.text.trim().isEmpty
-                                  ? null
-                                  : merkController.text.trim(),
-                              kondisi: kondisiController.text.trim().isEmpty
-                                  ? null
-                                  : kondisiController.text.trim(),
-                              tahunPerolehan:
-                                  tahunPerolehanController.text.trim().isEmpty
-                                      ? null
-                                      : tahunPerolehanController.text.trim(),
-                              nilaiResidu: double.tryParse(
-                                nilaiResiduController.text.trim(),
-                              ),
-                              pengguna: penggunaController.text.trim().isEmpty
-                                  ? null
-                                  : penggunaController.text.trim(),
-                              price:
-                                  double.tryParse(priceController.text.trim()),
-                              createdAt:
-                                  widget.product?.createdAt ?? DateTime.now(),
+                        if (isValid) {
+                          final product = Product(
+                            id: widget.product?.id ?? '',
+                            name: nameController.text.trim(),
+                            code: codeController.text.trim(),
+                            description:
+                                descriptionController.text.trim().isEmpty
+                                    ? null
+                                    : descriptionController.text.trim(),
+                            merk:
+                                merkController.text.trim().isEmpty
+                                    ? null
+                                    : merkController.text.trim(),
+                            kondisi:
+                                kondisiController.text.trim().isEmpty
+                                    ? null
+                                    : kondisiController.text.trim(),
+                            tahunPerolehan:
+                                tahunPerolehanController.text.trim().isEmpty
+                                    ? null
+                                    : tahunPerolehanController.text.trim(),
+                            nilaiResidu: double.tryParse(
+                              nilaiResiduController.text.trim(),
+                            ),
+                            pengguna:
+                                penggunaController.text.trim().isEmpty
+                                    ? null
+                                    : penggunaController.text.trim(),
+                            price: double.tryParse(priceController.text.trim()),
+                            createdAt:
+                                widget.product?.createdAt ?? DateTime.now(),
+                          );
+
+                          if (widget.product == null) {
+                            if (umayumchaHQBranch.value == null) {
+                              Get.snackbar(
+                                'Error',
+                                'UmayumchaHQ branch not found. Cannot save product.',
+                              );
+                              return;
+                            }
+                            final int initialQuantity = int.parse(
+                              initialQuantityController.text.trim(),
                             );
 
-                            if (widget.product == null) {
-                              if (umayumchaHQBranch.value == null) {
+                            final String? newProductId =
+                                await inventoryController.addProductAndGetId(
+                                  product,
+                                );
+
+                            if (newProductId != null) {
+                              final transactionSuccess =
+                                  await inventoryController.addTransaction(
+                                    productId: newProductId,
+                                    type: 'in',
+                                    quantityChange: initialQuantity,
+                                    reason: 'Initial stock for new product',
+                                    toBranchId: umayumchaHQBranch.value!.id,
+                                  );
+                              if (transactionSuccess) {
+                                Get.back();
+                                Get.snackbar(
+                                  'Success',
+                                  'Product and initial stock added successfully!',
+                                );
+                              } else {
                                 Get.snackbar(
                                   'Error',
-                                  'UmayumchaHQ branch not found. Cannot save product.',
+                                  'Failed to add initial stock.',
                                 );
-                                return;
-                              }
-                              final int initialQuantity = int.parse(
-                                initialQuantityController.text.trim(),
-                              );
-
-                              final String? newProductId =
-                                  await inventoryController
-                                      .addProductAndGetId(product);
-
-                              if (newProductId != null) {
-                                final transactionSuccess = await inventoryController.addTransaction(
-                                  productId: newProductId,
-                                  type: 'in',
-                                  quantityChange: initialQuantity,
-                                  reason: 'Initial stock for new product',
-                                  toBranchId: umayumchaHQBranch.value!.id,
-                                );
-                                if (transactionSuccess) {
-                                  Get.back();
-                                  Get.snackbar(
-                                    'Success',
-                                    'Product and initial stock added successfully!',
-                                  );
-                                } else {
-                                  Get.snackbar('Error', 'Failed to add initial stock.');
-                                }
-                              } else {
-                                Get.snackbar('Error', 'Failed to add product.');
                               }
                             } else {
-                              await inventoryController.updateProduct(product);
-                              Get.back();
+                              Get.snackbar('Error', 'Failed to add product.');
                             }
+                          } else {
+                            await inventoryController.updateProduct(product);
+                            Get.back();
                           }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 15.0), // Larger button
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0), // Rounded corners
-                          ),
-                          backgroundColor: Theme.of(context).primaryColor, // Use primary color
-                          foregroundColor: Colors.white, // White text
-                          elevation: 5, // Add shadow
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 15.0,
+                        ), // Larger button
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            10.0,
+                          ), // Rounded corners
                         ),
-                        child: Text(
-                          widget.product == null
-                              ? 'Save Product'
-                              : 'Update Product',
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold), // Bold text
-                        ),
-                      );
+                        backgroundColor:
+                            Theme.of(context).primaryColor, // Use primary color
+                        foregroundColor: Colors.white, // White text
+                        elevation: 5, // Add shadow
+                      ),
+                      child: Text(
+                        widget.product == null
+                            ? 'Save Product'
+                            : 'Update Product',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ), // Bold text
+                      ),
+                    );
               }),
               SizedBox(
-                height: MediaQuery.of(context).viewInsets.bottom > 0 ? 20.0 : 0.0, // Adjust space for keyboard
+                height:
+                    MediaQuery.of(context).viewInsets.bottom > 0
+                        ? 20.0
+                        : 0.0, // Adjust space for keyboard
               ),
             ],
           ),
