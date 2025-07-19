@@ -446,8 +446,23 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                               Get.snackbar('Error', 'Failed to add product.');
                             }
                           } else {
-                            await inventoryController.updateProduct(product);
-                            Get.back();
+                            final success = await inventoryController
+                                .updateProduct(product);
+                            if (success) {
+                              Get.back();
+                              Get.snackbar(
+                                'Success',
+                                'Product updated successfully!',
+                              );
+                            } else {
+                              Get.snackbar(
+                                'Error',
+                                'Failed to update product.',
+                                margin: EdgeInsets.all(10),
+                                backgroundColor: Colors.red,
+                                colorText: Colors.white,
+                              );
+                            }
                           }
                         }
                       },

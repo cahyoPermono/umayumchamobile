@@ -36,16 +36,16 @@ class InventoryController extends GetxController {
       productMap.remove('id');
       // Add updated_by
       final authController = Get.find<AuthController>();
-      productMap['updated_by'] = authController.currentUser.value?.id; // Assuming currentUser is Rx<User?>
+      productMap['updated_by'] =
+          authController
+              .currentUser
+              .value
+              ?.id; // Assuming currentUser is Rx<User?>
 
-      await supabase
-          .from('products')
-          .update(productMap)
-          .eq('id', product.id);
+      await supabase.from('products').update(productMap).eq('id', product.id);
 
       fetchBranchProducts(); // Refresh the list
       return true; // Return true on success
-
     } catch (e) {
       debugPrint('Error updating product: $e');
       Get.snackbar('Error', 'Failed to update product: ${e.toString()}');
@@ -58,15 +58,11 @@ class InventoryController extends GetxController {
   Future<void> deleteProduct(String productId) async {
     isLoading.value = true;
     try {
-      await supabase
-          .from('products')
-          .delete()
-          .eq('id', productId);
+      await supabase.from('products').delete().eq('id', productId);
 
       // If no exception is thrown, the deletion is successful.
       Get.snackbar('Success', 'Product deleted successfully');
       fetchBranchProducts(); // Refresh the list
-
     } catch (e) {
       debugPrint('Error deleting product: $e'); // Log the actual error
       Get.snackbar('Error', 'Failed to delete product: ${e.toString()}');
@@ -256,7 +252,10 @@ class InventoryController extends GetxController {
       return true; // Return true on success
     } catch (e) {
       debugPrint('Error adding transaction: ${e.toString()}');
-      Get.snackbar('Error', 'Failed to update stock: ${e.toString()}'); // Keep snackbar for error
+      Get.snackbar(
+        'Error',
+        'Failed to update stock: ${e.toString()}',
+      ); // Keep snackbar for error
       return false; // Return false on failure
     } finally {
       isLoading.value = false;

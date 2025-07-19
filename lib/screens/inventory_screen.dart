@@ -64,11 +64,12 @@ void _showTransactionDialog(
       actions: [
         TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
         ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
+            // Added async here
             if (formKey.currentState!.validate()) {
               // Use the key to validate
               final int quantity = int.parse(quantityController.text);
-              controller.addTransaction(
+              final success = await controller.addTransaction(
                 productId: branchProduct.productId,
                 type: type,
                 quantityChange: quantity,
@@ -77,6 +78,17 @@ void _showTransactionDialog(
                 toBranchId: type == 'in' ? branchProduct.branchId : null,
               );
               Get.back(); // Close dialog
+              if (success) {
+                Get.snackbar('Success', 'Stock updated successfully!');
+              } else {
+                Get.snackbar(
+                  'Error',
+                  'Failed to update stock.',
+                  margin: EdgeInsets.all(10),
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              }
             }
           },
           child: Text(type == 'in' ? 'Add' : 'Remove'),
