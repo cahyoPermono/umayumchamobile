@@ -5,6 +5,54 @@ import 'package:umayumcha/controllers/auth_controller.dart';
 import 'package:umayumcha/models/consumable_model.dart';
 
 class ConsumableController extends GetxController {
+  Future<void> addStock(int consumableId, int quantity, String reason) async {
+    try {
+      isLoading.value = true;
+      final consumable = consumables.firstWhere((c) => c.id == consumableId);
+      // Hanya log transaksi, update quantity dilakukan oleh trigger Supabase
+      await _logTransaction(
+        consumableId: consumableId,
+        consumableName: consumable.name,
+        quantityChange: quantity,
+        type: 'in',
+        reason: reason,
+      );
+      await fetchConsumables();
+      Get.snackbar('Success', 'Stock added successfully!');
+    } catch (e) {
+      log('Error adding stock: $e');
+      Get.snackbar('Error', 'Failed to add stock: ${e.toString()}');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> removeStock(
+    int consumableId,
+    int quantity,
+    String reason,
+  ) async {
+    try {
+      isLoading.value = true;
+      final consumable = consumables.firstWhere((c) => c.id == consumableId);
+      // Hanya log transaksi, update quantity dilakukan oleh trigger Supabase
+      await _logTransaction(
+        consumableId: consumableId,
+        consumableName: consumable.name,
+        quantityChange: -quantity,
+        type: 'out',
+        reason: reason,
+      );
+      await fetchConsumables();
+      Get.snackbar('Success', 'Stock removed successfully!');
+    } catch (e) {
+      log('Error removing stock: $e');
+      Get.snackbar('Error', 'Failed to remove stock: ${e.toString()}');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   final _supabase = Supabase.instance.client;
   var consumables = <Consumable>[].obs;
   var expiringConsumables = <Consumable>[].obs;
@@ -103,7 +151,11 @@ class ConsumableController extends GetxController {
 
       // Add updated_by
       final authController = Get.find<AuthController>();
-      consumableMap['updated_by'] = authController.currentUser.value?.id; // Assuming currentUser is Rx<User?>
+      consumableMap['updated_by'] =
+          authController
+              .currentUser
+              .value
+              ?.id; // Assuming currentUser is Rx<User?>
 
       await _supabase
           .from('consumables')
@@ -172,70 +224,6 @@ class ConsumableController extends GetxController {
     }
   }
 
-  Future<void> addConsumableQuantity(
-    int id,
-    int quantity,
-    String reason,
-  ) async {
-    try {
-      final consumable = consumables.firstWhere((c) => c.id == id);
-      await _supabase.from('consumables').update({
-        'quantity': consumable.quantity + quantity,
-      }).eq('id', id);
-      await _logTransaction(
-        consumableId: id,
-        consumableName: consumable.name,
-        quantityChange: quantity,
-        type: 'in',
-        reason: reason,
-        branchSourceId: umayumchaHQBranchId,
-        branchSourceName: 'UmayumchaHQ',
-        branchDestinationId: umayumchaHQBranchId,
-        branchDestinationName: 'UmayumchaHQ',
-      );
-      fetchConsumables();
-      Get.snackbar('Success', 'Consumable quantity added successfully!');
-    } catch (e) {
-      log('Error adding consumable quantity: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to add consumable quantity: ${e.toString()}',
-      );
-    }
-  }
-
-  Future<void> removeConsumableQuantity(
-    int id,
-    int quantity,
-    String reason,
-  ) async {
-    try {
-      final consumable = consumables.firstWhere((c) => c.id == id);
-      await _supabase.from('consumables').update({
-        'quantity': consumable.quantity - quantity,
-      }).eq('id', id);
-      await _logTransaction(
-        consumableId: id,
-        consumableName: consumable.name,
-        quantityChange: -quantity,
-        type: 'out',
-        reason: reason,
-        branchSourceId: umayumchaHQBranchId,
-        branchSourceName: 'UmayumchaHQ',
-        branchDestinationId: umayumchaHQBranchId,
-        branchDestinationName: 'UmayumchaHQ',
-      );
-      fetchConsumables();
-      Get.snackbar('Success', 'Consumable quantity removed successfully!');
-    } catch (e) {
-      log('Error removing consumable quantity: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to remove consumable quantity: ${e.toString()}',
-      );
-    }
-  }
-
   Future<void> addConsumableTransactionFromDeliveryNote({
     required int consumableId,
     required String consumableName,
@@ -247,9 +235,14 @@ class ConsumableController extends GetxController {
   }) async {
     try {
       // Update consumable quantity
-      await _supabase.from('consumables').update({
-        'quantity': consumables.firstWhere((c) => c.id == consumableId).quantity + quantityChange,
-      }).eq('id', consumableId);
+      await _supabase
+          .from('consumables')
+          .update({
+            'quantity':
+                consumables.firstWhere((c) => c.id == consumableId).quantity +
+                quantityChange,
+          })
+          .eq('id', consumableId);
 
       // Log transaction
       await _logTransaction(

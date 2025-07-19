@@ -14,80 +14,105 @@ void _showConsumableTransactionDialog(
   final ConsumableController controller = Get.find();
   final TextEditingController quantityController = TextEditingController();
   final TextEditingController reasonController = TextEditingController();
-  final formKey = GlobalKey<FormState>(); // Declare GlobalKey here
+  final formKey = GlobalKey<FormState>();
+  bool isLoading = false;
 
-  Get.dialog(
-    AlertDialog(
-      title: Text(
-        '${type == 'in' ? 'Add' : 'Remove'} Stock for ${consumable.name}',
-      ),
-      content: Form(
-        key: formKey, // Assign the key to the Form
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: quantityController,
-              decoration: const InputDecoration(
-                labelText: 'Quantity',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-              validator: (value) {
-                if (value == null ||
-                    int.tryParse(value) == null ||
-                    int.parse(value) <= 0) {
-                  return 'Please enter a valid quantity.';
-                }
-                return null;
-              },
+  void showDialogWithState() {
+    Get.dialog(
+      StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text(
+              '${type == 'in' ? 'Add' : 'Remove'} Stock for ${consumable.name}',
             ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: reasonController,
-              decoration: InputDecoration(
-                labelText:
-                    'Reason ${type == 'out' ? '(Required)' : '(Optional)'}',
-                border: const OutlineInputBorder(),
+            content: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: quantityController,
+                    decoration: const InputDecoration(
+                      labelText: 'Quantity',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null ||
+                          int.tryParse(value) == null ||
+                          int.parse(value) <= 0) {
+                        return 'Please enter a valid quantity.';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: reasonController,
+                    decoration: InputDecoration(
+                      labelText:
+                          'Reason ${type == 'out' ? '(Required)' : '(Optional)'}',
+                      border: const OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (type == 'out' && (value == null || value.isEmpty)) {
+                        return 'Reason is required for OUT transactions.';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
               ),
-              validator: (value) {
-                if (type == 'out' && (value == null || value.isEmpty)) {
-                  return 'Reason is required for OUT transactions.';
-                }
-                return null;
-              },
             ),
-          ],
-        ),
+            actions: [
+              TextButton(
+                onPressed: isLoading ? null : () => Get.back(),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed:
+                    isLoading
+                        ? null
+                        : () async {
+                          if (formKey.currentState!.validate()) {
+                            setState(() => isLoading = true);
+                            final int quantity = int.parse(
+                              quantityController.text,
+                            );
+                            if (type == 'in') {
+                              await controller.addStock(
+                                consumable.id!,
+                                quantity,
+                                reasonController.text.trim(),
+                              );
+                            } else {
+                              await controller.removeStock(
+                                consumable.id!,
+                                quantity,
+                                reasonController.text.trim(),
+                              );
+                            }
+                            setState(() => isLoading = false);
+                            Navigator.of(context, rootNavigator: true).pop();
+                          }
+                        },
+                child:
+                    isLoading
+                        ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                        : Text(type == 'in' ? 'Add' : 'Remove'),
+              ),
+            ],
+          );
+        },
       ),
-      actions: [
-        TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
-        ElevatedButton(
-          onPressed: () {
-            if (formKey.currentState!.validate()) {
-              // Use the key to validate
-              final int quantity = int.parse(quantityController.text);
-              if (type == 'in') {
-                controller.addConsumableQuantity(
-                  consumable.id!,
-                  quantity,
-                  reasonController.text.trim(),
-                );
-              } else {
-                controller.removeConsumableQuantity(
-                  consumable.id!,
-                  quantity,
-                  reasonController.text.trim(),
-                );
-              }
-              Get.back(); // Close dialog
-            }
-          },
-          child: Text(type == 'in' ? 'Add' : 'Remove'),
-        ),
-      ],
-    ),
-  );
+    );
+  }
+
+  showDialogWithState();
 }
 
 class ConsumableListScreen extends StatefulWidget {
