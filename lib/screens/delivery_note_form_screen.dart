@@ -23,11 +23,40 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
       TextEditingController();
   DateTime selectedDeliveryDate = DateTime.now();
 
-  Branch? selectedFromBranch; // New: Selected source branch
   Branch? selectedToBranch; // New: Selected destination branch
 
   final RxList<Map<String, dynamic>> selectedProducts =
       <Map<String, dynamic>>[].obs;
+
+  Rx<Branch?> umayumchaHQBranch = Rx<Branch?>(
+    null,
+  ); // To hold the UmayumchaHQ branch
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen for changes in branches and set UmayumchaHQ
+    ever(branchController.branches, (_) {
+      _findAndSetUmayumchaHQBranch();
+    });
+
+    // Also check immediately in case branches are already loaded
+    _findAndSetUmayumchaHQBranch();
+  }
+
+  void _findAndSetUmayumchaHQBranch() {
+    final foundBranch = branchController.branches.firstWhereOrNull(
+      (branch) => branch.name == 'UmayumchaHQ',
+    );
+    if (foundBranch != null) {
+      umayumchaHQBranch.value = foundBranch;
+    } else if (!branchController.isLoading.value) {
+      Get.snackbar(
+        'Error',
+        'UmayumchaHQ branch not found. Please ensure it exists.',
+      );
+    }
+  }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -43,18 +72,18 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
     }
   }
 
-  void _addProductToNote() async { // Made async
-    if (selectedFromBranch == null) {
-      Get.snackbar('Error', 'Please select a source branch first.');
+  void _addProductToNote() async {
+    if (umayumchaHQBranch.value == null) {
+      Get.snackbar('Error', 'UmayumchaHQ branch not found. Cannot add product.');
       return;
     }
 
     // Fetch products for the selected source branch
-    if (selectedFromBranch!.id == null) {
-      Get.snackbar('Error', 'Source branch ID is missing.');
+    if (umayumchaHQBranch.value!.id == null) {
+      Get.snackbar('Error', 'UmayumchaHQ branch ID is missing.');
       return;
     }
-    final List<BranchProduct> availableProducts = await inventoryController.fetchBranchProductsById(selectedFromBranch!.id!);
+    final List<BranchProduct> availableProducts = await inventoryController.fetchBranchProductsById(umayumchaHQBranch.value!.id!);
 
     if (availableProducts.isEmpty) {
       Get.snackbar(
@@ -127,33 +156,28 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // From Branch Selection
+            // From Branch Selection (Hidden and pre-selected to UmayumchaHQ)
             Obx(() {
               if (branchController.isLoading.value) {
                 return const CircularProgressIndicator();
               }
-              if (branchController.branches.isEmpty) {
+              if (umayumchaHQBranch.value == null) {
                 return const Text(
-                  'No branches available. Please add branches first.',
+                  'UmayumchaHQ branch not found. Please ensure it exists.',
                 );
               }
-              return DropdownButtonFormField<Branch>(
-                decoration: const InputDecoration(labelText: 'From Branch'),
-                value: selectedFromBranch,
-                onChanged: (Branch? newValue) {
-                  setState(() {
-                    selectedFromBranch = newValue;
-                    // When from branch changes, clear selected products
-                    selectedProducts.clear();
-                  });
-                },
-                items:
-                    branchController.branches.map((branch) {
-                      return DropdownMenuItem<Branch>(
-                        value: branch,
-                        child: Text(branch.name),
-                      );
-                    }).toList(),
+              return AbsorbPointer(
+                child: DropdownButtonFormField<Branch>(
+                  decoration: const InputDecoration(labelText: 'From Branch'),
+                  value: umayumchaHQBranch.value,
+                  onChanged: (Branch? newValue) {},
+                  items: [umayumchaHQBranch.value!].map((branch) {
+                    return DropdownMenuItem<Branch>(
+                      value: branch,
+                      child: Text(branch.name),
+                    );
+                  }).toList(),
+                ),
               );
             }),
             const SizedBox(height: 16),
@@ -166,6 +190,9 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
               if (branchController.branches.isEmpty) {
                 return const SizedBox.shrink();
               }
+              final List<Branch> otherBranches = branchController.branches
+                  .where((branch) => branch.name != 'UmayumchaHQ')
+                  .toList();
               return DropdownButtonFormField<Branch>(
                 decoration: const InputDecoration(labelText: 'To Branch'),
                 value: selectedToBranch,
@@ -174,18 +201,16 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                     selectedToBranch = newValue;
                   });
                 },
-                items:
-                    branchController.branches.map((branch) {
-                      return DropdownMenuItem<Branch>(
-                        value: branch,
-                        child: Text(branch.name),
-                      );
-                    }).toList(),
+                items: otherBranches.map((branch) {
+                  return DropdownMenuItem<Branch>(
+                    value: branch,
+                    child: Text(branch.name),
+                  );
+                }).toList(),
               );
             }),
             const SizedBox(height: 16),
 
-            const SizedBox(height: 16),
             ListTile(
               title: Text(
                 'Delivery Date: ${selectedDeliveryDate.toLocal().toString().split(' ').first}',
@@ -208,7 +233,7 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                     final item = selectedProducts[index];
                     return ListTile(
                       title: Text(
-                        '${item['product_name']} (from ${selectedFromBranch?.name ?? 'N/A'})',
+                        '${item['product_name']} (from ${umayumchaHQBranch.value?.name ?? 'N/A'})',
                       ),
                       trailing: Text('x${item['quantity']}'),
                       onLongPress: () {
@@ -250,8 +275,8 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                   ? const CircularProgressIndicator()
                   : ElevatedButton(
                     onPressed: () {
-                      if (selectedFromBranch == null) {
-                        Get.snackbar('Error', 'Please select a From Branch.');
+                      if (umayumchaHQBranch.value == null) {
+                        Get.snackbar('Error', 'UmayumchaHQ branch not found.');
                         return;
                       }
                       if (selectedToBranch == null) {
@@ -265,8 +290,8 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                         );
                         return;
                       }
-                      if (selectedFromBranch!.id == null) {
-                        Get.snackbar('Error', 'From Branch ID is missing.');
+                      if (umayumchaHQBranch.value!.id == null) {
+                        Get.snackbar('Error', 'UmayumchaHQ Branch ID is missing.');
                         return;
                       }
                       if (selectedToBranch!.id == null) {
@@ -277,7 +302,7 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                         customerName: 'Internal Transfer', // Default value
                         destinationAddress: 'Internal Transfer', // Default value
                         deliveryDate: selectedDeliveryDate,
-                        fromBranchId: selectedFromBranch!.id!,
+                        fromBranchId: umayumchaHQBranch.value!.id!,
                         toBranchId: selectedToBranch!.id!,
                         items: selectedProducts.toList(),
                       );
