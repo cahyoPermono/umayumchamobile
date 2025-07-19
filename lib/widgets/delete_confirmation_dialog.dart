@@ -17,8 +17,5 @@ void showDeleteConfirmationDialog({
       onConfirm();
       Get.back(); // Close the dialog
     },
-    onCancel: () {
-      Get.back(); // Close the dialog
-    },
   );
 }

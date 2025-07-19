@@ -5,6 +5,7 @@ import 'package:umayumcha/controllers/inventory_controller.dart';
 import 'package:umayumcha/controllers/branch_controller.dart';
 import 'package:umayumcha/models/branch_product_model.dart';
 import 'package:umayumcha/screens/product_form_screen.dart';
+import 'package:umayumcha/widgets/delete_confirmation_dialog.dart';
 
 void _showTransactionDialog(
   BuildContext context,
@@ -118,48 +119,51 @@ class _InventoryScreenState extends State<InventoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: _isSearching
-            ? Colors.white
-            : Theme.of(context).primaryColor, // Dynamic background color
+        backgroundColor:
+            _isSearching
+                ? Colors.white
+                : Theme.of(context).primaryColor, // Dynamic background color
         iconTheme: IconThemeData(
           color: _isSearching ? Colors.black : Colors.white,
         ), // Dynamic icon color
-        title: _isSearching
-            ? Container(
-                height: 40, // Adjust height as needed
-                decoration: BoxDecoration(
-                  color: Colors
-                      .white, // Solid white background for clear visibility
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: const InputDecoration(
-                    hintText: 'Search products...',
-                    hintStyle: TextStyle(
-                      color: Colors.grey,
-                    ), // Grey hint text
-                    border: InputBorder.none, // Remove default border
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: Colors.grey,
-                    ), // Grey search icon
-                    contentPadding: EdgeInsets.symmetric(
-                      vertical: 8.0,
-                      horizontal: 10.0,
-                    ), // Adjust padding
+        title:
+            _isSearching
+                ? Container(
+                  height: 40, // Adjust height as needed
+                  decoration: BoxDecoration(
+                    color:
+                        Colors
+                            .white, // Solid white background for clear visibility
+                    borderRadius: BorderRadius.circular(8.0),
                   ),
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 16,
-                  ), // Black text for contrast
-                  cursorColor: Colors.black,
-                ),
-              )
-            : const Text(
-                'Master Inventory',
-                style: TextStyle(color: Colors.white),
-              ), // Ensure title is white when not searching
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: const InputDecoration(
+                      hintText: 'Search products...',
+                      hintStyle: TextStyle(
+                        color: Colors.grey,
+                      ), // Grey hint text
+                      border: InputBorder.none, // Remove default border
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: Colors.grey,
+                      ), // Grey search icon
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8.0,
+                        horizontal: 10.0,
+                      ), // Adjust padding
+                    ),
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                    ), // Black text for contrast
+                    cursorColor: Colors.black,
+                  ),
+                )
+                : const Text(
+                  'Master Inventory',
+                  style: TextStyle(color: Colors.white),
+                ), // Ensure title is white when not searching
         elevation: 4,
         actions: [
           IconButton(
@@ -230,12 +234,14 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   itemBuilder: (context, index) {
                     final branchProduct =
                         inventoryController.filteredBranchProducts[index];
-                    final product = branchProduct
-                        .product; // Get the nested product details
+                    final product =
+                        branchProduct.product; // Get the nested product details
                     return Card(
                       elevation: 2,
                       margin: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -257,11 +263,11 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                   Expanded(
                                     child: Text(
                                       product?.name ?? 'N/A',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge
-                                          ?.copyWith(
-                                              fontWeight: FontWeight.bold),
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.titleLarge?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                   Text(
@@ -269,10 +275,9 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                     style: Theme.of(
                                       context,
                                     ).textTheme.titleMedium?.copyWith(
-                                          color:
-                                              Theme.of(context).primaryColor,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                      color: Theme.of(context).primaryColor,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -292,32 +297,36 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                   IconButton(
                                     icon: const Icon(Icons.edit),
                                     onPressed: () {
-                                      Get.to(() => ProductFormScreen(product: product));
+                                      Get.to(
+                                        () =>
+                                            ProductFormScreen(product: product),
+                                      );
                                     },
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.delete),
                                     onPressed: () {
-                                      Get.defaultDialog(
+                                      showDeleteConfirmationDialog(
                                         title: 'Delete Product',
-                                        middleText:
+                                        content:
                                             'Are you sure you want to delete ${product?.name ?? 'this product'}?',
                                         onConfirm: () {
                                           if (product != null) {
-                                            inventoryController.deleteProduct(product.id);
+                                            inventoryController.deleteProduct(
+                                              product.id,
+                                            );
                                           }
-                                          Get.back();
                                         },
-                                        onCancel: () {},
                                       );
                                     },
                                   ),
                                   ElevatedButton.icon(
-                                    onPressed: () => _showTransactionDialog(
-                                      context,
-                                      branchProduct,
-                                      'in',
-                                    ),
+                                    onPressed:
+                                        () => _showTransactionDialog(
+                                          context,
+                                          branchProduct,
+                                          'in',
+                                        ),
                                     icon: const Icon(Icons.add),
                                     label: const Text('In'),
                                     style: ElevatedButton.styleFrom(
@@ -326,11 +335,12 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                   ),
                                   const SizedBox(width: 8),
                                   ElevatedButton.icon(
-                                    onPressed: () => _showTransactionDialog(
-                                      context,
-                                      branchProduct,
-                                      'out',
-                                    ),
+                                    onPressed:
+                                        () => _showTransactionDialog(
+                                          context,
+                                          branchProduct,
+                                          'out',
+                                        ),
                                     icon: const Icon(Icons.remove),
                                     label: const Text('Out'),
                                     style: ElevatedButton.styleFrom(
