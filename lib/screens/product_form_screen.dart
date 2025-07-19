@@ -291,18 +291,22 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                                       .addProductAndGetId(product);
 
                               if (newProductId != null) {
-                                await inventoryController.addTransaction(
+                                final transactionSuccess = await inventoryController.addTransaction(
                                   productId: newProductId,
                                   type: 'in',
                                   quantityChange: initialQuantity,
                                   reason: 'Initial stock for new product',
                                   toBranchId: umayumchaHQBranch.value!.id,
                                 );
-                                Get.back();
-                                Get.snackbar(
-                                  'Success',
-                                  'Product and initial stock added successfully!',
-                                );
+                                if (transactionSuccess) {
+                                  Get.back();
+                                  Get.snackbar(
+                                    'Success',
+                                    'Product and initial stock added successfully!',
+                                  );
+                                } else {
+                                  Get.snackbar('Error', 'Failed to add initial stock.');
+                                }
                               } else {
                                 Get.snackbar('Error', 'Failed to add product.');
                               }

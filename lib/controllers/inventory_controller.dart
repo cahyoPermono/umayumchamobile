@@ -53,19 +53,22 @@ class InventoryController extends GetxController {
   }
 
   Future<void> deleteProduct(String productId) async {
+    isLoading.value = true;
     try {
-      final response = await Supabase.instance.client
+      await supabase
           .from('products')
           .delete()
-          .match({'id': productId});
-      if (response.error != null) {
-        Get.snackbar('Error', response.error!.message);
-      } else {
-        Get.snackbar('Success', 'Product deleted successfully');
-        fetchBranchProducts(); // Refresh the list
-      }
+          .eq('id', productId);
+
+      // If no exception is thrown, the deletion is successful.
+      Get.snackbar('Success', 'Product deleted successfully');
+      fetchBranchProducts(); // Refresh the list
+
     } catch (e) {
-      Get.snackbar('Error', 'Failed to delete product: $e');
+      debugPrint('Error deleting product: $e'); // Log the actual error
+      Get.snackbar('Error', 'Failed to delete product: ${e.toString()}');
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -222,14 +225,14 @@ class InventoryController extends GetxController {
     }
   }
 
-  Future<void> addTransaction({
+  Future<bool> addTransaction({
     required String productId,
     required String type,
     required int quantityChange,
     String? reason,
     String? deliveryNoteId,
-    String? fromBranchId, // New parameter
-    String? toBranchId, // New parameter
+    String? fromBranchId,
+    String? toBranchId,
   }) async {
     try {
       isLoading.value = true;
@@ -239,18 +242,19 @@ class InventoryController extends GetxController {
         'quantity_change': quantityChange,
         'reason': reason,
         'delivery_note_id': deliveryNoteId,
-        'from_branch_id': fromBranchId, // Pass new parameter
-        'to_branch_id': toBranchId, // Pass new parameter
+        'from_branch_id': fromBranchId,
+        'to_branch_id': toBranchId,
       });
       debugPrint(
         'Transaction added: type=$type, quantity=$quantityChange, product=$productId',
       );
-      fetchBranchProducts(); // Refresh product quantities for the selected branch
-      fetchGlobalLowStockProducts(); // Also refresh global low stock
-      Get.snackbar('Success', 'Stock updated successfully!');
+      fetchBranchProducts();
+      fetchGlobalLowStockProducts();
+      return true; // Return true on success
     } catch (e) {
       debugPrint('Error adding transaction: ${e.toString()}');
-      Get.snackbar('Error', 'Failed to update stock: ${e.toString()}');
+      Get.snackbar('Error', 'Failed to update stock: ${e.toString()}'); // Keep snackbar for error
+      return false; // Return false on failure
     } finally {
       isLoading.value = false;
     }

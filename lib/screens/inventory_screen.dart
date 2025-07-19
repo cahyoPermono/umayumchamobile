@@ -282,7 +282,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
                               Text(
-                                'Price: ${product?.price?.toStringAsFixed(2) ?? 'N/A'}',
+                                'Description: ${product?.description ?? 'No Description'}',
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
                               const SizedBox(height: 16),
