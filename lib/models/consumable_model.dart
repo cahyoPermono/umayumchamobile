@@ -8,6 +8,7 @@ class Consumable {
   final DateTime? expiredDate;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final String? updatedBy;
 
   Consumable({
     this.id,
@@ -18,6 +19,7 @@ class Consumable {
     this.expiredDate,
     this.createdAt,
     this.updatedAt,
+    this.updatedBy,
   });
 
   factory Consumable.fromJson(Map<String, dynamic> json) {
@@ -36,6 +38,7 @@ class Consumable {
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'])
           : null,
+      updatedBy: json['updated_by'] as String?,
     );
   }
 
@@ -46,6 +49,7 @@ class Consumable {
       'quantity': quantity,
       'description': description,
       'expired_date': expiredDate?.toIso8601String(),
+      'updated_by': updatedBy,
     };
     if (id != null) {
       map['id'] = id;

@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:umayumcha/controllers/auth_controller.dart';
 import 'package:umayumcha/models/consumable_model.dart';
 
 class ConsumableController extends GetxController {
@@ -96,9 +97,17 @@ class ConsumableController extends GetxController {
   Future<void> updateConsumable(Consumable consumable) async {
     try {
       isLoading.value = true;
+      final consumableMap = consumable.toJson();
+      consumableMap.remove('created_at'); // Ensure created_at is not updated
+      consumableMap.remove('id'); // Ensure id is not in the update payload
+
+      // Add updated_by
+      final authController = Get.find<AuthController>();
+      consumableMap['updated_by'] = authController.currentUser.value?.id; // Assuming currentUser is Rx<User?>
+
       await _supabase
           .from('consumables')
-          .update(consumable.toJson())
+          .update(consumableMap)
           .eq('id', consumable.id!);
       fetchConsumables(); // Refresh the list
       Get.back(); // Close the form screen

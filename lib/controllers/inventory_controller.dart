@@ -34,6 +34,9 @@ class InventoryController extends GetxController {
       final productMap = product.toJson();
       productMap.remove('created_at');
       productMap.remove('id');
+      // Add updated_by
+      final authController = Get.find<AuthController>();
+      productMap['updated_by'] = authController.currentUser.value?.id; // Assuming currentUser is Rx<User?>
 
       await supabase
           .from('products')
