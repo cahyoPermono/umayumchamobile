@@ -118,7 +118,7 @@ class TransactionLogController extends GetxController {
                                 'dd/MM/yyyy HH:mm',
                               ).format(t.createdAt),
                               t.productName ?? t.productId,
-                              t.type.capitalizeFirst,
+                              t.type?.capitalizeFirst,
                               t.quantityChange.toString(),
                               t.fromBranchName ?? '-',
                               t.toBranchName ?? '-',
@@ -181,7 +181,7 @@ class TransactionLogController extends GetxController {
         sheet.appendRow([
           DateFormat('dd/MM/yyyy HH:mm').format(t.createdAt),
           t.productName ?? t.productId,
-          t.type.capitalizeFirst,
+          t.type?.capitalizeFirst,
           t.quantityChange.toString(),
           t.fromBranchName ?? '-',
           t.toBranchName ?? '-',

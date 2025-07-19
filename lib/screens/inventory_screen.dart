@@ -323,9 +323,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                         content:
                                             'Are you sure you want to delete ${product?.name ?? 'this product'}?',
                                         onConfirm: () {
-                                          if (product != null) {
+                                          if (product != null && product.id != null) {
+                                            final productId = product.id!;
                                             inventoryController.deleteProduct(
-                                              product.id,
+                                              productId,
                                             );
                                           }
                                         },

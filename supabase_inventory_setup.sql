@@ -54,11 +54,14 @@ create policy "Admins can delete delivery notes." on public.delivery_notes for d
 create table public.inventory_transactions (
   id uuid not null primary key default gen_random_uuid(),
   created_at timestamp with time zone not null default now(),
-  product_id uuid not null references public.products(id) on delete cascade,
+  product_id uuid references public.products(id) on delete set null,
   type text not null check (type in ('in', 'out')),
   quantity_change integer not null,
   reason text,
   delivery_note_id uuid references public.delivery_notes(id) on delete set null,
+  product_name text,
+  from_branch_name text,
+  to_branch_name text,
   user_id uuid references auth.users(id) default auth.uid()
 );
 

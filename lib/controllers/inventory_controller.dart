@@ -31,18 +31,30 @@ class InventoryController extends GetxController {
   Future<bool> updateProduct(Product product) async {
     isLoading.value = true;
     try {
-      final productMap = product.toJson();
-      productMap.remove('created_at');
-      productMap.remove('id');
-      // Add updated_by
       final authController = Get.find<AuthController>();
-      productMap['updated_by'] =
-          authController
-              .currentUser
-              .value
-              ?.id; // Assuming currentUser is Rx<User?>
+      final String? currentUserId = authController.currentUser.value?.id;
 
-      await supabase.from('products').update(productMap).eq('id', product.id);
+      final Map<String, dynamic> updateData = {
+        'name': product.name,
+        'code': product.code,
+        'description': product.description,
+        'merk': product.merk,
+        'kondisi': product.kondisi,
+        'tahun_perolehan': product.tahunPerolehan,
+        'nilai_residu': product.nilaiResidu,
+        'pengguna': product.pengguna,
+        'price': product.price,
+        'updated_at': DateTime.now().toIso8601String(), // Set updated_at here
+      };
+
+      if (currentUserId != null) {
+        updateData['updated_by'] = currentUserId as dynamic;
+      }
+
+      await supabase
+          .from('products')
+          .update(updateData)
+          .eq('id', product.id!);
 
       fetchBranchProducts(); // Refresh the list
       return true; // Return true on success
@@ -235,14 +247,48 @@ class InventoryController extends GetxController {
   }) async {
     try {
       isLoading.value = true;
+
+      // Fetch product name
+      final productResponse = await supabase
+          .from('products')
+          .select('name')
+          .eq('id', productId)
+          .single();
+      final productName = productResponse['name'] as String;
+
+      // Fetch from_branch_name if fromBranchId is provided
+      String? fromBranchName;
+      if (fromBranchId != null) {
+        final fromBranchResponse = await supabase
+            .from('branches')
+            .select('name')
+            .eq('id', fromBranchId)
+            .single();
+        fromBranchName = fromBranchResponse['name'] as String;
+      }
+
+      // Fetch to_branch_name if toBranchId is provided
+      String? toBranchName;
+      if (toBranchId != null) {
+        final toBranchResponse = await supabase
+            .from('branches')
+            .select('name')
+            .eq('id', toBranchId)
+            .single();
+        toBranchName = toBranchResponse['name'] as String;
+      }
+
       await supabase.from('inventory_transactions').insert({
         'product_id': productId,
+        'product_name': productName, // Add product_name
         'type': type,
         'quantity_change': quantityChange,
         'reason': reason,
         'delivery_note_id': deliveryNoteId,
         'from_branch_id': fromBranchId,
+        'from_branch_name': fromBranchName, // Add from_branch_name
         'to_branch_id': toBranchId,
+        'to_branch_name': toBranchName, // Add to_branch_name
       });
       debugPrint(
         'Transaction added: type=$type, quantity=$quantityChange, product=$productId',

@@ -373,7 +373,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
 
                         if (isValid) {
                           final product = Product(
-                            id: widget.product?.id ?? '',
+                            id: widget.product?.id, // Now nullable
                             name: nameController.text.trim(),
                             code: codeController.text.trim(),
                             description:

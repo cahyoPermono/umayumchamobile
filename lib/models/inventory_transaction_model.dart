@@ -1,8 +1,8 @@
 class InventoryTransaction {
   final String id;
-  final String productId;
+  final String? productId;
   final String? productName;
-  final String type;
+  final String? type;
   final int quantityChange;
   final String? reason;
   final String? deliveryNoteId;
@@ -14,9 +14,9 @@ class InventoryTransaction {
 
   InventoryTransaction({
     required this.id,
-    required this.productId,
+    this.productId,
     this.productName,
-    required this.type,
+    this.type,
     required this.quantityChange,
     this.reason,
     this.deliveryNoteId,
@@ -30,9 +30,9 @@ class InventoryTransaction {
   factory InventoryTransaction.fromJson(Map<String, dynamic> json) {
     return InventoryTransaction(
       id: json['id'] as String,
-      productId: json['product_id'] as String,
+      productId: json['product_id'] as String?,
       productName: json['products']?['name'] as String?,
-      type: json['type'] as String,
+      type: json['type'] as String?,
       quantityChange: json['quantity_change'] as int,
       reason: json['reason'] as String?,
       deliveryNoteId: json['delivery_note_id'] as String?,

@@ -129,7 +129,7 @@ class TransactionLogScreen extends StatelessWidget {
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Type: ${transaction.type.capitalizeFirst}'),
+                          Text('Type: ${transaction.type?.capitalizeFirst}'),
                           if (transaction.fromBranchId != null)
                             Text(
                               'From: ${transaction.fromBranchName ?? 'N/A'}',

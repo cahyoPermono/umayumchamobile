@@ -1,6 +1,6 @@
 
 class Product {
-  final String id;
+  final String? id;
   final String name;
   final String code;
   final String? description;
@@ -53,8 +53,7 @@ class Product {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
+    final Map<String, dynamic> json = {
       'name': name,
       'code': code,
       'description': description,
@@ -68,6 +67,10 @@ class Product {
       'updated_at': updatedAt?.toIso8601String(),
       'updated_by': updatedBy,
     };
+    if (id != null) {
+      json['id'] = id;
+    }
+    return json;
   }
 
   Product copyWith({
