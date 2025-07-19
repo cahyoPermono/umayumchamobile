@@ -179,6 +179,9 @@ class ConsumableController extends GetxController {
   ) async {
     try {
       final consumable = consumables.firstWhere((c) => c.id == id);
+      await _supabase.from('consumables').update({
+        'quantity': consumable.quantity + quantity,
+      }).eq('id', id);
       await _logTransaction(
         consumableId: id,
         consumableName: consumable.name,
@@ -208,6 +211,9 @@ class ConsumableController extends GetxController {
   ) async {
     try {
       final consumable = consumables.firstWhere((c) => c.id == id);
+      await _supabase.from('consumables').update({
+        'quantity': consumable.quantity - quantity,
+      }).eq('id', id);
       await _logTransaction(
         consumableId: id,
         consumableName: consumable.name,
@@ -226,6 +232,41 @@ class ConsumableController extends GetxController {
       Get.snackbar(
         'Error',
         'Failed to remove consumable quantity: ${e.toString()}',
+      );
+    }
+  }
+
+  Future<void> addConsumableTransactionFromDeliveryNote({
+    required int consumableId,
+    required String consumableName,
+    required int quantityChange,
+    required String reason,
+    required String fromBranchId,
+    required String toBranchId,
+    String? deliveryNoteId,
+  }) async {
+    try {
+      // Update consumable quantity
+      await _supabase.from('consumables').update({
+        'quantity': consumables.firstWhere((c) => c.id == consumableId).quantity + quantityChange,
+      }).eq('id', consumableId);
+
+      // Log transaction
+      await _logTransaction(
+        consumableId: consumableId,
+        consumableName: consumableName,
+        quantityChange: quantityChange,
+        type: quantityChange > 0 ? 'in' : 'out',
+        reason: reason,
+        branchSourceId: fromBranchId,
+        branchDestinationId: toBranchId,
+      );
+      fetchConsumables(); // Refresh the list
+    } catch (e) {
+      log('Error adding consumable transaction from delivery note: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to add consumable transaction from delivery note: ${e.toString()}',
       );
     }
   }

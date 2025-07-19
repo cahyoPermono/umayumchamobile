@@ -130,13 +130,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
               () =>
                   authController.userRole.value == 'admin'
                       ? ListTile(
-                          leading: const Icon(Icons.people),
-                          title: const Text('Master User'),
-                          onTap: () {
-                            Get.back(); // Close the drawer
-                            Get.to(() => UserListScreen());
-                          },
-                        )
+                        leading: const Icon(Icons.people),
+                        title: const Text('Master User'),
+                        onTap: () {
+                          Get.back(); // Close the drawer
+                          Get.to(() => UserListScreen());
+                        },
+                      )
                       : const SizedBox.shrink(),
             ),
             ListTile(
@@ -278,14 +278,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           child: ListView.builder(
                             shrinkWrap: true,
                             physics: const ClampingScrollPhysics(),
-                            itemCount: inventoryController.globalLowStockProducts.length,
+                            itemCount:
+                                inventoryController
+                                    .globalLowStockProducts
+                                    .length,
                             itemBuilder: (context, index) {
-                              final bp = inventoryController.globalLowStockProducts[index];
+                              final bp =
+                                  inventoryController
+                                      .globalLowStockProducts[index];
                               debugPrint(
                                 'Processing low stock product: ${bp.product?.name}',
                               ); // Changed from SizedBox.shrink()
                               return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4.0,
+                                ),
                                 child: Row(
                                   children: [
                                     Icon(
@@ -388,14 +395,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           child: ListView.builder(
                             shrinkWrap: true,
                             physics: const ClampingScrollPhysics(),
-                            itemCount: consumableController.expiringConsumables.length,
+                            itemCount:
+                                consumableController.expiringConsumables.length,
                             itemBuilder: (context, index) {
-                              final c = consumableController.expiringConsumables[index];
+                              final c =
+                                  consumableController
+                                      .expiringConsumables[index];
                               debugPrint(
                                 'Processing expiring consumable: ${c.name}',
                               ); // Changed from SizedBox.shrink()
                               return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4.0,
+                                ),
                                 child: Row(
                                   children: [
                                     Icon(
@@ -494,7 +506,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     icon: Icons.receipt,
                     title: 'New Delivery Note',
                     subtitle: 'Create a new order',
-                    onTap: () => Get.to(() => const DeliveryNoteFormScreen()),
+                    onTap: () => Get.to(() => DeliveryNoteFormScreen()),
                   ),
                   _buildDashboardCard(
                     context,

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -13,9 +12,7 @@ class DeliveryNoteListScreen extends StatelessWidget {
     final DeliveryNoteController controller = Get.put(DeliveryNoteController());
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Delivery Notes (Reports)'),
-      ),
+      appBar: AppBar(title: const Text('Delivery Notes (Reports)')),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
@@ -30,21 +27,32 @@ class DeliveryNoteListScreen extends StatelessWidget {
             return Card(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: ExpansionTile(
-                title: Text('${note.customerName} - ${DateFormat('dd/MM/yyyy').format(note.deliveryDate)}'),
+                title: Text(
+                  '${note.customerName} - ${DateFormat('dd/MM/yyyy').format(note.deliveryDate)}',
+                ),
                 subtitle: Text(
-                    '${note.destinationAddress ?? 'No Address'} | From: ${note.fromBranchName ?? 'N/A'} | To: ${note.toBranchName ?? 'N/A'}'),
+                  '${note.destinationAddress ?? 'No Address'} | From: ${note.fromBranchName ?? 'N/A'} | To: ${note.toBranchName ?? 'N/A'}',
+                ),
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Items:', style: TextStyle(fontWeight: FontWeight.bold)),
+                        const Text(
+                          'Items:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                         if (note.items != null && note.items!.isNotEmpty)
-                          ...note.items!.map((item) => Text(
-                              '- ${item['product_name']} (x${item['quantity_change']})'))
+                          ...note.items!.map(
+                            (item) => Text(
+                              '- ${item['product_name']} (x${item['quantity_change']})',
+                            ),
+                          )
                         else
-                          const Text('No items recorded for this delivery note.'),
+                          const Text(
+                            'No items recorded for this delivery note.',
+                          ),
                       ],
                     ),
                   ),
@@ -56,7 +64,7 @@ class DeliveryNoteListScreen extends StatelessWidget {
       }),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Get.to(() => const DeliveryNoteFormScreen());
+          Get.to(() => DeliveryNoteFormScreen());
         },
         tooltip: 'Create Delivery Note',
         child: const Icon(Icons.add),

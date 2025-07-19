@@ -5,6 +5,23 @@ import 'package:umayumcha/controllers/inventory_controller.dart';
 import 'package:umayumcha/controllers/branch_controller.dart'; // Import BranchController
 import 'package:umayumcha/models/branch_model.dart'; // Import Branch model
 import 'package:umayumcha/models/branch_product_model.dart'; // Import BranchProduct model
+import 'package:umayumcha/controllers/consumable_controller.dart'; // New: Import ConsumableController
+import 'package:umayumcha/models/consumable_model.dart'; // New: Import Consumable model
+
+// Helper class for selectable items (Moved to top-level)
+class SelectableItem {
+  final String id;
+  final String name;
+  final int quantity;
+  final String type; // 'product' or 'consumable'
+
+  SelectableItem({
+    required this.id,
+    required this.name,
+    required this.quantity,
+    required this.type,
+  });
+}
 
 class DeliveryNoteFormScreen extends StatefulWidget {
   const DeliveryNoteFormScreen({super.key});
@@ -16,7 +33,10 @@ class DeliveryNoteFormScreen extends StatefulWidget {
 class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
   final DeliveryNoteController deliveryNoteController = Get.find();
   final InventoryController inventoryController = Get.find();
-  final BranchController branchController = Get.find(); // Get BranchController
+  final BranchController branchController =
+      Get.find(); // Import BranchController
+  final ConsumableController consumableController =
+      Get.find(); // New: Get ConsumableController
 
   final TextEditingController customerNameController = TextEditingController();
   final TextEditingController destinationAddressController =
@@ -74,63 +94,93 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
 
   void _addProductToNote() async {
     if (umayumchaHQBranch.value == null) {
-      Get.snackbar('Error', 'UmayumchaHQ branch not found. Cannot add product.');
+      Get.snackbar('Error', 'UmayumchaHQ branch not found. Cannot add item.');
       return;
     }
 
-    // Fetch products for the selected source branch
     if (umayumchaHQBranch.value!.id == null) {
       Get.snackbar('Error', 'UmayumchaHQ branch ID is missing.');
       return;
     }
-    final List<BranchProduct> availableProducts = await inventoryController.fetchBranchProductsById(umayumchaHQBranch.value!.id!);
 
-    if (availableProducts.isEmpty) {
+    // Fetch products and consumables
+    final List<BranchProduct> availableProducts = await inventoryController
+        .fetchBranchProductsById(
+          umayumchaHQBranch.value!.id!,
+        ); // Products from UmayumchaHQ
+    final List<Consumable> availableConsumables =
+        consumableController.consumables
+            .where((c) => c.quantity > 0)
+            .toList(); // All consumables with quantity > 0
+
+    // Combine into a single list of SelectableItem
+    final List<SelectableItem> selectableItems = [];
+    for (var bp in availableProducts) {
+      selectableItems.add(
+        SelectableItem(
+          id: bp.productId,
+          name: bp.product?.name ?? 'N/A',
+          quantity: bp.quantity,
+          type: 'product',
+        ),
+      );
+    }
+    for (var c in availableConsumables) {
+      selectableItems.add(
+        SelectableItem(
+          id: c.id.toString(), // Consumable ID is int, convert to String
+          name: c.name,
+          quantity: c.quantity,
+          type: 'consumable',
+        ),
+      );
+    }
+
+    if (selectableItems.isEmpty) {
       Get.snackbar(
         'Info',
-        'No products available in the selected source branch.',
+        'No products or consumables available in the selected source branch.',
       );
       return;
     }
 
     Get.dialog(
       AlertDialog(
-        title: const Text('Add Product to Delivery Note'),
-        content: DropdownButtonFormField<BranchProduct>( // Removed Obx here
-          decoration: const InputDecoration(labelText: 'Select Product'),
-          items: availableProducts.map((branchProduct) {
-            return DropdownMenuItem(
-              value: branchProduct,
-              child: Text(
-                '${branchProduct.product?.name ?? 'N/A'} (Stock: ${branchProduct.quantity})',
-              ),
-            );
-          }).toList(),
-          onChanged: (BranchProduct? branchProduct) {
-            if (branchProduct != null) {
+        title: const Text('Add Item to Delivery Note'),
+        content: DropdownButtonFormField<SelectableItem>(
+          decoration: const InputDecoration(labelText: 'Select Item'),
+          items:
+              selectableItems.map((item) {
+                return DropdownMenuItem(
+                  value: item,
+                  child: Text(
+                    '${item.name} (Stock: ${item.quantity}) [${item.type.capitalizeFirst}]',
+                  ),
+                );
+              }).toList(),
+          onChanged: (SelectableItem? selectedItem) {
+            if (selectedItem != null) {
               Get.dialog(
                 AlertDialog(
-                  title: Text(
-                    'Enter Quantity for ${branchProduct.product?.name ?? 'N/A'}',
-                  ),
+                  title: Text('Enter Quantity for ${selectedItem.name}'),
                   content: TextField(
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: 'Quantity (Max: ${branchProduct.quantity})',
+                      labelText: 'Quantity (Max: ${selectedItem.quantity})',
                     ),
                     onSubmitted: (value) {
                       final int? quantity = int.tryParse(value);
                       if (quantity != null &&
                           quantity > 0 &&
-                          quantity <= branchProduct.quantity) {
+                          quantity <= selectedItem.quantity) {
                         selectedProducts.add({
-                          'product_id': branchProduct.productId,
-                          'product_name':
-                              branchProduct.product?.name ?? 'N/A',
+                          'id': selectedItem.id,
+                          'name': selectedItem.name,
                           'quantity': quantity,
+                          'type': selectedItem.type, // Store type
                         });
                         Get.back(); // Close quantity dialog
-                        Get.back(); // Close product selection dialog
+                        Get.back(); // Close item selection dialog
                       } else {
                         Get.snackbar(
                           'Error',
@@ -171,12 +221,13 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                   decoration: const InputDecoration(labelText: 'From Branch'),
                   value: umayumchaHQBranch.value,
                   onChanged: (Branch? newValue) {},
-                  items: [umayumchaHQBranch.value!].map((branch) {
-                    return DropdownMenuItem<Branch>(
-                      value: branch,
-                      child: Text(branch.name),
-                    );
-                  }).toList(),
+                  items:
+                      [umayumchaHQBranch.value!].map((branch) {
+                        return DropdownMenuItem<Branch>(
+                          value: branch,
+                          child: Text(branch.name),
+                        );
+                      }).toList(),
                 ),
               );
             }),
@@ -190,9 +241,10 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
               if (branchController.branches.isEmpty) {
                 return const SizedBox.shrink();
               }
-              final List<Branch> otherBranches = branchController.branches
-                  .where((branch) => branch.name != 'UmayumchaHQ')
-                  .toList();
+              final List<Branch> otherBranches =
+                  branchController.branches
+                      .where((branch) => branch.name != 'UmayumchaHQ')
+                      .toList();
               return DropdownButtonFormField<Branch>(
                 decoration: const InputDecoration(labelText: 'To Branch'),
                 value: selectedToBranch,
@@ -201,12 +253,13 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                     selectedToBranch = newValue;
                   });
                 },
-                items: otherBranches.map((branch) {
-                  return DropdownMenuItem<Branch>(
-                    value: branch,
-                    child: Text(branch.name),
-                  );
-                }).toList(),
+                items:
+                    otherBranches.map((branch) {
+                      return DropdownMenuItem<Branch>(
+                        value: branch,
+                        child: Text(branch.name),
+                      );
+                    }).toList(),
               );
             }),
             const SizedBox(height: 16),
@@ -225,7 +278,7 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
             ),
             Obx(() {
               // Access selectedProducts.length to ensure Obx reacts to changes
-              selectedProducts.length; 
+              selectedProducts.length;
               return Expanded(
                 child: ListView.builder(
                   itemCount: selectedProducts.length,
@@ -233,7 +286,7 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                     final item = selectedProducts[index];
                     return ListTile(
                       title: Text(
-                        '${item['product_name']} (from ${umayumchaHQBranch.value?.name ?? 'N/A'})',
+                        '${item['name']} (from ${umayumchaHQBranch.value?.name ?? 'N/A'}) [${(item['type'] as String).capitalizeFirst}]',
                       ),
                       trailing: Text('x${item['quantity']}'),
                       onLongPress: () {
@@ -241,7 +294,7 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                           AlertDialog(
                             title: const Text('Remove Item?'),
                             content: Text(
-                              'Do you want to remove ${item['product_name']}?',
+                              'Do you want to remove ${item['name']}?',
                             ),
                             actions: [
                               TextButton(
@@ -291,7 +344,10 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                         return;
                       }
                       if (umayumchaHQBranch.value!.id == null) {
-                        Get.snackbar('Error', 'UmayumchaHQ Branch ID is missing.');
+                        Get.snackbar(
+                          'Error',
+                          'UmayumchaHQ Branch ID is missing.',
+                        );
                         return;
                       }
                       if (selectedToBranch!.id == null) {
@@ -300,11 +356,13 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                       }
                       deliveryNoteController.createDeliveryNote(
                         customerName: 'Internal Transfer', // Default value
-                        destinationAddress: 'Internal Transfer', // Default value
+                        destinationAddress:
+                            'Internal Transfer', // Default value
                         deliveryDate: selectedDeliveryDate,
                         fromBranchId: umayumchaHQBranch.value!.id!,
                         toBranchId: selectedToBranch!.id!,
-                        items: selectedProducts.toList(),
+                        items:
+                            selectedProducts.toList(), // Pass the modified list
                       );
                     },
                     child: const Text('Save Delivery Note'),

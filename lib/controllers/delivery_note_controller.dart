@@ -1,12 +1,15 @@
 import 'package:flutter/foundation.dart'; // For debugPrint
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:umayumcha/controllers/consumable_controller.dart';
 import 'package:umayumcha/controllers/inventory_controller.dart';
 import 'package:umayumcha/models/delivery_note_model.dart';
 
 class DeliveryNoteController extends GetxController {
   final SupabaseClient supabase = Supabase.instance.client;
   final InventoryController inventoryController = Get.find();
+  final ConsumableController consumableController =
+      Get.find(); // New: Get ConsumableController
 
   var deliveryNotes = <DeliveryNote>[].obs;
   var isLoading = false.obs;
@@ -46,7 +49,7 @@ class DeliveryNoteController extends GetxController {
     required DateTime deliveryDate,
     required String fromBranchId,
     required String toBranchId,
-    required List<Map<String, dynamic>> items, // {productId, quantity}
+    required List<Map<String, dynamic>> items, // {id, name, quantity, type}
   }) async {
     try {
       isLoading.value = true;
@@ -57,7 +60,8 @@ class DeliveryNoteController extends GetxController {
               .from('delivery_notes')
               .insert({
                 'customer_name': customerName ?? 'Internal Transfer',
-                'destination_address': destinationAddress ?? 'Internal Transfer',
+                'destination_address':
+                    destinationAddress ?? 'Internal Transfer',
                 'delivery_date':
                     deliveryDate.toIso8601String().split('T').first,
                 'from_branch_id': fromBranchId,
@@ -69,19 +73,37 @@ class DeliveryNoteController extends GetxController {
       final String deliveryNoteId = response['id'];
       debugPrint('Delivery note created with ID: $deliveryNoteId');
 
-      // 2. Create inventory transactions for each item in the delivery note
+      // 2. Create transactions for each item in the delivery note
       for (var item in items) {
-        await inventoryController.addTransaction(
-          productId: item['product_id'],
-          type: 'out',
-          quantityChange: item['quantity'],
-          reason: 'Delivery Note: $customerName',
-          deliveryNoteId: deliveryNoteId,
-          fromBranchId: fromBranchId,
-          toBranchId:
-              toBranchId, // For inter-branch transfer, toBranchId is also relevant for the transaction
-        );
-        debugPrint('Transaction added for product ${item['product_id']}');
+        final String itemType = item['type'];
+        final String itemId = item['id'];
+        final String itemName = item['name'];
+        final int quantity = item['quantity'];
+
+        if (itemType == 'product') {
+          await inventoryController.addTransaction(
+            productId: itemId,
+            type: 'out',
+            quantityChange: quantity,
+            reason: 'Delivery Note: $customerName',
+            deliveryNoteId: deliveryNoteId,
+            fromBranchId: fromBranchId,
+            toBranchId:
+                toBranchId, // For inter-branch transfer, toBranchId is also relevant for the transaction
+          );
+          debugPrint('Transaction added for product $itemName');
+        } else if (itemType == 'consumable') {
+          await consumableController.addConsumableTransactionFromDeliveryNote(
+            consumableId: int.parse(itemId),
+            consumableName: itemName,
+            quantityChange: quantity,
+            reason: 'Delivery Note: $customerName',
+            deliveryNoteId: deliveryNoteId,
+            fromBranchId: fromBranchId,
+            toBranchId: toBranchId,
+          );
+          debugPrint('Transaction added for consumable $itemName');
+        }
       }
 
       fetchDeliveryNotes(); // Refresh the list
