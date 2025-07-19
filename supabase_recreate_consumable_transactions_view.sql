@@ -1,3 +1,5 @@
+DROP VIEW IF EXISTS public.consumable_transactions_with_user_email_view;
+
 CREATE OR REPLACE VIEW public.consumable_transactions_with_user_email_view AS
 SELECT
   ct.id,

@@ -8,7 +8,11 @@ class ConsumableTransaction {
   final String? reason;
   final DateTime createdAt;
   final String? userId;
-  final String? userEmail; // New: User email
+  final String? userEmail;
+  final String? branchSourceId;
+  final String? branchSourceName;
+  final String? branchDestinationId;
+  final String? branchDestinationName;
 
   ConsumableTransaction({
     required this.id,
@@ -20,19 +24,27 @@ class ConsumableTransaction {
     required this.createdAt,
     this.userId,
     this.userEmail,
+    this.branchSourceId,
+    this.branchSourceName,
+    this.branchDestinationId,
+    this.branchDestinationName,
   });
 
   factory ConsumableTransaction.fromJson(Map<String, dynamic> json) {
     return ConsumableTransaction(
       id: json['id'] as int,
       consumableId: json['consumable_id'] as int?,
-      consumableName: json['consumables']?['name'] as String?,
+      consumableName: json['consumable_name'] as String?,
       quantityChange: json['quantity_change'] as int,
       type: json['type'] as String,
       reason: json['reason'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       userId: json['user_id'] as String?,
-      userEmail: json['user_email'] as String?, // Parse user email directly from the view
+      userEmail: json['user_email'] as String?,
+      branchSourceId: json['branch_source_id'] as String?,
+      branchSourceName: json['branch_source_name'] as String?,
+      branchDestinationId: json['branch_destination_id'] as String?,
+      branchDestinationName: json['branch_destination_name'] as String?,
     );
   }
 
@@ -43,6 +55,11 @@ class ConsumableTransaction {
       'type': type,
       'reason': reason,
       'user_id': userId,
+      'consumable_name': consumableName,
+      'branch_source_id': branchSourceId,
+      'branch_source_name': branchSourceName,
+      'branch_destination_id': branchDestinationId,
+      'branch_destination_name': branchDestinationName,
     };
   }
 }

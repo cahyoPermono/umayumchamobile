@@ -42,6 +42,16 @@ class ConsumableTransactionLogScreen extends StatelessWidget {
                       'Quantity Change: ${transaction.quantityChange}',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
+                    if (transaction.branchSourceName != null && transaction.branchSourceName!.isNotEmpty)
+                      Text(
+                        'From Branch: ${transaction.branchSourceName}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    if (transaction.branchDestinationName != null && transaction.branchDestinationName!.isNotEmpty)
+                      Text(
+                        'To Branch: ${transaction.branchDestinationName}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                     if (transaction.reason != null && transaction.reason!.isNotEmpty)
                       Text(
                         'Reason: ${transaction.reason}',
