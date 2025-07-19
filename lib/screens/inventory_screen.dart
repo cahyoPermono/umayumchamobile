@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:umayumcha/controllers/auth_controller.dart';
 import 'package:umayumcha/controllers/inventory_controller.dart';
 import 'package:umayumcha/controllers/branch_controller.dart';
-import 'package:umayumcha/models/branch_model.dart'; // Import Branch model
 import 'package:umayumcha/models/branch_product_model.dart';
 import 'package:umayumcha/screens/product_form_screen.dart';
 
@@ -15,33 +14,59 @@ void _showTransactionDialog(
   final InventoryController controller = Get.find();
   final TextEditingController quantityController = TextEditingController();
   final TextEditingController reasonController = TextEditingController();
+  final formKey = GlobalKey<FormState>(); // Declare GlobalKey here
 
   Get.dialog(
     AlertDialog(
       title: Text(
         '${type == 'in' ? 'Add' : 'Remove'} Stock for ${branchProduct.product?.name ?? 'N/A'}',
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: quantityController,
-            decoration: const InputDecoration(labelText: 'Quantity'),
-            keyboardType: TextInputType.number,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: reasonController,
-            decoration: const InputDecoration(labelText: 'Reason (Optional)'),
-          ),
-        ],
+      content: Form(
+        key: formKey, // Assign the key to the Form
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: quantityController,
+              decoration: const InputDecoration(
+                labelText: 'Quantity',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+              validator: (value) {
+                if (value == null ||
+                    int.tryParse(value) == null ||
+                    int.parse(value) <= 0) {
+                  return 'Please enter a valid quantity.';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: reasonController,
+              decoration: InputDecoration(
+                labelText:
+                    'Reason ${type == 'out' ? '(Required)' : '(Optional)'}',
+                border: const OutlineInputBorder(),
+              ),
+              validator: (value) {
+                if (type == 'out' && (value == null || value.isEmpty)) {
+                  return 'Reason is required for OUT transactions.';
+                }
+                return null;
+              },
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
         ElevatedButton(
           onPressed: () {
-            final int? quantity = int.tryParse(quantityController.text);
-            if (quantity != null && quantity > 0) {
+            if (formKey.currentState!.validate()) {
+              // Use the key to validate
+              final int quantity = int.parse(quantityController.text);
               controller.addTransaction(
                 productId: branchProduct.productId,
                 type: type,
@@ -51,8 +76,6 @@ void _showTransactionDialog(
                 toBranchId: type == 'in' ? branchProduct.branchId : null,
               );
               Get.back(); // Close dialog
-            } else {
-              Get.snackbar('Error', 'Please enter a valid quantity.');
             }
           },
           child: Text(type == 'in' ? 'Add' : 'Remove'),
@@ -62,77 +85,117 @@ void _showTransactionDialog(
   );
 }
 
-class InventoryScreen extends StatelessWidget {
+class InventoryScreen extends StatefulWidget {
   const InventoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final InventoryController inventoryController = Get.find();
-    final BranchController branchController = Get.find();
-    final AuthController authController = Get.find();
+  State<InventoryScreen> createState() => _InventoryScreenState();
+}
 
+class _InventoryScreenState extends State<InventoryScreen> {
+  final InventoryController inventoryController = Get.find();
+  final BranchController branchController = Get.find();
+  final AuthController authController = Get.find();
+
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      inventoryController.searchQuery.value = _searchController.text;
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Master Inventory')),
+      appBar: AppBar(
+        backgroundColor: _isSearching
+            ? Colors.white
+            : Theme.of(context).primaryColor, // Dynamic background color
+        iconTheme: IconThemeData(
+          color: _isSearching ? Colors.black : Colors.white,
+        ), // Dynamic icon color
+        title: _isSearching
+            ? Container(
+                height: 40, // Adjust height as needed
+                decoration: BoxDecoration(
+                  color: Colors
+                      .white, // Solid white background for clear visibility
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: const InputDecoration(
+                    hintText: 'Search products...',
+                    hintStyle: TextStyle(
+                      color: Colors.grey,
+                    ), // Grey hint text
+                    border: InputBorder.none, // Remove default border
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: Colors.grey,
+                    ), // Grey search icon
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 8.0,
+                      horizontal: 10.0,
+                    ), // Adjust padding
+                  ),
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                  ), // Black text for contrast
+                  cursorColor: Colors.black,
+                ),
+              )
+            : const Text(
+                'Master Inventory',
+                style: TextStyle(color: Colors.white),
+              ), // Ensure title is white when not searching
+        elevation: 4,
+        actions: [
+          IconButton(
+            icon: Icon(
+              _isSearching ? Icons.close : Icons.search,
+              color: _isSearching ? Colors.black : Colors.white,
+            ), // Dynamic icon color
+            onPressed: () {
+              setState(() {
+                _isSearching = !_isSearching;
+                if (!_isSearching) {
+                  _searchController.clear();
+                  inventoryController.searchQuery.value = '';
+                }
+              });
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Obx(() {
-              if (branchController.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
+          // Directly set UmayumchaHQ as the selected branch after the build is complete
+          Obx(() {
+            if (branchController.isLoading.value) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              final umayumchaHQBranch = branchController.branches
+                  .firstWhereOrNull((branch) => branch.name == 'UmayumchaHQ');
+              if (umayumchaHQBranch != null &&
+                  inventoryController.selectedBranch.value == null) {
+                inventoryController.selectedBranch.value = umayumchaHQBranch;
               }
-              if (branchController.branches.isEmpty) {
-                return const Center(
-                  child: Text(
-                    'No branches available. Please add a branch first.',
-                  ),
-                );
-              }
-              return DropdownButtonFormField<Branch>(
-                decoration: const InputDecoration(labelText: 'Select Branch'),
-                value: inventoryController.selectedBranch.value,
-                onChanged: authController.userRole.value == 'admin'
-                    ? (Branch? newValue) {
-                        inventoryController.selectedBranch.value = newValue;
-                      }
-                    : null, // Disable for non-admins
-                items: branchController.branches.map((branch) {
-                  return DropdownMenuItem<Branch>(
-                    value: branch,
-                    child: Text(branch.name),
-                  );
-                }).toList(),
-                // Set initial selected branch for non-admins
-                hint: authController.userRole.value != 'admin' &&
-                        authController.userBranchId.value != null &&
-                        inventoryController.selectedBranch.value == null
-                    ? Text(
-                        branchController.branches
-                            .firstWhere(
-                                (b) => b.id == authController.userBranchId.value)
-                            .name,
-                      )
-                    : null,
-                // Ensure selected branch is set for non-admins on first load
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                validator: (value) {
-                  if (authController.userRole.value != 'admin' &&
-                      authController.userBranchId.value != null &&
-                      inventoryController.selectedBranch.value == null) {
-                    // Set the selected branch to the user's branch if not already set
-                    final userBranch = branchController.branches.firstWhereOrNull(
-                        (b) => b.id == authController.userBranchId.value);
-                    if (userBranch != null) {
-                      inventoryController.selectedBranch.value = userBranch;
-                    }
-                  }
-                  return null;
-                },
-                // If not admin, ensure only their branch is in the list
-                // This is handled by BranchController.fetchBranches()
-              );
-            }),
-          ),
+            });
+            return const SizedBox.shrink(); // No UI for branch selection
+          }),
           Expanded(
             child: Obx(() {
               if (inventoryController.isLoading.value) {
@@ -143,67 +206,123 @@ class InventoryScreen extends StatelessWidget {
                   child: Text('Please select a branch to view inventory.'),
                 );
               }
-              if (inventoryController.branchProducts.isEmpty) {
-                return const Center(child: Text('No products in this branch.'));
+              if (inventoryController.filteredBranchProducts.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.inbox, size: 80, color: Colors.grey),
+                      SizedBox(height: 20),
+                      Text(
+                        inventoryController.searchQuery.isEmpty
+                            ? 'No products in this branch.'
+                            : 'No matching products found.',
+                        style: TextStyle(fontSize: 18, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                );
               }
-              return ListView.builder(
-                itemCount: inventoryController.branchProducts.length,
-                itemBuilder: (context, index) {
-                  final branchProduct =
-                      inventoryController.branchProducts[index];
-                  final product =
-                      branchProduct.product; // Get the nested product details
-                  return Card(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ListTile(
-                            title: Text(product?.name ?? 'N/A'),
-                            subtitle: Text(
-                              "${product?.sku ?? 'No SKU'} | Price: ${product?.price?.toStringAsFixed(2) ?? 'N/A'}",
-                            ),
-                            trailing: Text(
-                              'Stock: ${branchProduct.quantity}',
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
+              return RefreshIndicator(
+                onRefresh: () => inventoryController.fetchBranchProducts(),
+                child: ListView.builder(
+                  itemCount: inventoryController.filteredBranchProducts.length,
+                  itemBuilder: (context, index) {
+                    final branchProduct =
+                        inventoryController.filteredBranchProducts[index];
+                    final product = branchProduct
+                        .product; // Get the nested product details
+                    return Card(
+                      elevation: 2,
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: InkWell(
+                        onTap: () {
+                          // No direct edit for master products from here,
+                          // but could navigate to a product detail screen if needed.
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              ElevatedButton.icon(
-                                onPressed:
-                                    () => _showTransactionDialog(
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      product?.name ?? 'N/A',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.copyWith(
+                                              fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  Text(
+                                    'Qty: ${branchProduct.quantity}',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleMedium?.copyWith(
+                                          color:
+                                              Theme.of(context).primaryColor,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'SKU: ${product?.sku ?? 'No SKU'}',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              Text(
+                                'Price: ${product?.price?.toStringAsFixed(2) ?? 'N/A'}',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              const SizedBox(height: 16),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  ElevatedButton.icon(
+                                    onPressed: () => _showTransactionDialog(
                                       context,
                                       branchProduct,
                                       'in',
                                     ),
-                                icon: const Icon(Icons.add),
-                                label: const Text('In'),
-                              ),
-                              const SizedBox(width: 8),
-                              ElevatedButton.icon(
-                                onPressed:
-                                    () => _showTransactionDialog(
+                                    icon: const Icon(Icons.add),
+                                    label: const Text('In'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  ElevatedButton.icon(
+                                    onPressed: () => _showTransactionDialog(
                                       context,
                                       branchProduct,
                                       'out',
                                     ),
-                                icon: const Icon(Icons.remove),
-                                label: const Text('Out'),
+                                    icon: const Icon(Icons.remove),
+                                    label: const Text('Out'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.orange,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               );
             }),
           ),

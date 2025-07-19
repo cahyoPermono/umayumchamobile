@@ -13,6 +13,18 @@ class InventoryController extends GetxController {
   var isLoading = false.obs;
   var selectedBranch = Rx<Branch?>(null);
   var globalLowStockProducts = <BranchProduct>[].obs; // Renamed and now global
+  var searchQuery = ''.obs;
+
+  // Filtered list based on search query
+  RxList<BranchProduct> get filteredBranchProducts =>
+      branchProducts
+          .where((product) {
+            final query = searchQuery.value.toLowerCase();
+            return product.product!.name.toLowerCase().contains(query) ||
+                product.product!.sku!.toLowerCase().contains(query);
+          })
+          .toList()
+          .obs;
 
   static const int lowStockThreshold = 50; // Define your threshold here
 
@@ -79,15 +91,16 @@ class InventoryController extends GetxController {
           .eq('branch_id', selectedBranch.value!.id!)
           .order('created_at', ascending: true);
 
-      // Filter by user's branch if not admin and selected branch is not user's branch
+      // Allow all users to view UmayumchaHQ inventory
       final authController = Get.find<AuthController>();
       if (authController.userRole.value != 'admin' &&
+          selectedBranch.value?.name != 'UmayumchaHQ' &&
           authController.userBranchId.value != selectedBranch.value!.id) {
         // If a non-admin user tries to select a branch that is not theirs, clear products and show error
         branchProducts.clear();
         Get.snackbar(
           'Access Denied',
-          'You can only view products for your assigned branch.',
+          'You can only view products for your assigned branch or UmayumchaHQ.',
         );
         isLoading.value = false;
         return;
