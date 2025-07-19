@@ -103,16 +103,26 @@ class ConsumableController extends GetxController {
 
   Future<void> _logTransaction({
     required int consumableId,
+    required String consumableName,
     required int quantityChange,
     required String type,
     String? reason,
+    String? branchSourceId,
+    String? branchSourceName,
+    String? branchDestinationId,
+    String? branchDestinationName,
   }) async {
     try {
       await _supabase.from('consumable_transactions').insert({
         'consumable_id': consumableId,
+        'consumable_name': consumableName,
         'quantity_change': quantityChange,
         'type': type,
         'reason': reason,
+        'branch_source_id': branchSourceId,
+        'branch_source_name': branchSourceName,
+        'branch_destination_id': branchDestinationId,
+        'branch_destination_name': branchDestinationName,
       });
     } catch (e) {
       log('Error logging consumable transaction: $e');
@@ -122,7 +132,14 @@ class ConsumableController extends GetxController {
 
   Future<void> addConsumableQuantity(int id, int quantity, String reason) async {
     try {
-      await _logTransaction(consumableId: id, quantityChange: quantity, type: 'in', reason: reason);
+      final consumable = consumables.firstWhere((c) => c.id == id);
+      await _logTransaction(
+        consumableId: id,
+        consumableName: consumable.name,
+        quantityChange: quantity,
+        type: 'in',
+        reason: reason,
+      );
       fetchConsumables();
       Get.snackbar('Success', 'Consumable quantity added successfully!');
     } catch (e) {
@@ -133,7 +150,14 @@ class ConsumableController extends GetxController {
 
   Future<void> removeConsumableQuantity(int id, int quantity, String reason) async {
     try {
-      await _logTransaction(consumableId: id, quantityChange: -quantity, type: 'out', reason: reason);
+      final consumable = consumables.firstWhere((c) => c.id == id);
+      await _logTransaction(
+        consumableId: id,
+        consumableName: consumable.name,
+        quantityChange: -quantity,
+        type: 'out',
+        reason: reason,
+      );
       fetchConsumables();
       Get.snackbar('Success', 'Consumable quantity removed successfully!');
     } catch (e) {
