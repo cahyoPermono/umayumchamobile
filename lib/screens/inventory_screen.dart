@@ -289,6 +289,29 @@ class _InventoryScreenState extends State<InventoryScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.edit),
+                                    onPressed: () {
+                                      Get.to(() => ProductFormScreen(product: product));
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete),
+                                    onPressed: () {
+                                      Get.defaultDialog(
+                                        title: 'Delete Product',
+                                        middleText:
+                                            'Are you sure you want to delete ${product?.name ?? 'this product'}?',
+                                        onConfirm: () {
+                                          if (product != null) {
+                                            inventoryController.deleteProduct(product.id);
+                                          }
+                                          Get.back();
+                                        },
+                                        onCancel: () {},
+                                      );
+                                    },
+                                  ),
                                   ElevatedButton.icon(
                                     onPressed: () => _showTransactionDialog(
                                       context,

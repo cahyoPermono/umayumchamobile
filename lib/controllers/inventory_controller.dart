@@ -28,6 +28,47 @@ class InventoryController extends GetxController {
 
   static const int lowStockThreshold = 50; // Define your threshold here
 
+  Future<bool> updateProduct(Product product) async {
+    isLoading.value = true;
+    try {
+      final productMap = product.toJson();
+      productMap.remove('created_at');
+      productMap.remove('id');
+
+      await supabase
+          .from('products')
+          .update(productMap)
+          .eq('id', product.id);
+
+      fetchBranchProducts(); // Refresh the list
+      return true; // Return true on success
+
+    } catch (e) {
+      debugPrint('Error updating product: $e');
+      Get.snackbar('Error', 'Failed to update product: ${e.toString()}');
+      return false; // Return false on failure
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> deleteProduct(String productId) async {
+    try {
+      final response = await Supabase.instance.client
+          .from('products')
+          .delete()
+          .match({'id': productId});
+      if (response.error != null) {
+        Get.snackbar('Error', response.error!.message);
+      } else {
+        Get.snackbar('Success', 'Product deleted successfully');
+        fetchBranchProducts(); // Refresh the list
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to delete product: $e');
+    }
+  }
+
   @override
   void onInit() {
     // Listen for changes in selectedBranch and refetch products
