@@ -67,115 +67,116 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-            widget.consumable == null ? 'Add Consumable' : 'Edit Consumable'),
-        elevation: 4,
+          widget.consumable == null ? 'Add Consumable' : 'Edit Consumable',
+          style: const TextStyle(color: Colors.white), // Ensure title is white
+        ),
+        backgroundColor: Theme.of(context).primaryColor, // Use primary color for app bar
+        iconTheme: const IconThemeData(color: Colors.white), // White back button
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+        padding: const EdgeInsets.all(20.0), // Increased padding
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch, // Stretch fields horizontally
+            children: [
+              TextFormField(
+                controller: _codeController,
+                decoration: const InputDecoration(
+                  labelText: 'Code',
+                  hintText: 'e.g., C001',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a code';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Name',
+                  hintText: 'e.g., Kopi Bubuk',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a name';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _quantityController,
+                decoration: const InputDecoration(
+                  labelText: 'Quantity',
+                  hintText: 'e.g., 100',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                ),
+                keyboardType: TextInputType.number,
+                enabled: widget.consumable == null,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a quantity';
+                  }
+                  if (int.tryParse(value) == null) {
+                    return 'Please enter a valid number';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Description (Optional)',
+                  hintText: 'e.g., Kopi robusta kualitas premium',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                ),
+                maxLines: 3,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _locationController,
+                decoration: const InputDecoration(
+                  labelText: 'Location',
+                  hintText: 'e.g., Gudang Utama',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                ),
+                enabled: false, // Disabled as requested
+              ),
+              const SizedBox(height: 16),
+              InkWell(
+                onTap: () => _selectDate(context),
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: 'Expiration Date (Optional)',
+                    border: const OutlineInputBorder(),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                    suffixIcon: const Icon(Icons.calendar_today),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        TextFormField(
-                          controller: _codeController,
-                          decoration: const InputDecoration(
-                            labelText: 'Code',
-                            prefixIcon: Icon(Icons.qr_code),
-                            border: OutlineInputBorder(),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter a code';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _nameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Name',
-                            prefixIcon: Icon(Icons.label),
-                            border: OutlineInputBorder(),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter a name';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _quantityController,
-                          decoration: const InputDecoration(
-                            labelText: 'Quantity',
-                            prefixIcon: Icon(Icons.format_list_numbered),
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.number,
-                          enabled: widget.consumable == null,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter a quantity';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'Please enter a valid number';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _descriptionController,
-                          decoration: const InputDecoration(
-                            labelText: 'Description (Optional)',
-                            prefixIcon: Icon(Icons.description),
-                            border: OutlineInputBorder(),
-                          ),
-                          maxLines: 3,
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _locationController,
-                          decoration: const InputDecoration(
-                            labelText: 'Location',
-                            prefixIcon: Icon(Icons.location_on),
-                            border: OutlineInputBorder(),
-                          ),
-                          enabled: false, // Disabled as requested
-                        ),
-                        const SizedBox(height: 16),
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(color: Colors.grey.shade400),
-                          ),
-                          leading: const Icon(Icons.calendar_today),
-                          title: Text(_expiredDate == null
-                              ? 'Choose Expiration Date'
-                              : DateFormat.yMd().format(_expiredDate!)),
-                          trailing: const Icon(Icons.arrow_drop_down),
-                          onTap: () => _selectDate(context),
-                        ),
-                      ],
+                  child: Text(
+                    _expiredDate == null
+                        ? 'Choose Expiration Date'
+                        : DateFormat.yMd().format(_expiredDate!),
+                    style: TextStyle(
+                      color: _expiredDate == null ? Colors.grey[700] : Colors.black,
+                      fontSize: 16,
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
-                ElevatedButton(
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton(
                   onPressed: _isSubmitting ? null : () async { // Disable button when submitting
                     if (_formKey.currentState!.validate()) {
                       setState(() {
@@ -204,10 +205,13 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 15.0), // Larger button
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10.0), // Rounded corners
                     ),
+                    backgroundColor: Theme.of(context).primaryColor, // Use primary color
+                    foregroundColor: Colors.white, // White text
+                    elevation: 5, // Add shadow
                   ),
                   child: _isSubmitting
                       ? const SizedBox(
@@ -217,11 +221,10 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
                         )
                       : Text(
                           widget.consumable == null ? 'Add' : 'Update',
-                          style: const TextStyle(fontSize: 18),
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold), // Bold text
                         ),
                 ),
-              ],
-            ),
+            ],
           ),
         ),
       ),
