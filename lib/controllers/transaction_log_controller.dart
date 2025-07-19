@@ -15,6 +15,8 @@ class TransactionLogController extends GetxController {
   var isLoading = false.obs;
   var startDate = Rx<DateTime?>(null);
   var endDate = Rx<DateTime?>(null);
+  var distinctBranchDestinations = <String>[].obs;
+  var selectedBranchDestination = Rx<String?>(null);
 
   @override
   void onInit() {
@@ -25,33 +27,30 @@ class TransactionLogController extends GetxController {
     // Listen to date range changes
     ever(startDate, (_) => fetchTransactions());
     ever(endDate, (_) => fetchTransactions());
+    fetchDistinctBranchDestinations(); // New: Fetch distinct branches
+    ever(selectedBranchDestination, (_) => fetchTransactions()); // New: Listen to branch filter
     super.onInit();
   }
 
   Future<void> fetchTransactions() async {
     try {
       isLoading.value = true;
-      String selectQuery =
-          '*, products(name), from_branch_id(name), to_branch_id(name)';
-      List<String> conditions = [];
+      var query = supabase
+          .from('inventory_transactions')
+          .select('*, products(name), from_branch_id(name), to_branch_id(name)');
 
       if (startDate.value != null) {
-        conditions.add('created_at.gte.${startDate.value!.toIso8601String()}');
+        query = query.gte('created_at', startDate.value!.toIso8601String());
       }
       if (endDate.value != null) {
-        conditions.add(
-          'created_at.lte.${endDate.value!.add(const Duration(days: 1)).toIso8601String()}',
-        );
+        query = query.lte('created_at', endDate.value!.add(const Duration(days: 1)).toIso8601String());
       }
 
-      if (conditions.isNotEmpty) {
-        selectQuery +=
-            '.filter(${conditions.join(',')})'; // Append filter to select string
+      if (selectedBranchDestination.value != null) {
+        query = query.eq('to_branch_name', selectedBranchDestination.value!); // Apply branch filter
       }
 
-      final response = await supabase
-          .from('inventory_transactions')
-          .select(selectQuery) // Pass the full select string with filters
+      final response = await query
           .order('created_at', ascending: false);
 
       transactions.value =
@@ -69,6 +68,19 @@ class TransactionLogController extends GetxController {
       Get.snackbar('Error', 'Failed to fetch transactions: ${e.toString()}');
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchDistinctBranchDestinations() async {
+    try {
+      final response = await supabase
+          .from('inventory_distinct_to_branch_names')
+          .select('to_branch_name');
+      distinctBranchDestinations.value = (response as List)
+          .map((item) => item['to_branch_name'] as String)
+          .toList();
+    } catch (e) {
+      debugPrint('Error fetching distinct branch destinations: ${e.toString()}');
     }
   }
 
