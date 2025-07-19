@@ -61,6 +61,10 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       text: widget.product?.price?.toString() ?? '',
     );
 
+    if (widget.product == null) {
+      initialQuantityController.text = '0';
+    }
+
     // Listen for changes in branches and set UmayumchaHQ
     ever(branchController.branches, (_) {
       debugPrint(
@@ -182,7 +186,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: priceController,
-                decoration: const InputDecoration(labelText: 'Price (Optional)'),
+                decoration: const InputDecoration(
+                  labelText: 'Price (Optional)',
+                ),
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
               ),
               const SizedBox(height: 16),
@@ -230,104 +236,118 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 return inventoryController.isLoading.value
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
-                        onPressed: () async {
-                          final isValid = _formKey.currentState!.validate();
-                          debugPrint('Form validation result: $isValid');
-                          debugPrint('Name: ${nameController.text}');
-                          debugPrint('Code: ${codeController.text}');
-                          debugPrint('Description: ${descriptionController.text}');
-                          debugPrint('Merk: ${merkController.text}');
-                          debugPrint('Kondisi: ${kondisiController.text}');
-                          debugPrint('Tahun Perolehan: ${tahunPerolehanController.text}');
-                          debugPrint('Nilai Residu: ${nilaiResiduController.text}');
-                          debugPrint('Pengguna: ${penggunaController.text}');
-                          debugPrint('Price: ${priceController.text}');
+                      onPressed: () async {
+                        final isValid = _formKey.currentState!.validate();
+                        debugPrint('Form validation result: $isValid');
+                        debugPrint('Name: ${nameController.text}');
+                        debugPrint('Code: ${codeController.text}');
+                        debugPrint(
+                          'Description: ${descriptionController.text}',
+                        );
+                        debugPrint('Merk: ${merkController.text}');
+                        debugPrint('Kondisi: ${kondisiController.text}');
+                        debugPrint(
+                          'Tahun Perolehan: ${tahunPerolehanController.text}',
+                        );
+                        debugPrint(
+                          'Nilai Residu: ${nilaiResiduController.text}',
+                        );
+                        debugPrint('Pengguna: ${penggunaController.text}');
+                        debugPrint('Price: ${priceController.text}');
 
-                          if (isValid) {
-                            final product = Product(
-                              id: widget.product?.id ?? '',
-                              name: nameController.text.trim(),
-                              code: codeController.text.trim(),
-                              description:
-                                  descriptionController.text.trim().isEmpty
-                                      ? null
-                                      : descriptionController.text.trim(),
-                              merk: merkController.text.trim().isEmpty
-                                  ? null
-                                  : merkController.text.trim(),
-                              kondisi: kondisiController.text.trim().isEmpty
-                                  ? null
-                                  : kondisiController.text.trim(),
-                              tahunPerolehan:
-                                  tahunPerolehanController.text.trim().isEmpty
-                                      ? null
-                                      : tahunPerolehanController.text.trim(),
-                              nilaiResidu: double.tryParse(
-                                nilaiResiduController.text.trim(),
-                              ),
-                              pengguna: penggunaController.text.trim().isEmpty
-                                  ? null
-                                  : penggunaController.text.trim(),
-                              price:
-                                  double.tryParse(priceController.text.trim()),
-                              createdAt:
-                                  widget.product?.createdAt ?? DateTime.now(),
+                        if (isValid) {
+                          final product = Product(
+                            id: widget.product?.id ?? '',
+                            name: nameController.text.trim(),
+                            code: codeController.text.trim(),
+                            description:
+                                descriptionController.text.trim().isEmpty
+                                    ? null
+                                    : descriptionController.text.trim(),
+                            merk:
+                                merkController.text.trim().isEmpty
+                                    ? null
+                                    : merkController.text.trim(),
+                            kondisi:
+                                kondisiController.text.trim().isEmpty
+                                    ? null
+                                    : kondisiController.text.trim(),
+                            tahunPerolehan:
+                                tahunPerolehanController.text.trim().isEmpty
+                                    ? null
+                                    : tahunPerolehanController.text.trim(),
+                            nilaiResidu: double.tryParse(
+                              nilaiResiduController.text.trim(),
+                            ),
+                            pengguna:
+                                penggunaController.text.trim().isEmpty
+                                    ? null
+                                    : penggunaController.text.trim(),
+                            price: double.tryParse(priceController.text.trim()),
+                            createdAt:
+                                widget.product?.createdAt ?? DateTime.now(),
+                          );
+
+                          if (widget.product == null) {
+                            if (umayumchaHQBranch.value == null) {
+                              Get.snackbar(
+                                'Error',
+                                'UmayumchaHQ branch not found. Cannot save product.',
+                              );
+                              return;
+                            }
+                            final int initialQuantity = int.parse(
+                              initialQuantityController.text.trim(),
                             );
 
-                            if (widget.product == null) {
-                              if (umayumchaHQBranch.value == null) {
-                                Get.snackbar(
-                                  'Error',
-                                  'UmayumchaHQ branch not found. Cannot save product.',
+                            final String? newProductId =
+                                await inventoryController.addProductAndGetId(
+                                  product,
                                 );
-                                return;
-                              }
-                              final int initialQuantity = int.parse(
-                                initialQuantityController.text.trim(),
-                              );
 
-                              final String? newProductId =
-                                  await inventoryController
-                                      .addProductAndGetId(product);
-
-                              if (newProductId != null) {
-                                final transactionSuccess = await inventoryController.addTransaction(
-                                  productId: newProductId,
-                                  type: 'in',
-                                  quantityChange: initialQuantity,
-                                  reason: 'Initial stock for new product',
-                                  toBranchId: umayumchaHQBranch.value!.id,
-                                );
-                                if (transactionSuccess) {
-                                  Get.back();
-                                  Get.snackbar(
-                                    'Success',
-                                    'Product and initial stock added successfully!',
+                            if (newProductId != null) {
+                              final transactionSuccess =
+                                  await inventoryController.addTransaction(
+                                    productId: newProductId,
+                                    type: 'in',
+                                    quantityChange: initialQuantity,
+                                    reason: 'Initial stock for new product',
+                                    toBranchId: umayumchaHQBranch.value!.id,
                                   );
-                                } else {
-                                  Get.snackbar('Error', 'Failed to add initial stock.');
-                                }
-                              } else {
-                                Get.snackbar('Error', 'Failed to add product.');
-                              }
-                            } else {
-                              final success = await inventoryController.updateProduct(product);
-                              if (success) {
+                              if (transactionSuccess) {
                                 Get.back();
                                 Get.snackbar(
                                   'Success',
-                                  'Product updated successfully!',
+                                  'Product and initial stock added successfully!',
+                                );
+                              } else {
+                                Get.snackbar(
+                                  'Error',
+                                  'Failed to add initial stock.',
                                 );
                               }
+                            } else {
+                              Get.snackbar('Error', 'Failed to add product.');
+                            }
+                          } else {
+                            final success = await inventoryController
+                                .updateProduct(product);
+                            if (success) {
+                              Get.back();
+                              Get.snackbar(
+                                'Success',
+                                'Product updated successfully!',
+                              );
                             }
                           }
-                        },
-                        child: Text(
-                          widget.product == null
-                              ? 'Save Product'
-                              : 'Update Product',
-                        ),
-                      );
+                        }
+                      },
+                      child: Text(
+                        widget.product == null
+                            ? 'Save Product'
+                            : 'Update Product',
+                      ),
+                    );
               }),
               SizedBox(
                 height:
