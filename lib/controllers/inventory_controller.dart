@@ -258,71 +258,42 @@ class InventoryController extends GetxController {
           .single();
       final productName = productResponse['name'] as String;
 
-      // Fetch from_branch_name if fromBranchId is provided
-      String? fromBranchName;
-      if (fromBranchId != null) {
+      // Use provided branch names, or fetch them if only IDs are available.
+      String? finalFromBranchName = fromBranchName;
+      if (fromBranchId != null && finalFromBranchName == null) {
         final fromBranchResponse = await supabase
             .from('branches')
             .select('name')
             .eq('id', fromBranchId)
             .single();
-        fromBranchName = fromBranchResponse['name'] as String;
+        finalFromBranchName = fromBranchResponse['name'] as String;
       }
 
-      // Fetch to_branch_name if toBranchId is provided
-      String? toBranchName;
-      if (toBranchId != null) {
+      String? finalToBranchName = toBranchName;
+      if (toBranchId != null && finalToBranchName == null) {
         final toBranchResponse = await supabase
             .from('branches')
             .select('name')
             .eq('id', toBranchId)
             .single();
-        toBranchName = toBranchResponse['name'] as String;
+        finalToBranchName = toBranchResponse['name'] as String;
       }
 
-      // Determine the actual quantity change based on type
-      final int finalQuantityChange = type == 'out' ? -quantityChange : quantityChange;
-
-      // Determine which branch's product quantity to update
-      String? branchIdToUpdate;
-      if (type == 'out' && fromBranchId != null) {
-        branchIdToUpdate = fromBranchId;
-      } else if (type == 'in' && toBranchId != null) {
-        branchIdToUpdate = toBranchId;
-      }
-
-      if (branchIdToUpdate != null) {
-        // Get current quantity of the product in the relevant branch
-        final currentBranchProduct = await supabase
-            .from('branch_products')
-            .select('quantity')
-            .eq('product_id', productId)
-            .eq('branch_id', branchIdToUpdate)
-            .single();
-        final int currentQuantity = currentBranchProduct['quantity'] as int;
-        final int newQuantity = currentQuantity + finalQuantityChange;
-
-        // Update the quantity in branch_products table
-        await supabase
-            .from('branch_products')
-            .update({'quantity': newQuantity})
-            .eq('product_id', productId)
-            .eq('branch_id', branchIdToUpdate);
-        debugPrint('Updated branch_products for $productId in branch $branchIdToUpdate to $newQuantity');
-      }
-
+      // The database trigger 'on_branch_inventory_transaction' handles all stock updates.
+      // This function's only responsibility is to insert the transaction record.
       await supabase.from('inventory_transactions').insert({
         'product_id': productId,
-        'product_name': productName, // Add product_name
+        'product_name': productName,
         'type': type,
-        'quantity_change': finalQuantityChange,
+        'quantity_change': quantityChange, // The trigger expects a positive integer.
         'reason': reason,
         'delivery_note_id': deliveryNoteId,
         'from_branch_id': fromBranchId,
-        'from_branch_name': fromBranchName, // Add from_branch_name
+        'from_branch_name': finalFromBranchName,
         'to_branch_id': toBranchId,
-        'to_branch_name': toBranchName, // Add to_branch_name
+        'to_branch_name': finalToBranchName,
       });
+
       debugPrint(
         'Transaction added: type=$type, quantity=$quantityChange, product=$productId',
       );
@@ -333,8 +304,8 @@ class InventoryController extends GetxController {
       debugPrint('Error adding transaction: ${e.toString()}');
       Get.snackbar(
         'Error',
-        'Failed to update stock: ${e.toString()}',
-      ); // Keep snackbar for error
+        'Failed to add transaction: ${e.toString()}',
+      );
       return false; // Return false on failure
     } finally {
       isLoading.value = false;
