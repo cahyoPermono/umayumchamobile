@@ -67,10 +67,12 @@ class DeliveryNoteController extends GetxController {
                 'from_branch_id': fromBranchId,
                 'to_branch_id': toBranchId,
               })
-              .select('id')
+              .select('id, from_branch_id(name), to_branch_id(name)') // Select branch names
               .single();
 
       final String deliveryNoteId = response['id'];
+      final String? fromBranchName = response['from_branch_id']?['name'];
+      final String? toBranchName = response['to_branch_id']?['name'];
       debugPrint('Delivery note created with ID: $deliveryNoteId');
 
       // 2. Create transactions for each item in the delivery note
@@ -88,8 +90,9 @@ class DeliveryNoteController extends GetxController {
             reason: 'Delivery Note: $customerName',
             deliveryNoteId: deliveryNoteId,
             fromBranchId: fromBranchId,
-            toBranchId:
-                toBranchId, // For inter-branch transfer, toBranchId is also relevant for the transaction
+            toBranchId: toBranchId,
+            fromBranchName: fromBranchName,
+            toBranchName: toBranchName,
           );
           debugPrint('Transaction added for product $itemName');
         } else if (itemType == 'consumable') {
@@ -101,6 +104,8 @@ class DeliveryNoteController extends GetxController {
             deliveryNoteId: deliveryNoteId,
             fromBranchId: fromBranchId,
             toBranchId: toBranchId,
+            fromBranchName: fromBranchName, // Pass branch names
+            toBranchName: toBranchName, // Pass branch names
           );
           debugPrint('Transaction added for consumable $itemName');
         }

@@ -244,6 +244,8 @@ class InventoryController extends GetxController {
     String? deliveryNoteId,
     String? fromBranchId,
     String? toBranchId,
+    String? fromBranchName,
+    String? toBranchName,
   }) async {
     try {
       isLoading.value = true;

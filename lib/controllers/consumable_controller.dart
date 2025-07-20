@@ -234,6 +234,8 @@ class ConsumableController extends GetxController {
     required String fromBranchId,
     required String toBranchId,
     String? deliveryNoteId,
+    String? fromBranchName, // New: fromBranchName
+    String? toBranchName, // New: toBranchName
   }) async {
     try {
       // Update consumable quantity (subtract for delivery out)
@@ -256,6 +258,8 @@ class ConsumableController extends GetxController {
         branchSourceId: fromBranchId,
         branchDestinationId: toBranchId,
         deliveryNoteId: deliveryNoteId,
+        branchSourceName: fromBranchName, // Pass branch names
+        branchDestinationName: toBranchName, // Pass branch names
       );
       fetchConsumables(); // Refresh the list
     } catch (e) {
