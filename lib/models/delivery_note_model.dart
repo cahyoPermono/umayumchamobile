@@ -45,8 +45,7 @@ class DeliveryNote {
                 (e) => {
                   'product_id': e['product_id'],
                   'quantity_change': e['quantity_change'],
-                  'product_name':
-                      (e['products'] as Map<String, dynamic>?)?['name'],
+                  'product_name': e['product_name'], // Directly from transaction
                   'type': 'product',
                 },
               )
