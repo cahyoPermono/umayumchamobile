@@ -9,7 +9,8 @@ class DeliveryNote {
   final String? toBranchId;
   final String? fromBranchName;
   final String? toBranchName;
-  final List<Map<String, dynamic>>? items; // For displaying items in the note
+  final List<Map<String, dynamic>>? productItems; // For displaying product items in the note
+  final List<Map<String, dynamic>>? consumableItems; // For displaying consumable items in the note
 
   DeliveryNote({
     required this.id,
@@ -22,7 +23,8 @@ class DeliveryNote {
     this.toBranchId,
     this.fromBranchName,
     this.toBranchName,
-    this.items,
+    this.productItems,
+    this.consumableItems,
   });
 
   factory DeliveryNote.fromJson(Map<String, dynamic> json) {
@@ -40,7 +42,7 @@ class DeliveryNote {
       fromBranchName:
           (json['from_branch_id'] as Map<String, dynamic>?)?['name'],
       toBranchName: (json['to_branch_id'] as Map<String, dynamic>?)?['name'],
-      items:
+      productItems:
           (json['inventory_transactions'] as List?)
               ?.map(
                 (e) => {
@@ -48,6 +50,16 @@ class DeliveryNote {
                   'quantity_change': e['quantity_change'],
                   'product_name':
                       (e['products'] as Map<String, dynamic>?)?['name'],
+                },
+              )
+              .toList(),
+      consumableItems:
+          (json['consumable_transactions'] as List?)
+              ?.map(
+                (e) => {
+                  'consumable_id': e['consumable_id'],
+                  'quantity_change': e['quantity_change'],
+                  'consumable_name': e['consumable_name'],
                 },
               )
               .toList(),

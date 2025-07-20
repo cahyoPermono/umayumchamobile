@@ -26,7 +26,7 @@ class DeliveryNoteController extends GetxController {
       final response = await supabase
           .from('delivery_notes')
           .select(
-            '*, inventory_transactions(product_id, quantity_change, products(name)), from_branch_id(name), to_branch_id(name)',
+            '*, inventory_transactions(product_id, quantity_change, products(name)), consumable_transactions(consumable_id, quantity_change, consumable_name), from_branch_id(name), to_branch_id(name)',
           )
           .order('created_at', ascending: false);
 

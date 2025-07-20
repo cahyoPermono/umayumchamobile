@@ -43,13 +43,24 @@ class DeliveryNoteListScreen extends StatelessWidget {
                           'Items:',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        if (note.items != null && note.items!.isNotEmpty)
-                          ...note.items!.map(
+                        if (note.productItems != null &&
+                            note.productItems!.isNotEmpty)
+                          ...note.productItems!.map(
                             (item) => Text(
-                              '- ${item['product_name']} (x${item['quantity_change']})',
+                              '- ${item['product_name']} (${item['quantity_change']}) [Product]',
+                            ),
+                          ),
+                        if (note.consumableItems != null &&
+                            note.consumableItems!.isNotEmpty)
+                          ...note.consumableItems!.map(
+                            (item) => Text(
+                              '- ${item['consumable_name']} (${item['quantity_change']}) [Consumable]',
                             ),
                           )
-                        else
+                        else if ((note.productItems == null ||
+                                note.productItems!.isEmpty) &&
+                            (note.consumableItems == null ||
+                                note.consumableItems!.isEmpty))
                           const Text(
                             'No items recorded for this delivery note.',
                           ),
