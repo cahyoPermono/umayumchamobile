@@ -429,6 +429,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                                     quantityChange: initialQuantity,
                                     reason: 'Initial stock for new product',
                                     toBranchId: umayumchaHQBranch.value!.id,
+                                    toBranchName: 'UmayumchaHQ', // Set destination name
                                   );
                               if (transactionSuccess) {
                                 Get.back();

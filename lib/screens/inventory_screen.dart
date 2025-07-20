@@ -13,9 +13,17 @@ void _showTransactionDialog(
   String type,
 ) {
   final InventoryController controller = Get.find();
+  final BranchController branchController = Get.find(); // Get BranchController
   final TextEditingController quantityController = TextEditingController();
   final TextEditingController reasonController = TextEditingController();
   final formKey = GlobalKey<FormState>(); // Declare GlobalKey here
+
+  // Find UmayumchaHQ branch details
+  final umayumchaHQBranch = branchController.branches.firstWhereOrNull(
+    (branch) => branch.name == 'UmayumchaHQ',
+  );
+  final String? umayumchaHQBranchId = umayumchaHQBranch?.id;
+  const String umayumchaHQBranchName = 'UmayumchaHQ'; // Assuming constant name
 
   Get.dialog(
     AlertDialog(
@@ -69,13 +77,25 @@ void _showTransactionDialog(
             if (formKey.currentState!.validate()) {
               // Use the key to validate
               final int quantity = int.parse(quantityController.text);
+
+              String? fromBranchId;
+              String? toBranchId;
+              String? fromBranchName;
+              String? toBranchName;
+              toBranchId = umayumchaHQBranchId;
+              toBranchName = umayumchaHQBranchName;
+              fromBranchId = umayumchaHQBranchId;
+              fromBranchName = umayumchaHQBranchName;
+
               final success = await controller.addTransaction(
                 productId: branchProduct.productId,
                 type: type,
                 quantityChange: quantity,
                 reason: reasonController.text.trim(),
-                fromBranchId: type == 'out' ? branchProduct.branchId : null,
-                toBranchId: type == 'in' ? branchProduct.branchId : null,
+                fromBranchId: fromBranchId,
+                toBranchId: toBranchId,
+                fromBranchName: fromBranchName,
+                toBranchName: toBranchName,
               );
               Get.back(); // Close dialog
               if (success) {
@@ -323,7 +343,8 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                         content:
                                             'Are you sure you want to delete ${product?.name ?? 'this product'}?',
                                         onConfirm: () {
-                                          if (product != null && product.id != null) {
+                                          if (product != null &&
+                                              product.id != null) {
                                             final productId = product.id!;
                                             inventoryController.deleteProduct(
                                               productId,
