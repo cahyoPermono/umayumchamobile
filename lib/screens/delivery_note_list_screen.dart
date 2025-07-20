@@ -16,13 +16,15 @@ class DeliveryNoteListScreen extends StatelessWidget {
         title: const Text(
           'Delivery Notes',
           style: TextStyle(
-            color: Colors.black87, // Modern, slightly darker text
+            color: Colors.white, // White text for consistency
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: Colors.white, // Clean white background
-        elevation: 0, // No shadow for a clean look
-        centerTitle: true, // Center the title
+        backgroundColor: Theme.of(context).primaryColor, // Use primary color
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ), // White back button
+        elevation: 4, // Restore default elevation
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
