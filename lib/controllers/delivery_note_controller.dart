@@ -26,7 +26,7 @@ class DeliveryNoteController extends GetxController {
       final response = await supabase
           .from('delivery_notes')
           .select(
-            '*, inventory_transactions(product_id, quantity_change, products(name)), consumable_transactions(consumable_id, quantity_change, consumable_name), from_branch_id(name), to_branch_id(name)',
+            '*, inventory_transactions(product_id, quantity_change, products(name)), consumable_transactions(consumable_id, quantity_change, consumable_name)',
           )
           .order('created_at', ascending: false);
 
@@ -54,6 +54,21 @@ class DeliveryNoteController extends GetxController {
     try {
       isLoading.value = true;
 
+      // Fetch branch names before inserting into delivery_notes
+      final fromBranchResponse = await supabase
+          .from('branches')
+          .select('name')
+          .eq('id', fromBranchId)
+          .single();
+      final String fromBranchName = fromBranchResponse['name'] as String;
+
+      final toBranchResponse = await supabase
+          .from('branches')
+          .select('name')
+          .eq('id', toBranchId)
+          .single();
+      final String toBranchName = toBranchResponse['name'] as String;
+
       // 1. Create the delivery note entry
       final response =
           await supabase
@@ -66,13 +81,13 @@ class DeliveryNoteController extends GetxController {
                     deliveryDate.toIso8601String().split('T').first,
                 'from_branch_id': fromBranchId,
                 'to_branch_id': toBranchId,
+                'from_branch_name': fromBranchName, // Save branch name
+                'to_branch_name': toBranchName, // Save branch name
               })
-              .select('id, from_branch_id(name), to_branch_id(name)') // Select branch names
+              .select('id') // Only select ID now, names are already saved
               .single();
 
       final String deliveryNoteId = response['id'];
-      final String? fromBranchName = response['from_branch_id']?['name'];
-      final String? toBranchName = response['to_branch_id']?['name'];
       debugPrint('Delivery note created with ID: $deliveryNoteId');
 
       // 2. Create transactions for each item in the delivery note

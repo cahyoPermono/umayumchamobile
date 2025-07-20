@@ -7,8 +7,8 @@ class DeliveryNote {
   final String? userId;
   final String? fromBranchId;
   final String? toBranchId;
-  final String? fromBranchName;
-  final String? toBranchName;
+  final String? fromBranchName; // Direct field from DB
+  final String? toBranchName; // Direct field from DB
   final List<Map<String, dynamic>>? productItems; // For displaying product items in the note
   final List<Map<String, dynamic>>? consumableItems; // For displaying consumable items in the note
 
@@ -35,13 +35,10 @@ class DeliveryNote {
       destinationAddress: json['destination_address'] as String?,
       deliveryDate: DateTime.parse(json['delivery_date'] as String),
       userId: json['user_id'] as String?,
-      fromBranchId:
-          (json['from_branch_id'] as Map<String, dynamic>?)?['id'] as String?,
-      toBranchId:
-          (json['to_branch_id'] as Map<String, dynamic>?)?['id'] as String?,
-      fromBranchName:
-          (json['from_branch_id'] as Map<String, dynamic>?)?['name'],
-      toBranchName: (json['to_branch_id'] as Map<String, dynamic>?)?['name'],
+      fromBranchId: json['from_branch_id'] as String?,
+      toBranchId: json['to_branch_id'] as String?,
+      fromBranchName: json['from_branch_name'] as String?, // Read directly from top-level
+      toBranchName: json['to_branch_name'] as String?, // Read directly from top-level
       productItems:
           (json['inventory_transactions'] as List?)
               ?.map(
@@ -73,6 +70,8 @@ class DeliveryNote {
       'delivery_date': deliveryDate.toIso8601String().split('T').first,
       'from_branch_id': fromBranchId,
       'to_branch_id': toBranchId,
+      'from_branch_name': fromBranchName, // Add to toJson
+      'to_branch_name': toBranchName, // Add to toJson
     };
   }
 }
