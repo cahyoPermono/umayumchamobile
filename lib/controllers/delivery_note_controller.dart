@@ -38,9 +38,8 @@ class DeliveryNoteController extends GetxController {
       final response = await supabase
           .from('distinct_to_branch_names') // Query the new view
           .select('to_branch_name');
-      distinctToBranchNames.value = (response as List)
-          .map((e) => e['to_branch_name'] as String)
-          .toList();
+      distinctToBranchNames.value =
+          (response as List).map((e) => e['to_branch_name'] as String).toList();
     } catch (e) {
       debugPrint('Error fetching distinct branch names: ${e.toString()}');
     }
@@ -60,10 +59,16 @@ class DeliveryNoteController extends GetxController {
         query = query.eq('to_branch_name', selectedToBranchName.value!);
       }
       if (selectedFromDate.value != null) {
-        query = query.gte('delivery_date', selectedFromDate.value!.toIso8601String().split('T').first);
+        query = query.gte(
+          'delivery_date',
+          selectedFromDate.value!.toIso8601String().split('T').first,
+        );
       }
       if (selectedToDate.value != null) {
-        query = query.lte('delivery_date', selectedToDate.value!.toIso8601String().split('T').first);
+        query = query.lte(
+          'delivery_date',
+          selectedToDate.value!.toIso8601String().split('T').first,
+        );
       }
       final response = await query.order('created_at', ascending: false);
 
@@ -92,18 +97,20 @@ class DeliveryNoteController extends GetxController {
       isLoading.value = true;
 
       // Fetch branch names before inserting into delivery_notes
-      final fromBranchResponse = await supabase
-          .from('branches')
-          .select('name')
-          .eq('id', fromBranchId)
-          .single();
+      final fromBranchResponse =
+          await supabase
+              .from('branches')
+              .select('name')
+              .eq('id', fromBranchId)
+              .single();
       final String fromBranchName = fromBranchResponse['name'] as String;
 
-      final toBranchResponse = await supabase
-          .from('branches')
-          .select('name')
-          .eq('id', toBranchId)
-          .single();
+      final toBranchResponse =
+          await supabase
+              .from('branches')
+              .select('name')
+              .eq('id', toBranchId)
+              .single();
       final String toBranchName = toBranchResponse['name'] as String;
 
       // 1. Create the delivery note entry
@@ -188,30 +195,35 @@ class DeliveryNoteController extends GetxController {
       isLoading.value = true;
 
       // Fetch branch names (if needed, though they should be consistent for update)
-      final fromBranchResponse = await supabase
-          .from('branches')
-          .select('name')
-          .eq('id', fromBranchId)
-          .single();
+      final fromBranchResponse =
+          await supabase
+              .from('branches')
+              .select('name')
+              .eq('id', fromBranchId)
+              .single();
       final String fromBranchName = fromBranchResponse['name'] as String;
 
-      final toBranchResponse = await supabase
-          .from('branches')
-          .select('name')
-          .eq('id', toBranchId)
-          .single();
+      final toBranchResponse =
+          await supabase
+              .from('branches')
+              .select('name')
+              .eq('id', toBranchId)
+              .single();
       final String toBranchName = toBranchResponse['name'] as String;
 
       // 1. Update the delivery note entry
-      await supabase.from('delivery_notes').update({
-        'customer_name': customerName ?? 'Internal Transfer',
-        'destination_address': destinationAddress ?? 'Internal Transfer',
-        'delivery_date': deliveryDate.toIso8601String().split('T').first,
-        'from_branch_id': fromBranchId,
-        'to_branch_id': toBranchId,
-        'from_branch_name': fromBranchName,
-        'to_branch_name': toBranchName,
-      }).eq('id', deliveryNoteId);
+      await supabase
+          .from('delivery_notes')
+          .update({
+            'customer_name': customerName ?? 'Internal Transfer',
+            'destination_address': destinationAddress ?? 'Internal Transfer',
+            'delivery_date': deliveryDate.toIso8601String().split('T').first,
+            'from_branch_id': fromBranchId,
+            'to_branch_id': toBranchId,
+            'from_branch_name': fromBranchName,
+            'to_branch_name': toBranchName,
+          })
+          .eq('id', deliveryNoteId);
 
       // 2. Reverse the impact of original transactions and delete them
       final originalProductTransactions = await supabase
@@ -249,10 +261,13 @@ class DeliveryNoteController extends GetxController {
           quantityChange: transaction['quantity_change'].abs(),
           reason: 'Delivery Note Update (Reversal)',
           deliveryNoteId: deliveryNoteId,
-          fromBranchId: transaction['to_branch_id'], // Swapped for reversal
-          toBranchId: transaction['from_branch_id'], // Swapped for reversal
-          fromBranchName: transaction['to_branch_name'], // Swapped for reversal
-          toBranchName: transaction['from_branch_name'], // Swapped for reversal
+          fromBranchId: transaction['branch_source_id'], // Swapped for reversal
+          toBranchId:
+              transaction['branch_destination_id'], // Swapped for reversal
+          fromBranchName:
+              transaction['branch_source_name'], // Swapped for reversal
+          toBranchName:
+              transaction['branch_destination_name'], // Swapped for reversal
         );
       }
       await supabase
