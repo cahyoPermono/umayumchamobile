@@ -1,9 +1,16 @@
 import 'package:flutter/foundation.dart'; // For debugPrint
+import 'package:flutter/services.dart'; // For rootBundle
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha/controllers/consumable_controller.dart';
 import 'package:umayumcha/controllers/inventory_controller.dart';
 import 'package:umayumcha/models/delivery_note_model.dart';
+import 'package:excel/excel.dart';
+import 'package:pdf/pdf.dart' as pdf_colors; // New alias for PdfColors
+import 'package:pdf/widgets.dart' as pdf_lib; // Changed alias to pdf_lib
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'package:intl/intl.dart';
 
 class DeliveryNoteController extends GetxController {
   final SupabaseClient supabase = Supabase.instance.client;
@@ -232,18 +239,16 @@ class DeliveryNoteController extends GetxController {
       debugPrint('Original transactions reversed and deleted.');
 
       // 3. Update the delivery note entry itself
-      final fromBranchResponse =
-          await supabase
-              .from('branches')
-              .select('name')
-              .eq('id', fromBranchId)
-              .single();
-      final toBranchResponse =
-          await supabase
-              .from('branches')
-              .select('name')
-              .eq('id', toBranchId)
-              .single();
+      final fromBranchResponse = await supabase
+          .from('branches')
+          .select('name')
+          .eq('id', fromBranchId)
+          .single();
+      final toBranchResponse = await supabase
+          .from('branches')
+          .select('name')
+          .eq('id', toBranchId)
+          .single();
       final String fromBranchName = fromBranchResponse['name'];
       final String toBranchName = toBranchResponse['name'];
 
@@ -312,6 +317,183 @@ class DeliveryNoteController extends GetxController {
       Get.snackbar('Error', 'Failed to update delivery note: ${e.toString()}');
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> exportToExcel({
+    required DeliveryNote deliveryNote,
+    required String toBranchName,
+    required List<Map<String, dynamic>> items,
+  }) async {
+    try {
+      final excel = Excel.createExcel();
+      final sheet = excel['Delivery Note'];
+
+      
+
+      // Header
+      sheet.merge(CellIndex.indexByString('A5'), CellIndex.indexByString('F5'));
+      sheet.cell(CellIndex.indexByString('A5')).value = 'Umayumcha Head Quarter';
+      sheet.cell(CellIndex.indexByString('A5')).cellStyle = CellStyle(
+        horizontalAlign: HorizontalAlign.Left,
+        bold: true,
+      );
+
+      sheet.merge(CellIndex.indexByString('A6'), CellIndex.indexByString('F6'));
+      sheet.cell(CellIndex.indexByString('A6')).value = 'Jalan Dirgantara 4 no A5/11';
+      sheet.cell(CellIndex.indexByString('A6')).cellStyle = CellStyle(
+        horizontalAlign: HorizontalAlign.Left,
+      );
+
+      sheet.merge(CellIndex.indexByString('A7'), CellIndex.indexByString('F7'));
+      sheet.cell(CellIndex.indexByString('A7')).value = 'Sawojajar Malang';
+      sheet.cell(CellIndex.indexByString('A7')).cellStyle = CellStyle(
+        horizontalAlign: HorizontalAlign.Left,
+      );
+
+      sheet.cell(CellIndex.indexByString('A9')).value = 'No. Surat Jalan:';
+      sheet.cell(CellIndex.indexByString('B9')).value = deliveryNote.id;
+
+      sheet.cell(CellIndex.indexByString('A10')).value = 'Kepada:';
+      sheet.cell(CellIndex.indexByString('B10')).value = toBranchName;
+
+      sheet.cell(CellIndex.indexByString('A11')).value = 'Tanggal:';
+      sheet.cell(CellIndex.indexByString('B11')).value = DateFormat('dd-MM-yyyy').format(deliveryNote.deliveryDate);
+
+      // Items Table Header
+      sheet.cell(CellIndex.indexByString('A13')).value = 'Items';
+      sheet.cell(CellIndex.indexByString('B13')).value = 'Quantity';
+      sheet.cell(CellIndex.indexByString('C13')).value = 'Check';
+      sheet.cell(CellIndex.indexByString('D13')).value = 'Reason';
+
+      // Apply bold style to table headers
+      final headerStyle = CellStyle(
+        bold: true,
+        horizontalAlign: HorizontalAlign.Center,
+        verticalAlign: VerticalAlign.Center,
+      );
+      sheet.cell(CellIndex.indexByString('A13')).cellStyle = headerStyle;
+      sheet.cell(CellIndex.indexByString('B13')).cellStyle = headerStyle;
+      sheet.cell(CellIndex.indexByString('C13')).cellStyle = headerStyle;
+      sheet.cell(CellIndex.indexByString('D13')).cellStyle = headerStyle;
+
+      // Items Table Data
+      int rowIndex = 14;
+      for (var item in items) {
+        sheet.cell(CellIndex.indexByString('A$rowIndex')).value = item['name'];
+        sheet.cell(CellIndex.indexByString('B$rowIndex')).value = item['quantity'];
+        sheet.cell(CellIndex.indexByString('C$rowIndex')).value = '✓'; // Auto checklist
+        sheet.cell(CellIndex.indexByString('D$rowIndex')).value = ''; // Reason column
+        rowIndex++;
+      }
+
+      // Signatures
+      rowIndex += 3; // Add some space
+      sheet.cell(CellIndex.indexByString('A$rowIndex')).value = 'Pengirim';
+      sheet.cell(CellIndex.indexByString('D$rowIndex')).value = 'Penerima';
+
+      rowIndex += 4; // Space for signature
+      sheet.cell(CellIndex.indexByString('A$rowIndex')).value = '(____________)';
+      sheet.cell(CellIndex.indexByString('D$rowIndex')).value = '(____________)';
+
+      final String dir = (await getApplicationDocumentsDirectory()).path;
+      final String path = '$dir/DeliveryNote_${deliveryNote.id}.xlsx';
+      final List<int>? fileBytes = excel.save();
+      if (fileBytes != null) {
+        File(path)
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(fileBytes);
+        Get.snackbar('Success', 'Excel exported to $path');
+        // Optionally open the file
+        // OpenFile.open(path);
+      }
+    } catch (e) {
+      debugPrint('Error exporting to Excel: ${e.toString()}');
+      Get.snackbar('Error', 'Failed to export Excel: ${e.toString()}');
+    }
+  }
+
+  Future<void> exportToPdf({
+    required DeliveryNote deliveryNote,
+    required String toBranchName,
+    required List<Map<String, dynamic>> items,
+  }) async {
+    try {
+      final pdf_lib.Document pdf = pdf_lib.Document();
+
+      // Load logo
+      final ByteData logoBytes = await rootBundle.load('assets/images/logo.png');
+      final Uint8List logoUint8List = logoBytes.buffer.asUint8List();
+      final pdf_lib.MemoryImage logoImage = pdf_lib.MemoryImage(logoUint8List);
+
+      pdf.addPage(
+        pdf_lib.Page(
+          build: (pdf_lib.Context context) {
+            return pdf_lib.Column(
+              crossAxisAlignment: pdf_lib.CrossAxisAlignment.start,
+              children: [
+                pdf_lib.Image(logoImage, width: 150, height: 50),
+                pdf_lib.SizedBox(height: 20),
+                pdf_lib.Text(
+                  'Umayumcha Head Quarter',
+                  style: pdf_lib.TextStyle(fontWeight: pdf_lib.FontWeight.bold),
+                ),
+                pdf_lib.Text('Jalan Dirgantara 4 no A5/11'),
+                pdf_lib.Text('Sawojajar Malang'),
+                pdf_lib.SizedBox(height: 20),
+                pdf_lib.Text('No. Surat Jalan: ${deliveryNote.id}'),
+                pdf_lib.Text('Kepada: $toBranchName'),
+                pdf_lib.Text('Tanggal: ${DateFormat('dd-MM-yyyy').format(deliveryNote.deliveryDate)}'),
+                pdf_lib.SizedBox(height: 20),
+                pdf_lib.TableHelper.fromTextArray( // Changed to TableHelper
+                  headers: ['Items', 'Quantity', 'Check', 'Reason'],
+                  data: items.map((item) => [
+                    item['name'],
+                    item['quantity'].toString(),
+                    '✓', // Auto checklist
+                    '', // Reason
+                  ]).toList(),
+                  border: pdf_lib.TableBorder.all(color: pdf_colors.PdfColors.black), // Corrected PdfColors
+                  headerStyle: pdf_lib.TextStyle(fontWeight: pdf_lib.FontWeight.bold),
+                  cellAlignment: pdf_lib.Alignment.centerLeft,
+                  cellPadding: const pdf_lib.EdgeInsets.all(5),
+                ),
+                pdf_lib.SizedBox(height: 50),
+                pdf_lib.Row(
+                  mainAxisAlignment: pdf_lib.MainAxisAlignment.spaceAround,
+                  children: [
+                    pdf_lib.Column(
+                      children: [
+                        pdf_lib.Text('Pengirim'),
+                        pdf_lib.SizedBox(height: 40),
+                        pdf_lib.Text('(____________)'),
+                      ],
+                    ),
+                    pdf_lib.Column(
+                      children: [
+                        pdf_lib.Text('Penerima'),
+                        pdf_lib.SizedBox(height: 40),
+                        pdf_lib.Text('(____________)'),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
+      );
+
+      final String dir = (await getApplicationDocumentsDirectory()).path;
+      final String path = '$dir/DeliveryNote_${deliveryNote.id}.pdf';
+      final File file = File(path);
+      await file.writeAsBytes(await pdf.save());
+      Get.snackbar('Success', 'PDF exported to $path');
+      // Optionally open the file
+      // OpenFile.open(path);
+    } catch (e) {
+      debugPrint('Error exporting to PDF: ${e.toString()}');
+      Get.snackbar('Error', 'Failed to export PDF: ${e.toString()}');
     }
   }
 }
