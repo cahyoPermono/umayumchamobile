@@ -279,13 +279,15 @@ class InventoryController extends GetxController {
         finalToBranchName = toBranchResponse['name'] as String;
       }
 
+      final int finalQuantityChange = type == 'out' ? -quantityChange : quantityChange;
+
       // The database trigger 'on_branch_inventory_transaction' handles all stock updates.
       // This function's only responsibility is to insert the transaction record.
       await supabase.from('inventory_transactions').insert({
         'product_id': productId,
         'product_name': productName,
         'type': type,
-        'quantity_change': quantityChange, // The trigger expects a positive integer.
+        'quantity_change': finalQuantityChange, // Now correctly signed (negative for 'out')
         'reason': reason,
         'delivery_note_id': deliveryNoteId,
         'from_branch_id': fromBranchId,
