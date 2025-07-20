@@ -51,10 +51,7 @@ class InventoryController extends GetxController {
         updateData['updated_by'] = currentUserId as dynamic;
       }
 
-      await supabase
-          .from('products')
-          .update(updateData)
-          .eq('id', product.id!);
+      await supabase.from('products').update(updateData).eq('id', product.id!);
 
       fetchBranchProducts(); // Refresh the list
       return true; // Return true on success
@@ -238,11 +235,18 @@ class InventoryController extends GetxController {
 
   Future<void> reverseTransaction(String transactionId) async {
     try {
-      final transaction = await supabase
+      final transaction =
+          await supabase
+              .from('inventory_transactions')
+              .select('*')
+              .eq('id', transactionId)
+              .single();
+
+      // update transaction set deliveryNoteId to null
+      await supabase
           .from('inventory_transactions')
-          .select('*')
-          .eq('id', transactionId)
-          .single();
+          .update({'delivery_note_id': null})
+          .eq('id', transactionId);
 
       final String productId = transaction['product_id'];
       final String type = transaction['type'];
@@ -271,8 +275,13 @@ class InventoryController extends GetxController {
       );
       debugPrint('Reversed inventory transaction $transactionId');
     } catch (e) {
-      debugPrint('Error reversing inventory transaction $transactionId: ${e.toString()}');
-      Get.snackbar('Error', 'Failed to reverse inventory transaction: ${e.toString()}');
+      debugPrint(
+        'Error reversing inventory transaction $transactionId: ${e.toString()}',
+      );
+      Get.snackbar(
+        'Error',
+        'Failed to reverse inventory transaction: ${e.toString()}',
+      );
       rethrow; // Rethrow to allow calling function to catch and handle
     }
   }
@@ -292,35 +301,39 @@ class InventoryController extends GetxController {
       isLoading.value = true;
 
       // Fetch product name
-      final productResponse = await supabase
-          .from('products')
-          .select('name')
-          .eq('id', productId)
-          .single();
+      final productResponse =
+          await supabase
+              .from('products')
+              .select('name')
+              .eq('id', productId)
+              .single();
       final productName = productResponse['name'] as String;
 
       // Use provided branch names, or fetch them if only IDs are available.
       String? finalFromBranchName = fromBranchName;
       if (fromBranchId != null && finalFromBranchName == null) {
-        final fromBranchResponse = await supabase
-            .from('branches')
-            .select('name')
-            .eq('id', fromBranchId)
-            .single();
+        final fromBranchResponse =
+            await supabase
+                .from('branches')
+                .select('name')
+                .eq('id', fromBranchId)
+                .single();
         finalFromBranchName = fromBranchResponse['name'] as String;
       }
 
       String? finalToBranchName = toBranchName;
       if (toBranchId != null && finalToBranchName == null) {
-        final toBranchResponse = await supabase
-            .from('branches')
-            .select('name')
-            .eq('id', toBranchId)
-            .single();
+        final toBranchResponse =
+            await supabase
+                .from('branches')
+                .select('name')
+                .eq('id', toBranchId)
+                .single();
         finalToBranchName = toBranchResponse['name'] as String;
       }
 
-      final int finalQuantityChange = type == 'out' ? -quantityChange : quantityChange;
+      final int finalQuantityChange =
+          type == 'out' ? -quantityChange : quantityChange;
 
       // The database trigger 'on_branch_inventory_transaction' handles all stock updates.
       // This function's only responsibility is to insert the transaction record.
@@ -328,7 +341,8 @@ class InventoryController extends GetxController {
         'product_id': productId,
         'product_name': productName,
         'type': type,
-        'quantity_change': finalQuantityChange, // Now correctly signed (negative for 'out')
+        'quantity_change':
+            finalQuantityChange, // Now correctly signed (negative for 'out')
         'reason': reason,
         'delivery_note_id': deliveryNoteId,
         'from_branch_id': fromBranchId,
@@ -345,10 +359,7 @@ class InventoryController extends GetxController {
       return true; // Return true on success
     } catch (e) {
       debugPrint('Error adding transaction: ${e.toString()}');
-      Get.snackbar(
-        'Error',
-        'Failed to add transaction: ${e.toString()}',
-      );
+      Get.snackbar('Error', 'Failed to add transaction: ${e.toString()}');
       return false; // Return false on failure
     } finally {
       isLoading.value = false;
