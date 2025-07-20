@@ -280,11 +280,14 @@ class InventoryController extends GetxController {
         toBranchName = toBranchResponse['name'] as String;
       }
 
+      // Determine the actual quantity change based on type
+      final int finalQuantityChange = type == 'out' ? -quantityChange : quantityChange;
+
       await supabase.from('inventory_transactions').insert({
         'product_id': productId,
         'product_name': productName, // Add product_name
         'type': type,
-        'quantity_change': quantityChange,
+        'quantity_change': finalQuantityChange,
         'reason': reason,
         'delivery_note_id': deliveryNoteId,
         'from_branch_id': fromBranchId,
