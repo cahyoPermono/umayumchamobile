@@ -20,9 +20,17 @@ class DeliveryNoteController extends GetxController {
 
   @override
   void onInit() {
-    fetchDeliveryNotes();
+    _initializeFiltersAndFetch();
     fetchDistinctToBranchNames(); // Fetch distinct branch names on init
     super.onInit();
+  }
+
+  void _initializeFiltersAndFetch() {
+    // Set default fromDate to yesterday
+    selectedFromDate.value = DateTime.now().subtract(const Duration(days: 1));
+    // Set default toDate to today
+    selectedToDate.value = DateTime.now();
+    fetchDeliveryNotes(); // Fetch notes with initial filters
   }
 
   Future<void> fetchDistinctToBranchNames() async {

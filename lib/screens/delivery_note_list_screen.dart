@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:umayumcha/controllers/delivery_note_controller.dart';
+import 'package:umayumcha/screens/delivery_note_form_screen.dart';
 
 class DeliveryNoteListScreen extends StatelessWidget {
   const DeliveryNoteListScreen({super.key});
@@ -47,6 +48,7 @@ class DeliveryNoteListScreen extends StatelessWidget {
                     hint: const Text('All Branches'),
                     onChanged: (newValue) {
                       controller.selectedToBranchName.value = newValue;
+                      controller.fetchDeliveryNotes(); // Auto-apply filter
                     },
                     items: [
                       const DropdownMenuItem<String?>(
@@ -99,6 +101,8 @@ class DeliveryNoteListScreen extends StatelessWidget {
                             );
                             if (pickedDate != null) {
                               controller.selectedFromDate.value = pickedDate;
+                              controller
+                                  .fetchDeliveryNotes(); // Auto-apply filter
                             }
                           },
                         ),
@@ -137,6 +141,8 @@ class DeliveryNoteListScreen extends StatelessWidget {
                             );
                             if (pickedDate != null) {
                               controller.selectedToDate.value = pickedDate;
+                              controller
+                                  .fetchDeliveryNotes(); // Auto-apply filter
                             }
                           },
                         ),
@@ -145,47 +151,6 @@ class DeliveryNoteListScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-
-                // Filter Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          controller.fetchDeliveryNotes();
-                        },
-                        icon: const Icon(Icons.filter_list),
-                        label: const Text('Apply Filters'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          controller.selectedToBranchName.value = null;
-                          controller.selectedFromDate.value = null;
-                          controller.selectedToDate.value = null;
-                          controller.fetchDeliveryNotes();
-                        },
-                        icon: const Icon(Icons.clear),
-                        label: const Text('Clear Filters'),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -375,6 +340,12 @@ class DeliveryNoteListScreen extends StatelessWidget {
             }),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.to(() => const DeliveryNoteFormScreen());
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
