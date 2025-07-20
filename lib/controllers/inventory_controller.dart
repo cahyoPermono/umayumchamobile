@@ -236,6 +236,47 @@ class InventoryController extends GetxController {
     }
   }
 
+  Future<void> reverseTransaction(String transactionId) async {
+    try {
+      final transaction = await supabase
+          .from('inventory_transactions')
+          .select('*')
+          .eq('id', transactionId)
+          .single();
+
+      final String productId = transaction['product_id'];
+      final String type = transaction['type'];
+      final int quantityChange = transaction['quantity_change'].abs();
+      final String? fromBranchId = transaction['from_branch_id'];
+      final String? toBranchId = transaction['to_branch_id'];
+      final String? fromBranchName = transaction['from_branch_name'];
+      final String? toBranchName = transaction['to_branch_name'];
+
+      // Reverse the transaction type and branches
+      final String reversedType = type == 'in' ? 'out' : 'in';
+      final String? reversedFromBranchId = toBranchId;
+      final String? reversedToBranchId = fromBranchId;
+      final String? reversedFromBranchName = toBranchName;
+      final String? reversedToBranchName = fromBranchName;
+
+      await addTransaction(
+        productId: productId,
+        type: reversedType,
+        quantityChange: quantityChange,
+        reason: 'Reversal of transaction $transactionId',
+        fromBranchId: reversedFromBranchId,
+        toBranchId: reversedToBranchId,
+        fromBranchName: reversedFromBranchName,
+        toBranchName: reversedToBranchName,
+      );
+      debugPrint('Reversed inventory transaction $transactionId');
+    } catch (e) {
+      debugPrint('Error reversing inventory transaction $transactionId: ${e.toString()}');
+      Get.snackbar('Error', 'Failed to reverse inventory transaction: ${e.toString()}');
+      rethrow; // Rethrow to allow calling function to catch and handle
+    }
+  }
+
   Future<bool> addTransaction({
     required String productId,
     required String type,

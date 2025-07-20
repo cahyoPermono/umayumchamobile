@@ -236,6 +236,62 @@ class ConsumableController extends GetxController {
     }
   }
 
+  Future<void> reverseConsumableTransaction(int transactionId) async {
+    try {
+      final transaction =
+          await _supabase
+              .from('consumable_transactions')
+              .select('*')
+              .eq('id', transactionId)
+              .single();
+
+      // update transaction set deliveryNoteId to null
+      await _supabase
+          .from('consumable_transactions')
+          .update({'delivery_note_id': null})
+          .eq('id', transactionId);
+
+      final int consumableId = transaction['consumable_id'];
+      final String consumableName = transaction['consumable_name'];
+      final int quantityChange = transaction['quantity_change'].abs();
+      final String type = transaction['type'];
+      final String? branchSourceId = transaction['branch_source_id'];
+      final String? branchDestinationId = transaction['branch_destination_id'];
+      final String? branchSourceName = transaction['branch_source_name'];
+      final String? branchDestinationName =
+          transaction['branch_destination_name'];
+
+      // Reverse the transaction type and branches
+      final String reversedType = type == 'in' ? 'out' : 'in';
+      final String? reversedBranchSourceId = branchDestinationId;
+      final String? reversedBranchDestinationId = branchSourceId;
+      final String? reversedBranchSourceName = branchDestinationName;
+      final String? reversedBranchDestinationName = branchSourceName;
+
+      await _logTransaction(
+        consumableId: consumableId,
+        consumableName: consumableName,
+        quantityChange: quantityChange,
+        type: reversedType,
+        reason: 'Reversal of transaction $transactionId',
+        branchSourceId: reversedBranchSourceId,
+        branchSourceName: reversedBranchSourceName,
+        branchDestinationId: reversedBranchDestinationId,
+        branchDestinationName: reversedBranchDestinationName,
+      );
+      log('Reversed consumable transaction $transactionId');
+    } catch (e) {
+      log(
+        'Error reversing consumable transaction $transactionId: ${e.toString()}',
+      );
+      Get.snackbar(
+        'Error',
+        'Failed to reverse consumable transaction: ${e.toString()}',
+      );
+      rethrow; // Rethrow to allow calling function to catch and handle
+    }
+  }
+
   Future<void> addConsumableTransactionFromDeliveryNote({
     required int consumableId,
     required String consumableName,

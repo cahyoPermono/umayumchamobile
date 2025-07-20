@@ -137,13 +137,14 @@ class DeliveryNoteController extends GetxController {
       // 2. Create transactions for each item in the delivery note
       for (var item in items) {
         final String itemType = item['type'];
-        final String itemId = item['id'];
+        final dynamic itemId =
+            item['id']; // Use dynamic to handle both int and String
         final String itemName = item['name'];
         final int quantity = item['quantity'];
 
         if (itemType == 'product') {
           await inventoryController.addTransaction(
-            productId: itemId,
+            productId: itemId as String, // Cast to String for products
             type: 'out',
             quantityChange: quantity,
             reason: 'Delivery Note: $customerName',
@@ -156,7 +157,7 @@ class DeliveryNoteController extends GetxController {
           debugPrint('Transaction added for product $itemName');
         } else if (itemType == 'consumable') {
           await consumableController.addConsumableTransactionFromDeliveryNote(
-            consumableId: int.parse(itemId),
+            consumableId: int.parse(itemId), // Cast to int for consumables
             consumableName: itemName,
             quantityChange: quantity,
             reason: 'Delivery Note: $customerName',
@@ -194,24 +195,58 @@ class DeliveryNoteController extends GetxController {
     try {
       isLoading.value = true;
 
-      // Fetch branch names (if needed, though they should be consistent for update)
+      // --- Start a transaction
+      // Note: Supabase Flutter doesn't have a direct transaction API like node.js
+      // Instead, we'll perform the operations and handle rollbacks manually on error.
+
+      // 1. Reverse and delete original product transactions
+      final originalProductTransactions = await supabase
+          .from('inventory_transactions')
+          .select()
+          .eq('delivery_note_id', deliveryNoteId);
+
+      for (final transaction in originalProductTransactions) {
+        await inventoryController.reverseTransaction(transaction['id']);
+      }
+      await supabase
+          .from('inventory_transactions')
+          .delete()
+          .eq('delivery_note_id', deliveryNoteId);
+
+      // 2. Reverse and delete original consumable transactions
+      final originalConsumableTransactions = await supabase
+          .from('consumable_transactions')
+          .select()
+          .eq('delivery_note_id', deliveryNoteId);
+
+      for (final transaction in originalConsumableTransactions) {
+        await consumableController.reverseConsumableTransaction(
+          transaction['id'],
+        );
+      }
+      await supabase
+          .from('consumable_transactions')
+          .delete()
+          .eq('delivery_note_id', deliveryNoteId);
+
+      debugPrint('Original transactions reversed and deleted.');
+
+      // 3. Update the delivery note entry itself
       final fromBranchResponse =
           await supabase
               .from('branches')
               .select('name')
               .eq('id', fromBranchId)
               .single();
-      final String fromBranchName = fromBranchResponse['name'] as String;
-
       final toBranchResponse =
           await supabase
               .from('branches')
               .select('name')
               .eq('id', toBranchId)
               .single();
-      final String toBranchName = toBranchResponse['name'] as String;
+      final String fromBranchName = fromBranchResponse['name'];
+      final String toBranchName = toBranchResponse['name'];
 
-      // 1. Update the delivery note entry
       await supabase
           .from('delivery_notes')
           .update({
@@ -225,68 +260,17 @@ class DeliveryNoteController extends GetxController {
           })
           .eq('id', deliveryNoteId);
 
-      // 2. Reverse the impact of original transactions and delete them
-      final originalProductTransactions = await supabase
-          .from('inventory_transactions')
-          .select('*')
-          .eq('delivery_note_id', deliveryNoteId);
-
-      for (var transaction in originalProductTransactions) {
-        await inventoryController.addTransaction(
-          productId: transaction['product_id'],
-          type: transaction['type'] == 'out' ? 'in' : 'out', // Reverse type
-          quantityChange: transaction['quantity_change'].abs(),
-          reason: 'Delivery Note Update (Reversal)',
-          deliveryNoteId: deliveryNoteId,
-          fromBranchId: transaction['to_branch_id'], // Swapped for reversal
-          toBranchId: transaction['from_branch_id'], // Swapped for reversal
-          fromBranchName: transaction['to_branch_name'], // Swapped for reversal
-          toBranchName: transaction['from_branch_name'], // Swapped for reversal
-        );
-      }
-      await supabase
-          .from('inventory_transactions')
-          .delete()
-          .eq('delivery_note_id', deliveryNoteId);
-
-      final originalConsumableTransactions = await supabase
-          .from('consumable_transactions')
-          .select('*')
-          .eq('delivery_note_id', deliveryNoteId);
-
-      for (var transaction in originalConsumableTransactions) {
-        await consumableController.addConsumableTransactionFromDeliveryNote(
-          consumableId: transaction['consumable_id'],
-          consumableName: transaction['consumable_name'],
-          quantityChange: transaction['quantity_change'].abs(),
-          reason: 'Delivery Note Update (Reversal)',
-          deliveryNoteId: deliveryNoteId,
-          fromBranchId: transaction['branch_source_id'], // Swapped for reversal
-          toBranchId:
-              transaction['branch_destination_id'], // Swapped for reversal
-          fromBranchName:
-              transaction['branch_source_name'], // Swapped for reversal
-          toBranchName:
-              transaction['branch_destination_name'], // Swapped for reversal
-        );
-      }
-      await supabase
-          .from('consumable_transactions')
-          .delete()
-          .eq('delivery_note_id', deliveryNoteId);
-
-      debugPrint('Original transactions reversed and deleted.');
-
-      // 3. Create new transactions for each item in the updated delivery note
+      // 4. Create new transactions for the updated items
       for (var item in newItems) {
         final String itemType = item['type'];
-        final String itemId = item['id'];
+        final dynamic itemId =
+            item['id']; // Use dynamic to handle both int and String
         final String itemName = item['name'];
         final int quantity = item['quantity'];
 
         if (itemType == 'product') {
           await inventoryController.addTransaction(
-            productId: itemId,
+            productId: itemId as String, // Cast to String for products
             type: 'out',
             quantityChange: quantity,
             reason: 'Delivery Note: ${customerName ?? 'Internal Transfer'}',
@@ -299,7 +283,7 @@ class DeliveryNoteController extends GetxController {
           debugPrint('New transaction added for product $itemName');
         } else if (itemType == 'consumable') {
           await consumableController.addConsumableTransactionFromDeliveryNote(
-            consumableId: int.parse(itemId),
+            consumableId: int.parse(itemId), // Cast to int for consumables
             consumableName: itemName,
             quantityChange: quantity,
             reason: 'Delivery Note: ${customerName ?? 'Internal Transfer'}',
@@ -313,11 +297,17 @@ class DeliveryNoteController extends GetxController {
         }
       }
 
-      // 4. Refresh the list
+      // --- If all operations are successful, commit
       fetchDeliveryNotes();
-      Get.back(); // Close the form screen
+      Get.back();
       Get.snackbar('Success', 'Delivery note updated successfully!');
     } catch (e) {
+      // --- If any error occurs, we should ideally roll back the changes.
+      // However, without a proper transaction block, a full rollback is complex.
+      // The reversal logic at the start helps, but if an error happens *after*
+      // reversal but *before* creating new items, the state is inconsistent.
+      // For now, we'll just show an error. A more robust solution would
+      // involve creating a stored procedure in Supabase for this entire update process.
       debugPrint('Error updating delivery note: ${e.toString()}');
       Get.snackbar('Error', 'Failed to update delivery note: ${e.toString()}');
     } finally {
