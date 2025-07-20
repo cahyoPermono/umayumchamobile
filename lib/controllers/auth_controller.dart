@@ -2,8 +2,6 @@ import 'package:flutter/material.dart'; // For debugPrint
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha/controllers/branch_controller.dart';
-import 'package:umayumcha/screens/dashboard_screen.dart';
-import 'package:umayumcha/screens/sign_in_screen.dart'; // For debugPrint
 import 'package:umayumcha/controllers/user_controller.dart';
 
 class AuthController extends GetxController {
@@ -37,7 +35,7 @@ class AuthController extends GetxController {
         if (!Get.find<UserController>().isCreatingUserByAdmin.value) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             debugPrint('AuthController: Navigating to Dashboard.');
-            Get.offAll(() => DashboardScreen());
+            Get.offAllNamed('/dashboard');
           });
         }
       } else {
@@ -48,7 +46,7 @@ class AuthController extends GetxController {
         userBranchId.value = null; // Clear branch ID on sign out
         WidgetsBinding.instance.addPostFrameCallback((_) {
           debugPrint('AuthController: Navigating to Sign In.');
-          Get.offAll(() => const SignInScreen());
+          Get.offAllNamed('/sign_in');
         });
       }
     });
