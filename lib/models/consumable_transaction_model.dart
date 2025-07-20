@@ -13,6 +13,7 @@ class ConsumableTransaction {
   final String? branchSourceName;
   final String? branchDestinationId;
   final String? branchDestinationName;
+  final String? deliveryNoteId; // New: delivery_note_id
 
   ConsumableTransaction({
     required this.id,
@@ -28,6 +29,7 @@ class ConsumableTransaction {
     this.branchSourceName,
     this.branchDestinationId,
     this.branchDestinationName,
+    this.deliveryNoteId, // New: delivery_note_id
   });
 
   factory ConsumableTransaction.fromJson(Map<String, dynamic> json) {
@@ -45,6 +47,7 @@ class ConsumableTransaction {
       branchSourceName: json['branch_source_name'] as String?,
       branchDestinationId: json['branch_destination_id'] as String?,
       branchDestinationName: json['branch_destination_name'] as String?,
+      deliveryNoteId: json['delivery_note_id'] as String?, // New: delivery_note_id
     );
   }
 
@@ -60,6 +63,7 @@ class ConsumableTransaction {
       'branch_source_name': branchSourceName,
       'branch_destination_id': branchDestinationId,
       'branch_destination_name': branchDestinationName,
+      'delivery_note_id': deliveryNoteId, // New: delivery_note_id
     };
   }
 }

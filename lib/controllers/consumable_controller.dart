@@ -202,6 +202,7 @@ class ConsumableController extends GetxController {
     String? branchSourceName,
     String? branchDestinationId,
     String? branchDestinationName,
+    String? deliveryNoteId, // New: deliveryNoteId
   }) async {
     try {
       await _supabase.from('consumable_transactions').insert({
@@ -214,6 +215,7 @@ class ConsumableController extends GetxController {
         'branch_source_name': branchSourceName,
         'branch_destination_id': branchDestinationId,
         'branch_destination_name': branchDestinationName,
+        'delivery_note_id': deliveryNoteId, // New: deliveryNoteId
       });
     } catch (e) {
       log('Error logging consumable transaction: $e');
@@ -253,6 +255,7 @@ class ConsumableController extends GetxController {
         reason: reason,
         branchSourceId: fromBranchId,
         branchDestinationId: toBranchId,
+        deliveryNoteId: deliveryNoteId, // Pass deliveryNoteId
       );
       fetchConsumables(); // Refresh the list
     } catch (e) {
