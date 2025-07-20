@@ -173,4 +173,140 @@ class DeliveryNoteController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<void> updateDeliveryNote({
+    required String deliveryNoteId,
+    String? customerName,
+    String? destinationAddress,
+    required DateTime deliveryDate,
+    required String fromBranchId,
+    required String toBranchId,
+    required List<Map<String, dynamic>> newItems,
+    required List<Map<String, dynamic>> originalItems,
+  }) async {
+    try {
+      isLoading.value = true;
+
+      // Fetch branch names (if needed, though they should be consistent for update)
+      final fromBranchResponse = await supabase
+          .from('branches')
+          .select('name')
+          .eq('id', fromBranchId)
+          .single();
+      final String fromBranchName = fromBranchResponse['name'] as String;
+
+      final toBranchResponse = await supabase
+          .from('branches')
+          .select('name')
+          .eq('id', toBranchId)
+          .single();
+      final String toBranchName = toBranchResponse['name'] as String;
+
+      // 1. Update the delivery note entry
+      await supabase.from('delivery_notes').update({
+        'customer_name': customerName ?? 'Internal Transfer',
+        'destination_address': destinationAddress ?? 'Internal Transfer',
+        'delivery_date': deliveryDate.toIso8601String().split('T').first,
+        'from_branch_id': fromBranchId,
+        'to_branch_id': toBranchId,
+        'from_branch_name': fromBranchName,
+        'to_branch_name': toBranchName,
+      }).eq('id', deliveryNoteId);
+
+      // 2. Reverse the impact of original transactions and delete them
+      final originalProductTransactions = await supabase
+          .from('inventory_transactions')
+          .select('*')
+          .eq('delivery_note_id', deliveryNoteId);
+
+      for (var transaction in originalProductTransactions) {
+        await inventoryController.addTransaction(
+          productId: transaction['product_id'],
+          type: transaction['type'] == 'out' ? 'in' : 'out', // Reverse type
+          quantityChange: transaction['quantity_change'],
+          reason: 'Delivery Note Update (Reversal)',
+          deliveryNoteId: deliveryNoteId,
+          fromBranchId: transaction['to_branch_id'], // Swapped for reversal
+          toBranchId: transaction['from_branch_id'], // Swapped for reversal
+          fromBranchName: transaction['to_branch_name'], // Swapped for reversal
+          toBranchName: transaction['from_branch_name'], // Swapped for reversal
+        );
+      }
+      await supabase
+          .from('inventory_transactions')
+          .delete()
+          .eq('delivery_note_id', deliveryNoteId);
+
+      final originalConsumableTransactions = await supabase
+          .from('consumable_transactions')
+          .select('*')
+          .eq('delivery_note_id', deliveryNoteId);
+
+      for (var transaction in originalConsumableTransactions) {
+        await consumableController.addConsumableTransactionFromDeliveryNote(
+          consumableId: transaction['consumable_id'],
+          consumableName: transaction['consumable_name'],
+          quantityChange: transaction['quantity_change'],
+          reason: 'Delivery Note Update (Reversal)',
+          deliveryNoteId: deliveryNoteId,
+          fromBranchId: transaction['to_branch_id'], // Swapped for reversal
+          toBranchId: transaction['from_branch_id'], // Swapped for reversal
+          fromBranchName: transaction['to_branch_name'], // Swapped for reversal
+          toBranchName: transaction['from_branch_name'], // Swapped for reversal
+        );
+      }
+      await supabase
+          .from('consumable_transactions')
+          .delete()
+          .eq('delivery_note_id', deliveryNoteId);
+
+      debugPrint('Original transactions reversed and deleted.');
+
+      // 3. Create new transactions for each item in the updated delivery note
+      for (var item in newItems) {
+        final String itemType = item['type'];
+        final String itemId = item['id'];
+        final String itemName = item['name'];
+        final int quantity = item['quantity'];
+
+        if (itemType == 'product') {
+          await inventoryController.addTransaction(
+            productId: itemId,
+            type: 'out',
+            quantityChange: quantity,
+            reason: 'Delivery Note: ${customerName ?? 'Internal Transfer'}',
+            deliveryNoteId: deliveryNoteId,
+            fromBranchId: fromBranchId,
+            toBranchId: toBranchId,
+            fromBranchName: fromBranchName,
+            toBranchName: toBranchName,
+          );
+          debugPrint('New transaction added for product $itemName');
+        } else if (itemType == 'consumable') {
+          await consumableController.addConsumableTransactionFromDeliveryNote(
+            consumableId: int.parse(itemId),
+            consumableName: itemName,
+            quantityChange: quantity,
+            reason: 'Delivery Note: ${customerName ?? 'Internal Transfer'}',
+            deliveryNoteId: deliveryNoteId,
+            fromBranchId: fromBranchId,
+            toBranchId: toBranchId,
+            fromBranchName: fromBranchName,
+            toBranchName: toBranchName,
+          );
+          debugPrint('New transaction added for consumable $itemName');
+        }
+      }
+
+      // 4. Refresh the list
+      fetchDeliveryNotes();
+      Get.back(); // Close the form screen
+      Get.snackbar('Success', 'Delivery note updated successfully!');
+    } catch (e) {
+      debugPrint('Error updating delivery note: ${e.toString()}');
+      Get.snackbar('Error', 'Failed to update delivery note: ${e.toString()}');
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

@@ -8,6 +8,7 @@ import 'package:umayumcha/models/branch_product_model.dart'; // Import BranchPro
 import 'package:umayumcha/controllers/consumable_controller.dart'; // New: Import ConsumableController
 import 'package:umayumcha/models/consumable_model.dart'; // New: Import Consumable model
 import 'package:umayumcha/widgets/item_selection_dialog.dart'; // New: Import ItemSelectionDialog
+import 'package:umayumcha/models/delivery_note_model.dart'; // Import DeliveryNote model
 
 // Helper class for selectable items (Moved to top-level)
 class SelectableItem {
@@ -25,7 +26,8 @@ class SelectableItem {
 }
 
 class DeliveryNoteFormScreen extends StatefulWidget {
-  const DeliveryNoteFormScreen({super.key});
+  final DeliveryNote? deliveryNote;
+  const DeliveryNoteFormScreen({super.key, this.deliveryNote});
 
   @override
   State<DeliveryNoteFormScreen> createState() => _DeliveryNoteFormScreenState();
@@ -53,9 +55,43 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
     null,
   ); // To hold the UmayumchaHQ branch
 
+  String? deliveryNoteId; // New: To store the ID of the delivery note being edited
+
   @override
   void initState() {
     super.initState();
+    if (widget.deliveryNote != null) {
+      deliveryNoteId = widget.deliveryNote!.id;
+      selectedDeliveryDate = widget.deliveryNote!.deliveryDate;
+      selectedProducts.clear(); // Clear existing items before populating
+      // Find the branch object from branchController.branches based on to_branch_id
+      selectedToBranch = branchController.branches.firstWhereOrNull(
+        (branch) => branch.id == widget.deliveryNote!.toBranchId,
+      );
+
+      // Populate selectedProducts from existing productItems and consumableItems
+      if (widget.deliveryNote!.productItems != null) {
+        for (var item in widget.deliveryNote!.productItems!) {
+          selectedProducts.add({
+            'id': item['product_id'],
+            'name': item['product_name'],
+            'quantity': item['quantity_change'],
+            'type': 'product',
+          });
+        }
+      }
+      if (widget.deliveryNote!.consumableItems != null) {
+        for (var item in widget.deliveryNote!.consumableItems!) {
+          selectedProducts.add({
+            'id': item['consumable_id'].toString(), // Convert int to String
+            'name': item['consumable_name'],
+            'quantity': item['quantity_change'],
+            'type': 'consumable',
+          });
+        }
+      }
+    }
+
     // Listen for changes in branches and set UmayumchaHQ
     ever(branchController.branches, (_) {
       _findAndSetUmayumchaHQBranch();
@@ -200,9 +236,9 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Create Delivery Note',
-          style: TextStyle(
+        title: Text(
+          widget.deliveryNote == null ? 'Create Delivery Note' : 'Edit Delivery Note',
+          style: const TextStyle(
             color: Colors.white, // White text for consistency
             fontWeight: FontWeight.bold,
           ),
@@ -458,17 +494,33 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                           Get.snackbar('Error', 'To Branch ID is missing.');
                           return;
                         }
-                        deliveryNoteController.createDeliveryNote(
-                          customerName: 'Internal Transfer',
-                          destinationAddress: 'Internal Transfer',
-                          deliveryDate: selectedDeliveryDate,
-                          fromBranchId: umayumchaHQBranch.value!.id!,
-                          toBranchId: selectedToBranch!.id!,
-                          items: selectedProducts.toList(),
-                        );
+
+                        if (widget.deliveryNote == null) {
+                          // Create new delivery note
+                          deliveryNoteController.createDeliveryNote(
+                            customerName: 'Internal Transfer',
+                            destinationAddress: 'Internal Transfer',
+                            deliveryDate: selectedDeliveryDate,
+                            fromBranchId: umayumchaHQBranch.value!.id!,
+                            toBranchId: selectedToBranch!.id!,
+                            items: selectedProducts.toList(),
+                          );
+                        } else {
+                          // Update existing delivery note
+                          deliveryNoteController.updateDeliveryNote(
+                            deliveryNoteId: deliveryNoteId!,
+                            customerName: 'Internal Transfer',
+                            destinationAddress: 'Internal Transfer',
+                            deliveryDate: selectedDeliveryDate,
+                            fromBranchId: umayumchaHQBranch.value!.id!,
+                            toBranchId: selectedToBranch!.id!,
+                            newItems: selectedProducts.toList(),
+                            originalItems: widget.deliveryNote!.productItems! + widget.deliveryNote!.consumableItems!,
+                          );
+                        }
                       },
-                      icon: const Icon(Icons.save),
-                      label: const Text('Save Delivery Note'),
+                      icon: Icon(widget.deliveryNote == null ? Icons.save : Icons.update),
+                      label: Text(widget.deliveryNote == null ? 'Save Delivery Note' : 'Update Delivery Note'),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         shape: RoundedRectangleBorder(

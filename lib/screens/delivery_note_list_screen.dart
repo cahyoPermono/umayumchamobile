@@ -246,6 +246,12 @@ class DeliveryNoteListScreen extends StatelessWidget {
                           ),
                         ],
                       ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          Get.to(() => DeliveryNoteFormScreen(deliveryNote: note));
+                        },
+                      ),
                       children: [
                         const Divider(
                           height: 1,

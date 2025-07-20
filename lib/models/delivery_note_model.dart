@@ -47,6 +47,7 @@ class DeliveryNote {
                   'quantity_change': e['quantity_change'],
                   'product_name':
                       (e['products'] as Map<String, dynamic>?)?['name'],
+                  'type': 'product',
                 },
               )
               .toList(),
@@ -57,6 +58,7 @@ class DeliveryNote {
                   'consumable_id': e['consumable_id'],
                   'quantity_change': e['quantity_change'],
                   'consumable_name': e['consumable_name'],
+                  'type': 'consumable',
                 },
               )
               .toList(),
