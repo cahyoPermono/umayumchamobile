@@ -199,24 +199,47 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Delivery Note')),
-      body: Padding(
+      appBar: AppBar(
+        title: const Text(
+          'Create Delivery Note',
+          style: TextStyle(
+            color: Colors.white, // White text for consistency
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Theme.of(context).primaryColor, // Use primary color
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ), // White back button
+        elevation: 4, // Restore default elevation
+      ),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            
+
             // From Branch Selection (Hidden and pre-selected to UmayumchaHQ)
             Obx(() {
               if (branchController.isLoading.value) {
-                return const CircularProgressIndicator();
+                return const Center(child: CircularProgressIndicator());
               }
               if (umayumchaHQBranch.value == null) {
                 return const Text(
                   'UmayumchaHQ branch not found. Please ensure it exists.',
+                  style: TextStyle(color: Colors.red),
                 );
               }
               return AbsorbPointer(
                 child: DropdownButtonFormField<Branch>(
-                  decoration: const InputDecoration(labelText: 'From Branch'),
+                  decoration: InputDecoration(
+                    labelText: 'From Branch',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    prefixIcon: const Icon(Icons.warehouse),
+                  ),
                   value: umayumchaHQBranch.value,
                   onChanged: (Branch? newValue) {},
                   items:
@@ -234,7 +257,7 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
             // To Branch Selection
             Obx(() {
               if (branchController.isLoading.value) {
-                return const CircularProgressIndicator();
+                return const Center(child: CircularProgressIndicator());
               }
               if (branchController.branches.isEmpty) {
                 return const SizedBox.shrink();
@@ -244,7 +267,13 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                       .where((branch) => branch.name != 'UmayumchaHQ')
                       .toList();
               return DropdownButtonFormField<Branch>(
-                decoration: const InputDecoration(labelText: 'To Branch'),
+                decoration: InputDecoration(
+                  labelText: 'To Branch',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  prefixIcon: const Icon(Icons.store),
+                ),
                 value: selectedToBranch,
                 onChanged: (Branch? newValue) {
                   setState(() {
@@ -262,108 +291,195 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
             }),
             const SizedBox(height: 16),
 
-            ListTile(
-              title: Text(
-                'Delivery Date: ${selectedDeliveryDate.toLocal().toString().split(' ').first}',
-              ),
-              trailing: const Icon(Icons.calendar_today),
+            // Delivery Date
+            GestureDetector(
               onTap: () => _selectDate(context),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Products for Delivery:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Obx(() {
-              // Access selectedProducts.length to ensure Obx reacts to changes
-              selectedProducts.length;
-              return Expanded(
-                child: ListView.builder(
-                  itemCount: selectedProducts.length,
-                  itemBuilder: (context, index) {
-                    final item = selectedProducts[index];
-                    return ListTile(
-                      title: Text(
-                        '${item['name']} (from ${umayumchaHQBranch.value?.name ?? 'N/A'}) [${(item['type'] as String).capitalizeFirst}]',
-                      ),
-                      trailing: Text('x${item['quantity']}'),
-                      onLongPress: () {
-                        Get.dialog(
-                          AlertDialog(
-                            title: const Text('Remove Item?'),
-                            content: Text(
-                              'Do you want to remove ${item['name']}?',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Get.back(),
-                                child: const Text('Cancel'),
-                              ),
-                              ElevatedButton(
-                                onPressed: () {
-                                  selectedProducts.removeAt(index);
-                                  Get.back();
-                                },
-                                child: const Text('Remove'),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  },
+              child: AbsorbPointer(
+                child: TextFormField(
+                  controller: TextEditingController(
+                    text:
+                        selectedDeliveryDate.toLocal().toString().split(' ')[0],
+                  ),
+                  decoration: InputDecoration(
+                    labelText: 'Delivery Date',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    prefixIcon: const Icon(Icons.calendar_today),
+                  ),
                 ),
-              );
-            }),
-            ElevatedButton.icon(
-              onPressed: _addProductToNote,
-              icon: const Icon(Icons.add),
-              label: const Text('Add Product to Note'),
+              ),
             ),
             const SizedBox(height: 24),
+
+            // Products for Delivery Section
+            Text(
+              'Items for Delivery:',
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Obx(() {
+              if (selectedProducts.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20.0),
+                  child: Center(
+                    child: Text(
+                      'No items added yet. Tap "Add Item" to begin.',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  ),
+                );
+              }
+              return ListView.builder(
+                shrinkWrap: true, // Important for nested ListView in Column
+                physics:
+                    const NeverScrollableScrollPhysics(), // Disable scrolling for nested ListView
+                itemCount: selectedProducts.length,
+                itemBuilder: (context, index) {
+                  final item = selectedProducts[index];
+                  return Card(
+                    margin: const EdgeInsets.symmetric(vertical: 8.0),
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      leading: Icon(
+                        item['type'] == 'product'
+                            ? Icons.inventory_2_outlined
+                            : Icons.category_outlined,
+                        color:
+                            item['type'] == 'product'
+                                ? Colors.blueGrey
+                                : Colors.teal,
+                      ),
+                      title: Text(
+                        '${item['name']}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      subtitle: Text(
+                        'Type: ${(item['type'] as String).capitalizeFirst} | Quantity: x${item['quantity']}',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () {
+                          Get.dialog(
+                            AlertDialog(
+                              title: const Text('Remove Item?'),
+                              content: Text(
+                                'Do you want to remove ${item['name']}?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Get.back(),
+                                  child: const Text('Cancel'),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    selectedProducts.removeAt(index);
+                                    Get.back();
+                                  },
+                                  child: const Text('Remove'),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                },
+              );
+            }),
+            const SizedBox(height: 16),
+            Center(
+              child: ElevatedButton.icon(
+                onPressed: _addProductToNote,
+                icon: const Icon(Icons.add),
+                label: const Text('Add Item to Delivery Note'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  textStyle: const TextStyle(fontSize: 16),
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+
+            // Save Button
             Obx(() {
               return deliveryNoteController.isLoading.value
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                    onPressed: () {
-                      if (umayumchaHQBranch.value == null) {
-                        Get.snackbar('Error', 'UmayumchaHQ branch not found.');
-                        return;
-                      }
-                      if (selectedToBranch == null) {
-                        Get.snackbar('Error', 'Please select a To Branch.');
-                        return;
-                      }
-                      if (selectedProducts.isEmpty) {
-                        Get.snackbar(
-                          'Error',
-                          'Please add at least one product to the delivery note.',
+                  ? const Center(child: CircularProgressIndicator())
+                  : SizedBox(
+                    width: double.infinity, // Make button full width
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        if (umayumchaHQBranch.value == null) {
+                          Get.snackbar(
+                            'Error',
+                            'UmayumchaHQ branch not found.',
+                          );
+                          return;
+                        }
+                        if (selectedToBranch == null) {
+                          Get.snackbar('Error', 'Please select a To Branch.');
+                          return;
+                        }
+                        if (selectedProducts.isEmpty) {
+                          Get.snackbar(
+                            'Error',
+                            'Please add at least one item to the delivery note.',
+                          );
+                          return;
+                        }
+                        if (umayumchaHQBranch.value!.id == null) {
+                          Get.snackbar(
+                            'Error',
+                            'UmayumchaHQ Branch ID is missing.',
+                          );
+                          return;
+                        }
+                        if (selectedToBranch!.id == null) {
+                          Get.snackbar('Error', 'To Branch ID is missing.');
+                          return;
+                        }
+                        deliveryNoteController.createDeliveryNote(
+                          customerName: 'Internal Transfer',
+                          destinationAddress: 'Internal Transfer',
+                          deliveryDate: selectedDeliveryDate,
+                          fromBranchId: umayumchaHQBranch.value!.id!,
+                          toBranchId: selectedToBranch!.id!,
+                          items: selectedProducts.toList(),
                         );
-                        return;
-                      }
-                      if (umayumchaHQBranch.value!.id == null) {
-                        Get.snackbar(
-                          'Error',
-                          'UmayumchaHQ Branch ID is missing.',
-                        );
-                        return;
-                      }
-                      if (selectedToBranch!.id == null) {
-                        Get.snackbar('Error', 'To Branch ID is missing.');
-                        return;
-                      }
-                      deliveryNoteController.createDeliveryNote(
-                        customerName: 'Internal Transfer', // Default value
-                        destinationAddress:
-                            'Internal Transfer', // Default value
-                        deliveryDate: selectedDeliveryDate,
-                        fromBranchId: umayumchaHQBranch.value!.id!,
-                        toBranchId: selectedToBranch!.id!,
-                        items:
-                            selectedProducts.toList(), // Pass the modified list
-                      );
-                    },
-                    child: const Text('Save Delivery Note'),
+                      },
+                      icon: const Icon(Icons.save),
+                      label: const Text('Save Delivery Note'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   );
             }),
           ],
