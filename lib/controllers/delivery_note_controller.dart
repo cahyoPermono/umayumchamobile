@@ -28,16 +28,11 @@ class DeliveryNoteController extends GetxController {
   Future<void> fetchDistinctToBranchNames() async {
     try {
       final response = await supabase
-          .from('delivery_notes')
-          .select('to_branch_name')
-          .order('to_branch_name', ascending: true)
-          .limit(1000); // Add a limit to distinct query
+          .from('distinct_to_branch_names') // Query the new view
+          .select('to_branch_name');
       distinctToBranchNames.value = (response as List)
           .map((e) => e['to_branch_name'] as String)
-          .where((name) => name.isNotEmpty) // Filter out null/empty names
-          .toSet() // Get unique names
           .toList();
-      distinctToBranchNames.sort(); // Sort alphabetically
     } catch (e) {
       debugPrint('Error fetching distinct branch names: ${e.toString()}');
     }
