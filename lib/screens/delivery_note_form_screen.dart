@@ -7,6 +7,7 @@ import 'package:umayumcha/models/branch_model.dart'; // Import Branch model
 import 'package:umayumcha/models/branch_product_model.dart'; // Import BranchProduct model
 import 'package:umayumcha/controllers/consumable_controller.dart'; // New: Import ConsumableController
 import 'package:umayumcha/models/consumable_model.dart'; // New: Import Consumable model
+import 'package:umayumcha/widgets/item_selection_dialog.dart'; // New: Import ItemSelectionDialog
 
 // Helper class for selectable items (Moved to top-level)
 class SelectableItem {
@@ -144,59 +145,55 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
       return;
     }
 
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Add Item to Delivery Note'),
-        content: DropdownButtonFormField<SelectableItem>(
-          isExpanded: true, // Added to fix layout issues
-          decoration: const InputDecoration(labelText: 'Select Item'),
-          items:
-              selectableItems.map((item) {
-                return DropdownMenuItem(
-                  value: item,
-                  child: Text(
-                    '${item.name} (Stock: ${item.quantity}) [${item.type.capitalizeFirst}]',
-                  ),
-                );
-              }).toList(),
-          onChanged: (SelectableItem? selectedItem) {
-            if (selectedItem != null) {
-              Get.dialog(
-                AlertDialog(
-                  title: Text('Enter Quantity for ${selectedItem.name}'),
-                  content: TextField(
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Quantity (Max: ${selectedItem.quantity})',
-                    ),
-                    onSubmitted: (value) {
-                      final int? quantity = int.tryParse(value);
-                      if (quantity != null &&
-                          quantity > 0 &&
-                          quantity <= selectedItem.quantity) {
-                        selectedProducts.add({
-                          'id': selectedItem.id,
-                          'name': selectedItem.name,
-                          'quantity': quantity,
-                          'type': selectedItem.type, // Store type
-                        });
-                        Get.back(); // Close quantity dialog
-                        Get.back(); // Close item selection dialog
-                      } else {
-                        Get.snackbar(
-                          'Error',
-                          'Please enter a valid quantity within available stock.',
-                        );
-                      }
-                    },
-                  ),
-                ),
-              );
-            }
-          },
-        ),
-      ),
+    final SelectableItem? selectedItem = await Get.dialog<SelectableItem>(
+      ItemSelectionDialog(items: selectableItems),
     );
+
+    if (selectedItem != null) {
+      final TextEditingController quantityController = TextEditingController();
+      Get.dialog(
+        AlertDialog(
+          title: Text('Enter Quantity for ${selectedItem.name}'),
+          content: TextField(
+            controller: quantityController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: 'Quantity (Max: ${selectedItem.quantity})',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back(); // Close quantity dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final int? quantity = int.tryParse(quantityController.text);
+                if (quantity != null &&
+                    quantity > 0 &&
+                    quantity <= selectedItem.quantity) {
+                  selectedProducts.add({
+                    'id': selectedItem.id,
+                    'name': selectedItem.name,
+                    'quantity': quantity,
+                    'type': selectedItem.type, // Store type
+                  });
+                  Get.back(); // Close quantity dialog
+                } else {
+                  Get.snackbar(
+                    'Error',
+                    'Please enter a valid quantity within available stock.',
+                  );
+                }
+              },
+              child: const Text('Accept'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   @override
