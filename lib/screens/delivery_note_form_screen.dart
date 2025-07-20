@@ -148,6 +148,7 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
       AlertDialog(
         title: const Text('Add Item to Delivery Note'),
         content: DropdownButtonFormField<SelectableItem>(
+          isExpanded: true, // Added to fix layout issues
           decoration: const InputDecoration(labelText: 'Select Item'),
           items:
               selectableItems.map((item) {
