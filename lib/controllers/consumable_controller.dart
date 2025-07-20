@@ -248,15 +248,8 @@ class ConsumableController extends GetxController {
     String? toBranchName, // New: toBranchName
   }) async {
     try {
-      // Update consumable quantity (subtract for delivery out)
-      await _supabase
-          .from('consumables')
-          .update({
-            'quantity':
-                consumables.firstWhere((c) => c.id == consumableId).quantity -
-                quantityChange, // Subtract quantity
-          })
-          .eq('id', consumableId);
+      // The database trigger now handles all quantity updates.
+      // This function only needs to log the transaction.
 
       // Log transaction as 'out'
       await _logTransaction(
