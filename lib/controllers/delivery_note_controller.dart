@@ -13,22 +13,56 @@ class DeliveryNoteController extends GetxController {
 
   var deliveryNotes = <DeliveryNote>[].obs;
   var isLoading = false.obs;
+  var distinctToBranchNames = <String>[].obs; // New: For filter dropdown
+  var selectedToBranchName = Rx<String?>(null); // New: Selected filter
+  var selectedFromDate = Rx<DateTime?>(null); // New: Selected filter
+  var selectedToDate = Rx<DateTime?>(null); // New: Selected filter
 
   @override
   void onInit() {
     fetchDeliveryNotes();
+    fetchDistinctToBranchNames(); // Fetch distinct branch names on init
     super.onInit();
+  }
+
+  Future<void> fetchDistinctToBranchNames() async {
+    try {
+      final response = await supabase
+          .from('delivery_notes')
+          .select('to_branch_name')
+          .order('to_branch_name', ascending: true)
+          .limit(1000); // Add a limit to distinct query
+      distinctToBranchNames.value = (response as List)
+          .map((e) => e['to_branch_name'] as String)
+          .where((name) => name.isNotEmpty) // Filter out null/empty names
+          .toSet() // Get unique names
+          .toList();
+      distinctToBranchNames.sort(); // Sort alphabetically
+    } catch (e) {
+      debugPrint('Error fetching distinct branch names: ${e.toString()}');
+    }
   }
 
   Future<void> fetchDeliveryNotes() async {
     try {
       isLoading.value = true;
-      final response = await supabase
+      var query = supabase
           .from('delivery_notes')
           .select(
             '*, inventory_transactions(product_id, quantity_change, products(name)), consumable_transactions(consumable_id, quantity_change, consumable_name)',
-          )
-          .order('created_at', ascending: false);
+          );
+
+      // Apply filters
+      if (selectedToBranchName.value != null) {
+        query = query.eq('to_branch_name', selectedToBranchName.value!);
+      }
+      if (selectedFromDate.value != null) {
+        query = query.gte('delivery_date', selectedFromDate.value!.toIso8601String().split('T').first);
+      }
+      if (selectedToDate.value != null) {
+        query = query.lte('delivery_date', selectedToDate.value!.toIso8601String().split('T').first);
+      }
+      final response = await query.order('created_at', ascending: false);
 
       deliveryNotes.value =
           (response as List)
