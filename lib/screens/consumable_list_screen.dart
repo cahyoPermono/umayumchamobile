@@ -93,6 +93,7 @@ void _showConsumableTransactionDialog(
                               );
                             }
                             setState(() => isLoading = false);
+                            if (!context.mounted) return;
                             Navigator.of(context, rootNavigator: true).pop();
                           }
                         },
