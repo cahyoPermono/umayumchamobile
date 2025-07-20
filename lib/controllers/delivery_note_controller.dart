@@ -223,7 +223,7 @@ class DeliveryNoteController extends GetxController {
         await inventoryController.addTransaction(
           productId: transaction['product_id'],
           type: transaction['type'] == 'out' ? 'in' : 'out', // Reverse type
-          quantityChange: transaction['quantity_change'],
+          quantityChange: transaction['quantity_change'].abs(),
           reason: 'Delivery Note Update (Reversal)',
           deliveryNoteId: deliveryNoteId,
           fromBranchId: transaction['to_branch_id'], // Swapped for reversal
@@ -246,7 +246,7 @@ class DeliveryNoteController extends GetxController {
         await consumableController.addConsumableTransactionFromDeliveryNote(
           consumableId: transaction['consumable_id'],
           consumableName: transaction['consumable_name'],
-          quantityChange: transaction['quantity_change'],
+          quantityChange: transaction['quantity_change'].abs(),
           reason: 'Delivery Note Update (Reversal)',
           deliveryNoteId: deliveryNoteId,
           fromBranchId: transaction['to_branch_id'], // Swapped for reversal

@@ -283,6 +283,34 @@ class InventoryController extends GetxController {
       // Determine the actual quantity change based on type
       final int finalQuantityChange = type == 'out' ? -quantityChange : quantityChange;
 
+      // Determine which branch's product quantity to update
+      String? branchIdToUpdate;
+      if (type == 'out' && fromBranchId != null) {
+        branchIdToUpdate = fromBranchId;
+      } else if (type == 'in' && toBranchId != null) {
+        branchIdToUpdate = toBranchId;
+      }
+
+      if (branchIdToUpdate != null) {
+        // Get current quantity of the product in the relevant branch
+        final currentBranchProduct = await supabase
+            .from('branch_products')
+            .select('quantity')
+            .eq('product_id', productId)
+            .eq('branch_id', branchIdToUpdate)
+            .single();
+        final int currentQuantity = currentBranchProduct['quantity'] as int;
+        final int newQuantity = currentQuantity + finalQuantityChange;
+
+        // Update the quantity in branch_products table
+        await supabase
+            .from('branch_products')
+            .update({'quantity': newQuantity})
+            .eq('product_id', productId)
+            .eq('branch_id', branchIdToUpdate);
+        debugPrint('Updated branch_products for $productId in branch $branchIdToUpdate to $newQuantity');
+      }
+
       await supabase.from('inventory_transactions').insert({
         'product_id': productId,
         'product_name': productName, // Add product_name
