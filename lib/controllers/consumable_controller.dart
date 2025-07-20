@@ -16,6 +16,11 @@ class ConsumableController extends GetxController {
         quantityChange: quantity,
         type: 'in',
         reason: reason,
+        branchSourceId: umayumchaHQBranchId, // Set source to UmayumchaHQ
+        branchSourceName: 'UmayumchaHQ', // Set destination name
+        branchDestinationId:
+            umayumchaHQBranchId, // Set destination to UmayumchaHQ
+        branchDestinationName: 'UmayumchaHQ',
       );
       await fetchConsumables();
       Get.snackbar('Success', 'Stock added successfully!');
@@ -42,6 +47,11 @@ class ConsumableController extends GetxController {
         quantityChange: -quantity,
         type: 'out',
         reason: reason,
+        branchSourceId: umayumchaHQBranchId, // Set source to UmayumchaHQ
+        branchSourceName: 'UmayumchaHQ', // Set source name
+        branchDestinationId:
+            umayumchaHQBranchId, // Set destination to UmayumchaHQ
+        branchDestinationName: 'UmayumchaHQ',
       );
       await fetchConsumables();
       Get.snackbar('Success', 'Stock removed successfully!');
