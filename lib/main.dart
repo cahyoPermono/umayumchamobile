@@ -6,7 +6,7 @@ import 'package:umayumcha/controllers/branch_controller.dart';
 import 'package:umayumcha/screens/splash_screen.dart';
 import 'package:umayumcha/screens/dashboard_screen.dart';
 import 'package:umayumcha/screens/sign_in_screen.dart';
-import 'package:umayumcha/screens/sign_up_screen.dart';
+
 import 'package:umayumcha/bindings/dashboard_binding.dart';
 import 'package:umayumcha/supabase_credentials.dart';
 import 'package:umayumcha/controllers/inventory_controller.dart';
@@ -120,7 +120,6 @@ class MyApp extends StatelessWidget {
           binding: DashboardBinding(),
         ),
         GetPage(name: '/sign_in', page: () => const SignInScreen()),
-        GetPage(name: '/sign_up', page: () => const SignUpScreen()),
       ],
     );
   }

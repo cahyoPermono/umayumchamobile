@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:umayumcha/controllers/auth_controller.dart';
-import 'package:umayumcha/screens/sign_up_screen.dart';
 
 class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
@@ -26,7 +25,7 @@ class SignInScreen extends StatelessWidget {
               // Logo or App Icon
               Image.asset(
                 'assets/images/logo2.png',
-                height: 240, // Adjust size as needed
+                height: 180, // Adjust size as needed
               ),
               const SizedBox(height: 16),
               Text(
@@ -92,34 +91,6 @@ class SignInScreen extends StatelessWidget {
                               ),
                             );
                       }),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Sign Up Button
-              TextButton(
-                onPressed: () {
-                  Get.to(() => const SignUpScreen());
-                },
-                child: Text.rich(
-                  TextSpan(
-                    text: "Don't have an account? ",
-                    style: TextStyle(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.7),
-                    ),
-                    children: [
-                      TextSpan(
-                        text: 'Sign Up',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
                     ],
                   ),
                 ),
