@@ -241,7 +241,7 @@ class TransactionLogScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Date: ${DateFormat('yyyy-MM-dd HH:mm').format(transaction.createdAt)}',
+                                'Date: ${DateFormat('yyyy-MM-dd HH:mm').format(transaction.createdAt.add(const Duration(hours: 7)))}',
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodySmall
