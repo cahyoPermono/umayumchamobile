@@ -6,8 +6,7 @@ import 'package:umayumcha/screens/inventory_screen.dart';
 import 'package:umayumcha/controllers/inventory_controller.dart'; // Import InventoryController
 import 'package:umayumcha/controllers/consumable_controller.dart';
 import 'package:umayumcha/screens/delivery_note_list_screen.dart';
-import 'package:umayumcha/screens/product_form_screen.dart';
-import 'package:umayumcha/screens/delivery_note_form_screen.dart';
+
 import 'package:umayumcha/screens/transaction_log_screen.dart';
 import 'package:umayumcha/screens/consumable_transaction_log_screen.dart';
 import 'package:umayumcha/screens/user_list_screen.dart';
@@ -496,40 +495,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   _buildDashboardCard(
                     context,
-                    icon: Icons.add_box,
-                    title: 'Add New Product',
-                    subtitle: 'For admins only',
-                    onTap: () {
-                      if (authController.userRole.value == 'admin') {
-                        Get.to(() => const ProductFormScreen());
-                      } else {
-                        Get.snackbar(
-                          'Access Denied',
-                          'Only admins can add products.',
-                        );
-                      }
-                    },
-                  ),
-                  _buildDashboardCard(
-                    context,
-                    icon: Icons.receipt,
-                    title: 'New Delivery Note',
-                    subtitle: 'Create a new order',
-                    onTap: () => Get.to(() => DeliveryNoteFormScreen()),
-                  ),
-                  _buildDashboardCard(
-                    context,
                     icon: Icons.local_drink,
                     title: 'Consumables',
                     subtitle: 'Manage consumables',
                     onTap: () => Get.to(() => ConsumableListScreen()),
-                  ),
-                  _buildDashboardCard(
-                    context,
-                    icon: Icons.receipt_long,
-                    title: 'Consumable Log',
-                    subtitle: 'View consumable transactions',
-                    onTap: () => Get.to(() => ConsumableTransactionLogScreen()),
                   ),
                 ],
               ),
