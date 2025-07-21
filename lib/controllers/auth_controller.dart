@@ -2,7 +2,6 @@ import 'package:flutter/material.dart'; // For debugPrint
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha/controllers/branch_controller.dart';
-import 'package:umayumcha/controllers/user_controller.dart';
 
 class AuthController extends GetxController {
   final SupabaseClient supabase = Supabase.instance.client;
@@ -15,14 +14,11 @@ class AuthController extends GetxController {
 
   @override
   void onInit() {
-    // Get initial user session and role
-    final initialUser = supabase.auth.currentUser;
-    if (initialUser != null) {
-      currentUser.value = initialUser;
-      _fetchUserProfile(initialUser.id);
-    }
+    super.onInit();
+    isLoading.value = true; // Start in a loading state
 
-    // Listen to auth state changes
+    // The onAuthStateChange stream fires immediately with the current auth state.
+    // This single listener will handle both initial load and subsequent changes.
     supabase.auth.onAuthStateChange.listen((data) async {
       debugPrint('Auth state changed: ${data.event}');
       final Session? session = data.session;
@@ -31,27 +27,13 @@ class AuthController extends GetxController {
       if (session != null) {
         debugPrint('User session found. Fetching profile...');
         await _fetchUserProfile(session.user.id);
-        // Only navigate if not creating user by admin
-        if (!Get.find<UserController>().isCreatingUserByAdmin.value) {
-          WidgetsBinding.instance.addPostFrameCallback((_) async {
-            debugPrint('AuthController: Navigating to Dashboard.');
-            await Get.offAllNamed('/dashboard');
-            isLoading.value = false; // Set isLoading to false after navigation is complete
-          });
-        }
       } else {
-        debugPrint(
-          'No user session found. Clearing profile and navigating to sign in.',
-        );
+        debugPrint('No user session found. Clearing profile.');
         userRole.value = ''; // Clear role on sign out
         userBranchId.value = null; // Clear branch ID on sign out
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          debugPrint('AuthController: Navigating to Sign In.');
-          Get.offAllNamed('/sign_in');
-        });
       }
+      isLoading.value = false; // End loading state after processing
     });
-    super.onInit();
   }
 
   Future<void> _fetchUserProfile(String userId) async {

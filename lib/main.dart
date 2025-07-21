@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha/controllers/auth_controller.dart';
 import 'package:umayumcha/controllers/branch_controller.dart';
-import 'package:umayumcha/screens/splash_screen.dart';
 import 'package:umayumcha/screens/dashboard_screen.dart';
 import 'package:umayumcha/screens/sign_in_screen.dart';
 
@@ -12,6 +11,8 @@ import 'package:umayumcha/supabase_credentials.dart';
 import 'package:umayumcha/controllers/inventory_controller.dart';
 import 'package:umayumcha/controllers/consumable_controller.dart';
 import 'package:umayumcha/controllers/user_controller.dart';
+
+import 'package:umayumcha/screens/auth_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -111,9 +112,9 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: '/',
+      home: const AuthWrapper(),
       getPages: [
-        GetPage(name: '/', page: () => const SplashScreen()),
+        GetPage(name: '/', page: () => const AuthWrapper()),
         GetPage(
           name: '/dashboard',
           page: () => const DashboardScreen(),

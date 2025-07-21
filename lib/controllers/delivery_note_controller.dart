@@ -405,7 +405,7 @@ class DeliveryNoteController extends GetxController {
       sheet.cell(CellIndex.indexByString('D$rowIndex')).value =
           '(____________)';
 
-      final String dir = (await getApplicationDocumentsDirectory()).path;
+      final String dir = (await getDownloadsDirectory())!.path;
       final String path = '$dir/DeliveryNote_${deliveryNote.id}.xlsx';
       final List<int>? fileBytes = excel.save();
       if (fileBytes != null) {
@@ -507,7 +507,7 @@ class DeliveryNoteController extends GetxController {
         ),
       );
 
-      final String dir = (await getApplicationDocumentsDirectory()).path;
+      final String dir = (await getDownloadsDirectory())!.path;
       final String path = '$dir/DeliveryNote_${deliveryNote.id}.pdf';
       final File file = File(path);
       await file.writeAsBytes(await pdf.save());
