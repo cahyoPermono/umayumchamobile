@@ -1,16 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:umayumcha/controllers/auth_controller.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
-class SignInScreen extends StatelessWidget {
+class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final AuthController authController = Get.find();
-    final TextEditingController emailController = TextEditingController();
-    final TextEditingController passwordController = TextEditingController();
+  State<SignInScreen> createState() => _SignInScreenState();
+}
 
+class _SignInScreenState extends State<SignInScreen> {
+  final AuthController authController = Get.find();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  String _version = 'Loading...';
+
+  @override
+  void initState() {
+    super.initState();
+    _initPackageInfo();
+  }
+
+  Future<void> _initPackageInfo() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    setState(() {
+      _version = packageInfo.version;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor:
           Theme.of(
@@ -39,9 +60,7 @@ class SignInScreen extends StatelessWidget {
               Text(
                 'Sign in to manage your dimsum inventory',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.7),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
               ),
               const SizedBox(height: 48),
@@ -94,6 +113,13 @@ class SignInScreen extends StatelessWidget {
                     ],
                   ),
                 ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Version: $_version',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
               ),
             ],
           ),
