@@ -46,7 +46,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Image.asset(
-                  'assets/images/logodaftar.png',
+                  'assets/images/logo2.png',
                   height: 200, // Increased logo size
                 ),
                 const SizedBox(height: 32), // More space after logo
