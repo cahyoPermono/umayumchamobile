@@ -60,27 +60,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   Icon(
                     Icons.fastfood,
-                    size: 50,
+                    size: 60,
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),
                   const SizedBox(height: 8),
                   Obx(
                     () => Text(
-                      'Welcome, ${authController.currentUser.value?.email ?? 'Guest'}',
+                      // 'Welcome, ${authController.currentUser.value?.email ?? 'Guest'}',
+                      'Welcome,',
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onPrimary,
-                        fontSize: 18,
+                        fontSize: 24,
                       ),
                     ),
                   ),
                   Obx(
                     () => Text(
-                      'Role: ${authController.userRole.value}',
+                      authController.userRole.value,
                       style: TextStyle(
                         color: Theme.of(
                           context,
                         ).colorScheme.onPrimary.withValues(alpha: 0.8),
-                        fontSize: 14,
+                        fontSize: 20,
                       ),
                     ),
                   ),
@@ -88,11 +89,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             ListTile(
+              leading: const Icon(Icons.history),
+              title: const Text('Inventory Transaction Log'),
+              onTap: () {
+                Get.back(); // Close the drawer
+                Get.to(() => const TransactionLogScreen());
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.receipt_long),
+              title: const Text('Consumable Transaction Log'),
+              onTap: () {
+                Get.back(); // Close the drawer
+                Get.to(() => ConsumableTransactionLogScreen());
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.inventory),
-              title: const Text('Master Inventory'),
+              title: const Text('Inventory'),
               onTap: () {
                 Get.back(); // Close the drawer
                 Get.to(() => const InventoryScreen());
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.local_drink),
+              title: const Text('Consumable'),
+              onTap: () {
+                Get.back(); // Close the drawer
+                Get.to(() => ConsumableListScreen());
               },
             ),
             ListTile(
@@ -104,27 +129,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.history),
-              title: const Text('Transaction Log'),
+              leading: const Icon(Icons.store),
+              title: const Text('Cabang'),
               onTap: () {
                 Get.back(); // Close the drawer
-                Get.to(() => const TransactionLogScreen());
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.local_drink),
-              title: const Text('Master Consumable'),
-              onTap: () {
-                Get.back(); // Close the drawer
-                Get.to(() => ConsumableListScreen());
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.receipt_long),
-              title: const Text('Consumable Transaction Log'),
-              onTap: () {
-                Get.back(); // Close the drawer
-                Get.to(() => ConsumableTransactionLogScreen());
+                Get.to(() => BranchListScreen());
               },
             ),
             Obx(
@@ -132,21 +141,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   authController.userRole.value == 'admin'
                       ? ListTile(
                         leading: const Icon(Icons.people),
-                        title: const Text('Master User'),
+                        title: const Text('User'),
                         onTap: () {
                           Get.back(); // Close the drawer
                           Get.to(() => UserListScreen());
                         },
                       )
                       : const SizedBox.shrink(),
-            ),
-            ListTile(
-              leading: const Icon(Icons.store),
-              title: const Text('Master Cabang'),
-              onTap: () {
-                Get.back(); // Close the drawer
-                Get.to(() => BranchListScreen());
-              },
             ),
             const Divider(),
             ListTile(
@@ -168,61 +169,61 @@ class _DashboardScreenState extends State<DashboardScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               // Welcome Section
-              Obx(() {
-                final user = authController.currentUser.value;
-                final role = authController.userRole.value;
-                return Card(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Hello, ${user?.email?.split('@').first ?? 'User'}!',
-                            style: Theme.of(
-                              context,
-                            ).textTheme.headlineSmall?.copyWith(
-                              color:
-                                  Theme.of(
-                                    context,
-                                  ).colorScheme.onPrimaryContainer,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Your role: $role',
-                            style: Theme.of(
-                              context,
-                            ).textTheme.titleMedium?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer
-                                  .withValues(alpha: 0.8),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Manage your dimsum business efficiently.',
-                            style: Theme.of(
-                              context,
-                            ).textTheme.bodyLarge?.copyWith(
-                              color:
-                                  Theme.of(
-                                    context,
-                                  ).colorScheme.onPrimaryContainer,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              }),
-              const SizedBox(height: 24),
+              // Obx(() {
+              //   final user = authController.currentUser.value;
+              //   final role = authController.userRole.value;
+              //   return Card(
+              //     color: Theme.of(context).colorScheme.primaryContainer,
+              //     child: Padding(
+              //       padding: const EdgeInsets.all(20.0),
+              //       child: SizedBox(
+              //         width: double.infinity,
+              //         child: Column(
+              //           crossAxisAlignment: CrossAxisAlignment.start,
+              //           children: [
+              //             Text(
+              //               'Hello, ${user?.email?.split('@').first ?? 'User'}!',
+              //               style: Theme.of(
+              //                 context,
+              //               ).textTheme.headlineSmall?.copyWith(
+              //                 color:
+              //                     Theme.of(
+              //                       context,
+              //                     ).colorScheme.onPrimaryContainer,
+              //                 fontWeight: FontWeight.bold,
+              //               ),
+              //             ),
+              //             const SizedBox(height: 8),
+              //             Text(
+              //               'Your role: $role',
+              //               style: Theme.of(
+              //                 context,
+              //               ).textTheme.titleMedium?.copyWith(
+              //                 color: Theme.of(context)
+              //                     .colorScheme
+              //                     .onPrimaryContainer
+              //                     .withValues(alpha: 0.8),
+              //               ),
+              //             ),
+              //             const SizedBox(height: 16),
+              //             Text(
+              //               'Manage your dimsum business efficiently.',
+              //               style: Theme.of(
+              //                 context,
+              //               ).textTheme.bodyLarge?.copyWith(
+              //                 color:
+              //                     Theme.of(
+              //                       context,
+              //                     ).colorScheme.onPrimaryContainer,
+              //               ),
+              //             ),
+              //           ],
+              //         ),
+              //       ),
+              //     ),
+              //   );
+              // }),
+              // const SizedBox(height: 24),
 
               // Combined Low Stock Warning Section
               Obx(() {
