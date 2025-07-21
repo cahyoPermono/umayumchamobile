@@ -64,14 +64,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),
                   const SizedBox(height: 8),
-                  Obx(
-                    () => Text(
-                      // 'Welcome, ${authController.currentUser.value?.email ?? 'Guest'}',
-                      'Welcome,',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onPrimary,
-                        fontSize: 24,
-                      ),
+                  Text(
+                    // 'Welcome, ${authController.currentUser.value?.email ?? 'Guest'}',
+                    'Welcome,',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontSize: 24,
                     ),
                   ),
                   Obx(
