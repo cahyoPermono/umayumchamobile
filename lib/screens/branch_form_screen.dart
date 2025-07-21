@@ -50,7 +50,7 @@ class _BranchFormScreenState extends State<BranchFormScreen> {
             children: [
               TextFormField(
                 controller: _nameController,
-                readOnly: _isReadOnly,
+                readOnly: _isReadOnly || widget.branch?.name == 'UmayumchaHQ',
                 decoration: const InputDecoration(labelText: 'Branch Name'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
