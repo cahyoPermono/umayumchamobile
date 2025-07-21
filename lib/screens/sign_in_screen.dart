@@ -25,8 +25,8 @@ class SignInScreen extends StatelessWidget {
             children: [
               // Logo or App Icon
               Image.asset(
-                'assets/images/logo.png',
-                height: 120, // Adjust size as needed
+                'assets/images/logo2.png',
+                height: 240, // Adjust size as needed
               ),
               const SizedBox(height: 16),
               Text(

@@ -239,16 +239,18 @@ class DeliveryNoteController extends GetxController {
       debugPrint('Original transactions reversed and deleted.');
 
       // 3. Update the delivery note entry itself
-      final fromBranchResponse = await supabase
-          .from('branches')
-          .select('name')
-          .eq('id', fromBranchId)
-          .single();
-      final toBranchResponse = await supabase
-          .from('branches')
-          .select('name')
-          .eq('id', toBranchId)
-          .single();
+      final fromBranchResponse =
+          await supabase
+              .from('branches')
+              .select('name')
+              .eq('id', fromBranchId)
+              .single();
+      final toBranchResponse =
+          await supabase
+              .from('branches')
+              .select('name')
+              .eq('id', toBranchId)
+              .single();
       final String fromBranchName = fromBranchResponse['name'];
       final String toBranchName = toBranchResponse['name'];
 
@@ -329,18 +331,18 @@ class DeliveryNoteController extends GetxController {
       final excel = Excel.createExcel();
       final sheet = excel['Delivery Note'];
 
-      
-
       // Header
       sheet.merge(CellIndex.indexByString('A5'), CellIndex.indexByString('F5'));
-      sheet.cell(CellIndex.indexByString('A5')).value = 'Umayumcha Head Quarter';
+      sheet.cell(CellIndex.indexByString('A5')).value =
+          'Umayumcha Head Quarter';
       sheet.cell(CellIndex.indexByString('A5')).cellStyle = CellStyle(
         horizontalAlign: HorizontalAlign.Left,
         bold: true,
       );
 
       sheet.merge(CellIndex.indexByString('A6'), CellIndex.indexByString('F6'));
-      sheet.cell(CellIndex.indexByString('A6')).value = 'Jalan Dirgantara 4 no A5/11';
+      sheet.cell(CellIndex.indexByString('A6')).value =
+          'Jalan Dirgantara 4 no A5/11';
       sheet.cell(CellIndex.indexByString('A6')).cellStyle = CellStyle(
         horizontalAlign: HorizontalAlign.Left,
       );
@@ -358,7 +360,9 @@ class DeliveryNoteController extends GetxController {
       sheet.cell(CellIndex.indexByString('B10')).value = toBranchName;
 
       sheet.cell(CellIndex.indexByString('A11')).value = 'Tanggal:';
-      sheet.cell(CellIndex.indexByString('B11')).value = DateFormat('dd-MM-yyyy').format(deliveryNote.deliveryDate);
+      sheet.cell(CellIndex.indexByString('B11')).value = DateFormat(
+        'dd-MM-yyyy',
+      ).format(deliveryNote.deliveryDate);
 
       // Items Table Header
       sheet.cell(CellIndex.indexByString('A13')).value = 'Items';
@@ -381,9 +385,12 @@ class DeliveryNoteController extends GetxController {
       int rowIndex = 14;
       for (var item in items) {
         sheet.cell(CellIndex.indexByString('A$rowIndex')).value = item['name'];
-        sheet.cell(CellIndex.indexByString('B$rowIndex')).value = item['quantity'];
-        sheet.cell(CellIndex.indexByString('C$rowIndex')).value = '✓'; // Auto checklist
-        sheet.cell(CellIndex.indexByString('D$rowIndex')).value = ''; // Reason column
+        sheet.cell(CellIndex.indexByString('B$rowIndex')).value =
+            item['quantity'];
+        sheet.cell(CellIndex.indexByString('C$rowIndex')).value =
+            '✓'; // Auto checklist
+        sheet.cell(CellIndex.indexByString('D$rowIndex')).value =
+            ''; // Reason column
         rowIndex++;
       }
 
@@ -393,8 +400,10 @@ class DeliveryNoteController extends GetxController {
       sheet.cell(CellIndex.indexByString('D$rowIndex')).value = 'Penerima';
 
       rowIndex += 4; // Space for signature
-      sheet.cell(CellIndex.indexByString('A$rowIndex')).value = '(____________)';
-      sheet.cell(CellIndex.indexByString('D$rowIndex')).value = '(____________)';
+      sheet.cell(CellIndex.indexByString('A$rowIndex')).value =
+          '(____________)';
+      sheet.cell(CellIndex.indexByString('D$rowIndex')).value =
+          '(____________)';
 
       final String dir = (await getApplicationDocumentsDirectory()).path;
       final String path = '$dir/DeliveryNote_${deliveryNote.id}.xlsx';
@@ -422,7 +431,9 @@ class DeliveryNoteController extends GetxController {
       final pdf_lib.Document pdf = pdf_lib.Document();
 
       // Load logo
-      final ByteData logoBytes = await rootBundle.load('assets/images/logo.png');
+      final ByteData logoBytes = await rootBundle.load(
+        'assets/images/logo2.png',
+      );
       final Uint8List logoUint8List = logoBytes.buffer.asUint8List();
       final pdf_lib.MemoryImage logoImage = pdf_lib.MemoryImage(logoUint8List);
 
@@ -443,18 +454,30 @@ class DeliveryNoteController extends GetxController {
                 pdf_lib.SizedBox(height: 20),
                 pdf_lib.Text('No. Surat Jalan: ${deliveryNote.id}'),
                 pdf_lib.Text('Kepada: $toBranchName'),
-                pdf_lib.Text('Tanggal: ${DateFormat('dd-MM-yyyy').format(deliveryNote.deliveryDate)}'),
+                pdf_lib.Text(
+                  'Tanggal: ${DateFormat('dd-MM-yyyy').format(deliveryNote.deliveryDate)}',
+                ),
                 pdf_lib.SizedBox(height: 20),
-                pdf_lib.TableHelper.fromTextArray( // Changed to TableHelper
+                pdf_lib.TableHelper.fromTextArray(
+                  // Changed to TableHelper
                   headers: ['Items', 'Quantity', 'Check', 'Reason'],
-                  data: items.map((item) => [
-                    item['name'],
-                    item['quantity'].toString(),
-                    '✓', // Auto checklist
-                    '', // Reason
-                  ]).toList(),
-                  border: pdf_lib.TableBorder.all(color: pdf_colors.PdfColors.black), // Corrected PdfColors
-                  headerStyle: pdf_lib.TextStyle(fontWeight: pdf_lib.FontWeight.bold),
+                  data:
+                      items
+                          .map(
+                            (item) => [
+                              item['name'],
+                              item['quantity'].toString(),
+                              '✓', // Auto checklist
+                              '', // Reason
+                            ],
+                          )
+                          .toList(),
+                  border: pdf_lib.TableBorder.all(
+                    color: pdf_colors.PdfColors.black,
+                  ), // Corrected PdfColors
+                  headerStyle: pdf_lib.TextStyle(
+                    fontWeight: pdf_lib.FontWeight.bold,
+                  ),
                   cellAlignment: pdf_lib.Alignment.centerLeft,
                   cellPadding: const pdf_lib.EdgeInsets.all(5),
                 ),

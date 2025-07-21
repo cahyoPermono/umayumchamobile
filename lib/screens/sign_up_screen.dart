@@ -32,7 +32,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             children: [
               // Logo or App Icon
               Image.asset(
-                'assets/images/logo.png',
+                'assets/images/logo2.png',
                 height: 120, // Adjust size as needed
               ),
               const SizedBox(height: 16),
@@ -47,7 +47,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
               Text(
                 'Create your account to get started',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
               ),
               const SizedBox(height: 48),
@@ -87,22 +89,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           return const CircularProgressIndicator();
                         }
                         if (branchController.branches.isEmpty) {
-                          return const Text('No branches available. Please add a branch first.');
+                          return const Text(
+                            'No branches available. Please add a branch first.',
+                          );
                         }
                         return DropdownButtonFormField<Branch>(
-                          decoration: const InputDecoration(labelText: 'Assign to Branch'),
+                          decoration: const InputDecoration(
+                            labelText: 'Assign to Branch',
+                          ),
                           value: selectedBranch,
                           onChanged: (Branch? newValue) {
                             setState(() {
                               selectedBranch = newValue;
                             });
                           },
-                          items: branchController.branches.map((branch) {
-                            return DropdownMenuItem<Branch>(
-                              value: branch,
-                              child: Text(branch.name),
-                            );
-                          }).toList(),
+                          items:
+                              branchController.branches.map((branch) {
+                                return DropdownMenuItem<Branch>(
+                                  value: branch,
+                                  child: Text(branch.name),
+                                );
+                              }).toList(),
                         );
                       }),
                       const SizedBox(height: 24),
@@ -114,7 +121,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               child: ElevatedButton(
                                 onPressed: () {
                                   if (selectedBranch == null) {
-                                    Get.snackbar('Error', 'Please select a branch.');
+                                    Get.snackbar(
+                                      'Error',
+                                      'Please select a branch.',
+                                    );
                                     return;
                                   }
                                   authController.signUp(
@@ -142,7 +152,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   TextSpan(
                     text: "Already have an account? ",
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                     children: [
                       TextSpan(
