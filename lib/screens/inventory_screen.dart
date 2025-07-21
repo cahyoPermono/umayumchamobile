@@ -395,19 +395,13 @@ class _InventoryScreenState extends State<InventoryScreen> {
           ),
         ],
       ),
-      floatingActionButton: Obx(() {
-        // Only show the add product button to admins
-        if (authController.userRole.value == 'admin') {
-          return FloatingActionButton(
-            onPressed: () {
-              Get.to(() => const ProductFormScreen());
-            },
-            tooltip: 'Add New Master Product',
-            child: const Icon(Icons.add),
-          );
-        }
-        return const SizedBox.shrink(); // Return empty space if not admin
-      }),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.to(() => const ProductFormScreen());
+        },
+        tooltip: 'Add New Master Product',
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }

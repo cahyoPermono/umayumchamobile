@@ -307,7 +307,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   return AbsorbPointer(
                     child: TextFormField(
                       decoration: InputDecoration(
-                        labelText: 'Initial Stock Branch',
+                        labelText: 'Location',
                         border: const OutlineInputBorder(),
                         contentPadding: const EdgeInsets.symmetric(
                           vertical: 12.0,
@@ -429,7 +429,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                                     quantityChange: initialQuantity,
                                     reason: 'Initial stock for new product',
                                     toBranchId: umayumchaHQBranch.value!.id,
-                                    toBranchName: 'UmayumchaHQ', // Set destination name
+                                    toBranchName:
+                                        'UmayumchaHQ', // Set destination name
                                   );
                               if (transactionSuccess) {
                                 Get.back();
