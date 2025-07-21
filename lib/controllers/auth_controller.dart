@@ -33,9 +33,10 @@ class AuthController extends GetxController {
         await _fetchUserProfile(session.user.id);
         // Only navigate if not creating user by admin
         if (!Get.find<UserController>().isCreatingUserByAdmin.value) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
             debugPrint('AuthController: Navigating to Dashboard.');
-            Get.offAllNamed('/dashboard');
+            await Get.offAllNamed('/dashboard');
+            isLoading.value = false; // Set isLoading to false after navigation is complete
           });
         }
       } else {
@@ -115,11 +116,11 @@ class AuthController extends GetxController {
     } on AuthException catch (e) {
       debugPrint('AuthException during sign in: ${e.message}');
       Get.snackbar('Auth Error', e.message);
+      isLoading.value = false; // Set isLoading to false on error
     } catch (e) {
       debugPrint('Unexpected error during sign in: ${e.toString()}');
       Get.snackbar('Error', 'An unexpected error occurred.');
-    } finally {
-      isLoading.value = false;
+      isLoading.value = false; // Set isLoading to false on error
     }
   }
 

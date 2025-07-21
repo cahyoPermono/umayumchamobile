@@ -107,6 +107,9 @@ class InventoryController extends GetxController {
   Future<void> fetchGlobalLowStockProducts() async {
     try {
       if (umayumchaHQBranchId == null) {
+        await _fetchUmayumchaHQBranchId(); // Ensure branch ID is fetched
+      }
+      if (umayumchaHQBranchId == null) {
         debugPrint('UmayumchaHQ branch ID is null, cannot fetch low stock products.');
         return;
       }

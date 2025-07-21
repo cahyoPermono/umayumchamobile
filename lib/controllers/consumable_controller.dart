@@ -141,6 +141,16 @@ class ConsumableController extends GetxController {
 
   Future<void> fetchGlobalLowStockConsumables() async {
     try {
+      if (umayumchaHQBranchId == null) {
+        await _fetchUmayumchaHQBranchId(); // Ensure branch ID is fetched
+      }
+      if (umayumchaHQBranchId == null) {
+        log(
+          'UmayumchaHQ branch ID is null, cannot fetch low stock consumables.',
+        );
+        return;
+      }
+
       final response = await _supabase
           .from('consumables')
           .select('*')
