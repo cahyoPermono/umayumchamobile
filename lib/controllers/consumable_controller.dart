@@ -66,9 +66,13 @@ class ConsumableController extends GetxController {
   final _supabase = Supabase.instance.client;
   var consumables = <Consumable>[].obs;
   var expiringConsumables = <Consumable>[].obs;
+  var globalLowStockConsumables =
+      <Consumable>[].obs; // New: Global low stock consumables
   var isLoading = false.obs;
   var searchQuery = ''.obs; // New: Search query observable
   String? umayumchaHQBranchId;
+
+  static const int lowStockThreshold = 50; // Define your threshold here
 
   // New: Filtered consumables list
   RxList<Consumable> get filteredConsumables =>
@@ -93,6 +97,7 @@ class ConsumableController extends GetxController {
     super.onInit();
     fetchConsumables();
     _fetchUmayumchaHQBranchId();
+    fetchGlobalLowStockConsumables(); // Fetch global low stock consumables on init
   }
 
   Future<void> _fetchUmayumchaHQBranchId() async {
@@ -131,6 +136,23 @@ class ConsumableController extends GetxController {
       Get.snackbar('Error', 'Failed to fetch consumables: ${e.toString()}');
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchGlobalLowStockConsumables() async {
+    try {
+      final response = await _supabase
+          .from('consumables')
+          .select('*')
+          .lt('quantity', lowStockThreshold); // Filter by UmayumchaHQ branch
+
+      globalLowStockConsumables.value =
+          (response as List).map((item) => Consumable.fromJson(item)).toList();
+      log(
+        'Global low stock consumables fetched: ${globalLowStockConsumables.length}',
+      );
+    } catch (e) {
+      log('Error fetching global low stock consumables: ${e.toString()}');
     }
   }
 

@@ -35,6 +35,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       inventoryController.refreshDashboardData();
       consumableController.fetchConsumables();
+      consumableController
+          .fetchGlobalLowStockConsumables(); // Fetch low stock consumables
     });
   }
 
@@ -223,18 +225,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
               }),
               const SizedBox(height: 24),
 
-              // Low Stock Warning Section
+              // Combined Low Stock Warning Section
               Obx(() {
-                if (inventoryController.isLoading.value) {
-                  return const Center(child: CircularProgressIndicator());
+                final lowStockProducts =
+                    inventoryController.globalLowStockProducts;
+                final lowStockConsumables =
+                    consumableController.globalLowStockConsumables;
+
+                if (lowStockProducts.isEmpty && lowStockConsumables.isEmpty) {
+                  debugPrint('No low stock inventory or consumables.');
+                  return Container();
                 }
-                if (inventoryController.globalLowStockProducts.isEmpty) {
-                  debugPrint('No low stock products.');
-                  return Container(); // Changed from SizedBox.shrink()
+
+                final allLowStockItems = <String>[];
+                for (var bp in lowStockProducts) {
+                  allLowStockItems.add(
+                    '${bp.product?.name ?? 'N/A'} (Inventory): ${bp.quantity} left',
+                  );
                 }
+                for (var c in lowStockConsumables) {
+                  allLowStockItems.add(
+                    '${c.name} (Consumable): ${c.quantity} left',
+                  );
+                }
+
                 debugPrint(
-                  'Low stock products: ${inventoryController.globalLowStockProducts.length}',
+                  'Combined low stock items: ${allLowStockItems.length}',
                 );
+
                 return Card(
                   color: Theme.of(context).colorScheme.errorContainer,
                   child: Padding(
@@ -253,42 +271,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               size: 28,
                             ),
                             const SizedBox(width: 12),
-                            Text(
-                              'Low Stock Alert!',
-                              style: Theme.of(
-                                context,
-                              ).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color:
-                                    Theme.of(
-                                      context,
-                                    ).colorScheme.onErrorContainer,
+                            Expanded(
+                              child: Text(
+                                'Low Stock Alert (UmayumchaHQ)!',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.onErrorContainer,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 12),
-                        const Divider(
-                          height: 1,
-                          thickness: 1,
-                        ), // Visual separator
+                        const Divider(height: 1, thickness: 1),
                         const SizedBox(height: 12),
                         SizedBox(
-                          height: 120, // Fixed height for scrollable content
+                          height: 120, // Dynamic height up to 120
                           child: ListView.builder(
                             shrinkWrap: true,
                             physics: const ClampingScrollPhysics(),
-                            itemCount:
-                                inventoryController
-                                    .globalLowStockProducts
-                                    .length,
+                            itemCount: allLowStockItems.length,
                             itemBuilder: (context, index) {
-                              final bp =
-                                  inventoryController
-                                      .globalLowStockProducts[index];
-                              debugPrint(
-                                'Processing low stock product: ${bp.product?.name}',
-                              ); // Changed from SizedBox.shrink()
                               return Padding(
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 4.0,
@@ -306,7 +315,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                        '${bp.product?.name ?? 'N/A'} (${bp.branchName ?? 'N/A'}): ${bp.quantity} left',
+                                        allLowStockItems[index],
                                         style: TextStyle(
                                           color:
                                               Theme.of(

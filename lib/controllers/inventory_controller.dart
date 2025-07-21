@@ -14,6 +14,7 @@ class InventoryController extends GetxController {
   var selectedBranch = Rx<Branch?>(null);
   var globalLowStockProducts = <BranchProduct>[].obs; // Renamed and now global
   var searchQuery = ''.obs;
+  String? umayumchaHQBranchId; // To store UmayumchaHQ branch ID
 
   // Filtered list based on search query
   RxList<BranchProduct> get filteredBranchProducts =>
@@ -84,27 +85,46 @@ class InventoryController extends GetxController {
   void onInit() {
     // Listen for changes in selectedBranch and refetch products
     ever(selectedBranch, (_) => fetchBranchProducts());
+    _fetchUmayumchaHQBranchId(); // Fetch UmayumchaHQ branch ID on init
     fetchGlobalLowStockProducts(); // Fetch global low stock on init
     super.onInit();
   }
 
+  Future<void> _fetchUmayumchaHQBranchId() async {
+    try {
+      final response = await supabase
+          .from('branches')
+          .select('id')
+          .eq('name', 'UmayumchaHQ')
+          .single();
+      umayumchaHQBranchId = response['id'] as String;
+      debugPrint('UmayumchaHQ branch ID fetched: $umayumchaHQBranchId');
+    } catch (e) {
+      debugPrint('Error fetching UmayumchaHQ branch ID: $e');
+    }
+  }
+
   Future<void> fetchGlobalLowStockProducts() async {
     try {
+      if (umayumchaHQBranchId == null) {
+        debugPrint('UmayumchaHQ branch ID is null, cannot fetch low stock products.');
+        return;
+      }
+
       var query = supabase
           .from('branch_products')
           .select(
             '*, products(*), branches(name)',
           ) // Join products and branches
-          .lt('quantity', lowStockThreshold);
+          .lt('quantity', lowStockThreshold)
+          .eq('branch_id', umayumchaHQBranchId!); // Filter by UmayumchaHQ branch
 
       // Filter by user's branch if not admin
       final authController = Get.find<AuthController>();
       if (authController.userRole.value != 'admin' &&
           authController.userBranchId.value != null) {
-        query = query.eq(
-          'branch_id',
-          authController.userBranchId.value!,
-        ); // Filter by user's branch
+        // No need to filter by user's branch here, as we are specifically looking for UmayumchaHQ
+        // This block can be removed or modified if other global low stock views are needed.
       }
 
       final response = await query;
