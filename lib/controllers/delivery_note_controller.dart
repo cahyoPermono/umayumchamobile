@@ -217,10 +217,10 @@ class DeliveryNoteController extends GetxController {
       for (final transaction in originalProductTransactions) {
         await inventoryController.reverseTransaction(transaction['id']);
       }
-      await supabase
-          .from('inventory_transactions')
-          .delete()
-          .eq('delivery_note_id', deliveryNoteId);
+      // await supabase
+      //     .from('inventory_transactions')
+      //     .delete()
+      //     .eq('delivery_note_id', deliveryNoteId);
 
       // 2. Reverse and delete original consumable transactions
       final originalConsumableTransactions = await supabase
@@ -233,10 +233,10 @@ class DeliveryNoteController extends GetxController {
           transaction['id'],
         );
       }
-      await supabase
-          .from('consumable_transactions')
-          .delete()
-          .eq('delivery_note_id', deliveryNoteId);
+      // await supabase
+      //     .from('consumable_transactions')
+      //     .delete()
+      //     .eq('delivery_note_id', deliveryNoteId);
 
       debugPrint('Original transactions reversed and deleted.');
 
@@ -276,7 +276,7 @@ class DeliveryNoteController extends GetxController {
         final dynamic itemId =
             item['id']; // Use dynamic to handle both int and String
         final String itemName = item['name'];
-        final int quantity = item['quantity'];
+        final int quantity = item['quantity'].abs();
 
         if (itemType == 'product') {
           await inventoryController.addTransaction(
