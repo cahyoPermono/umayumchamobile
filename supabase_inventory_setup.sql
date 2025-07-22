@@ -37,6 +37,7 @@ create table public.delivery_notes (
   customer_name text not null,
   destination_address text,
   delivery_date date not null default now(),
+  keterangan text,
   user_id uuid references auth.users(id) default auth.uid()
 );
 

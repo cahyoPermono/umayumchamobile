@@ -9,6 +9,7 @@ class DeliveryNote {
   final String? toBranchId;
   final String? fromBranchName; // Direct field from DB
   final String? toBranchName; // Direct field from DB
+  final String? keterangan; // New field
   final List<Map<String, dynamic>>? productItems; // For displaying product items in the note
   final List<Map<String, dynamic>>? consumableItems; // For displaying consumable items in the note
 
@@ -23,6 +24,7 @@ class DeliveryNote {
     this.toBranchId,
     this.fromBranchName,
     this.toBranchName,
+    this.keterangan, // New field
     this.productItems,
     this.consumableItems,
   });
@@ -39,6 +41,7 @@ class DeliveryNote {
       toBranchId: json['to_branch_id'] as String?,
       fromBranchName: json['from_branch_name'] as String?, // Read directly from top-level
       toBranchName: json['to_branch_name'] as String?, // Read directly from top-level
+      keterangan: json['keterangan'] as String?, // New field
       productItems:
           (json['inventory_transactions'] as List?)
               ?.map(
@@ -73,6 +76,7 @@ class DeliveryNote {
       'to_branch_id': toBranchId,
       'from_branch_name': fromBranchName, // Add to toJson
       'to_branch_name': toBranchName, // Add to toJson
+      'keterangan': keterangan, // Add to toJson
     };
   }
 }

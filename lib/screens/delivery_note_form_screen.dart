@@ -45,6 +45,7 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
   final TextEditingController customerNameController = TextEditingController();
   final TextEditingController destinationAddressController =
       TextEditingController();
+  final TextEditingController keteranganController = TextEditingController(); // New: Keterangan controller
   DateTime selectedDeliveryDate = DateTime.now();
 
   Branch? selectedToBranch; // New: Selected destination branch
@@ -70,6 +71,7 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
       selectedToBranch = branchController.branches.firstWhereOrNull(
         (branch) => branch.id == widget.deliveryNote!.toBranchId,
       );
+      keteranganController.text = widget.deliveryNote!.keterangan ?? ''; // Initialize keterangan
 
       // Populate selectedProducts from existing productItems and consumableItems
       if (widget.deliveryNote!.productItems != null) {
@@ -348,6 +350,18 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: keteranganController,
+              decoration: InputDecoration(
+                labelText: 'Keterangan',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                prefixIcon: const Icon(Icons.description),
+              ),
+              maxLines: 3,
+            ),
             const SizedBox(height: 24),
 
             // Products for Delivery Section
@@ -511,6 +525,7 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                                 fromBranchId: umayumchaHQBranch.value!.id!,
                                 toBranchId: selectedToBranch!.id!,
                                 items: selectedProducts.toList(),
+                                keterangan: keteranganController.text,
                               );
                             } else {
                               // Update existing delivery note
@@ -525,6 +540,7 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                                 originalItems:
                                     widget.deliveryNote!.productItems! +
                                     widget.deliveryNote!.consumableItems!,
+                                keterangan: keteranganController.text,
                               );
                             }
                           },

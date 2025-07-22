@@ -57,7 +57,7 @@ class DeliveryNoteController extends GetxController {
       var query = supabase
           .from('delivery_notes')
           .select(
-            '*, inventory_transactions(product_id, product_name, quantity_change), consumable_transactions(consumable_id, consumable_name, quantity_change)',
+            '*, inventory_transactions(product_id, product_name, quantity_change), consumable_transactions(consumable_id, consumable_name, quantity_change), keterangan',
           );
 
       // Apply filters
@@ -98,6 +98,7 @@ class DeliveryNoteController extends GetxController {
     required String fromBranchId,
     required String toBranchId,
     required List<Map<String, dynamic>> items, // {id, name, quantity, type}
+    String? keterangan,
   }) async {
     try {
       isLoading.value = true;
@@ -133,6 +134,7 @@ class DeliveryNoteController extends GetxController {
                 'to_branch_id': toBranchId,
                 'from_branch_name': fromBranchName, // Save branch name
                 'to_branch_name': toBranchName, // Save branch name
+                'keterangan': keterangan, // New field
               })
               .select('id') // Only select ID now, names are already saved
               .single();
@@ -197,6 +199,7 @@ class DeliveryNoteController extends GetxController {
     required String toBranchId,
     required List<Map<String, dynamic>> newItems,
     required List<Map<String, dynamic>> originalItems,
+    String? keterangan,
   }) async {
     try {
       isLoading.value = true;
@@ -263,6 +266,7 @@ class DeliveryNoteController extends GetxController {
             'to_branch_id': toBranchId,
             'from_branch_name': fromBranchName,
             'to_branch_name': toBranchName,
+            'keterangan': keterangan,
           })
           .eq('id', deliveryNoteId);
 
@@ -364,11 +368,15 @@ class DeliveryNoteController extends GetxController {
         'dd-MM-yyyy',
       ).format(deliveryNote.deliveryDate);
 
+      // Keterangan
+      sheet.cell(CellIndex.indexByString('A12')).value = 'Keterangan:';
+      sheet.cell(CellIndex.indexByString('B12')).value = deliveryNote.keterangan ?? '';
+
       // Items Table Header
-      sheet.cell(CellIndex.indexByString('A13')).value = 'Items';
-      sheet.cell(CellIndex.indexByString('B13')).value = 'Quantity';
-      sheet.cell(CellIndex.indexByString('C13')).value = 'Check';
-      sheet.cell(CellIndex.indexByString('D13')).value = 'Reason';
+      sheet.cell(CellIndex.indexByString('A14')).value = 'Items';
+      sheet.cell(CellIndex.indexByString('B14')).value = 'Quantity';
+      sheet.cell(CellIndex.indexByString('C14')).value = 'Check';
+      sheet.cell(CellIndex.indexByString('D14')).value = 'Reason';
 
       // Apply bold style to table headers
       final headerStyle = CellStyle(
@@ -376,13 +384,13 @@ class DeliveryNoteController extends GetxController {
         horizontalAlign: HorizontalAlign.Center,
         verticalAlign: VerticalAlign.Center,
       );
-      sheet.cell(CellIndex.indexByString('A13')).cellStyle = headerStyle;
-      sheet.cell(CellIndex.indexByString('B13')).cellStyle = headerStyle;
-      sheet.cell(CellIndex.indexByString('C13')).cellStyle = headerStyle;
-      sheet.cell(CellIndex.indexByString('D13')).cellStyle = headerStyle;
+      sheet.cell(CellIndex.indexByString('A14')).cellStyle = headerStyle;
+      sheet.cell(CellIndex.indexByString('B14')).cellStyle = headerStyle;
+      sheet.cell(CellIndex.indexByString('C14')).cellStyle = headerStyle;
+      sheet.cell(CellIndex.indexByString('D14')).cellStyle = headerStyle;
 
       // Items Table Data
-      int rowIndex = 14;
+      int rowIndex = 15;
       for (var item in items) {
         sheet.cell(CellIndex.indexByString('A$rowIndex')).value = item['name'];
         sheet.cell(CellIndex.indexByString('B$rowIndex')).value =
@@ -448,6 +456,15 @@ class DeliveryNoteController extends GetxController {
                 pdf_lib.Text(
                   'Tanggal: ${DateFormat('dd-MM-yyyy').format(deliveryNote.deliveryDate)}',
                 ),
+                if (deliveryNote.keterangan != null && deliveryNote.keterangan!.isNotEmpty)
+                  pdf_lib.Column(
+                    crossAxisAlignment: pdf_lib.CrossAxisAlignment.start,
+                    children: [
+                      pdf_lib.SizedBox(height: 10),
+                      pdf_lib.Text('Keterangan:'),
+                      pdf_lib.Text(deliveryNote.keterangan!),
+                    ],
+                  ),
                 pdf_lib.SizedBox(height: 20),
                 pdf_lib.TableHelper.fromTextArray(
                   // Changed to TableHelper
