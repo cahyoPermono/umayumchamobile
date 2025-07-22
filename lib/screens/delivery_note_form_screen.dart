@@ -10,6 +10,7 @@ import 'package:umayumcha_ims/models/consumable_model.dart'; // New: Import Cons
 import 'package:umayumcha_ims/widgets/item_selection_dialog.dart'; // New: Import ItemSelectionDialog
 import 'package:umayumcha_ims/models/delivery_note_model.dart'; // Import DeliveryNote model
 import 'package:umayumcha_ims/utils/file_exporter.dart'; // New: Import file_exporter
+import 'package:umayumcha_ims/controllers/auth_controller.dart'; // Import AuthController
 
 // Helper class for selectable items (Moved to top-level)
 class SelectableItem {
@@ -567,76 +568,87 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                         ),
                       ),
                       if (widget.deliveryNote != null) ...[
-                        const SizedBox(height: 16),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: () async { // Added async
-                              final excelBytes = await deliveryNoteController.exportToExcel(
-                                deliveryNote: widget.deliveryNote!,
-                                toBranchName: selectedToBranch?.name ?? 'N/A',
-                                items: selectedProducts.toList(),
-                              );
-                              if (excelBytes != null) {
-                                await exportPdfAndExcel(
-                                  pdfBytes: [], // No PDF bytes for Excel export
-                                  pdfFileName: '', // No PDF file name
-                                  excelBytes: excelBytes,
-                                  excelFileName: 'DeliveryNote_${widget.deliveryNote!.id}.xlsx',
-                                );
-                              }
-                            },
-                            icon: const Icon(Icons.download),
-                            label: const Text('Export to Excel'),
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 15),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              textStyle: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              backgroundColor: Colors.green, // Green for Excel
-                              foregroundColor: Colors.white,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: () async { // Added async
-                              final pdfBytes = await deliveryNoteController.exportToPdf(
-                                deliveryNote: widget.deliveryNote!,
-                                toBranchName: selectedToBranch?.name ?? 'N/A',
-                                items: selectedProducts.toList(),
-                              );
-                              if (pdfBytes != null) {
-                                await exportPdfAndExcel(
-                                  pdfBytes: pdfBytes,
-                                  pdfFileName: 'DeliveryNote_${widget.deliveryNote!.id}.pdf',
-                                  excelBytes: [], // No Excel bytes for PDF export
-                                  excelFileName: '', // No Excel file name
-                                );
-                              }
-                            },
-                            icon: const Icon(Icons.picture_as_pdf),
-                            label: const Text('Export to PDF'),
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 15),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              textStyle: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              backgroundColor: Colors.red, // Red for PDF
-                              foregroundColor: Colors.white,
-                            ),
-                          ),
-                        ),
+                        Obx(() {
+                          final AuthController authController = Get.find();
+                          if (authController.userRole.value == 'admin') {
+                            return Column(
+                              children: [
+                                const SizedBox(height: 16),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton.icon(
+                                    onPressed: () async { // Added async
+                                      final excelBytes = await deliveryNoteController.exportToExcel(
+                                        deliveryNote: widget.deliveryNote!,
+                                        toBranchName: selectedToBranch?.name ?? 'N/A',
+                                        items: selectedProducts.toList(),
+                                      );
+                                      if (excelBytes != null) {
+                                        await exportPdfAndExcel(
+                                          pdfBytes: [], // No PDF bytes for Excel export
+                                          pdfFileName: '', // No PDF file name
+                                          excelBytes: excelBytes,
+                                          excelFileName: 'DeliveryNote_${widget.deliveryNote!.id}.xlsx',
+                                        );
+                                      }
+                                    },
+                                    icon: const Icon(Icons.download),
+                                    label: const Text('Export to Excel'),
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(vertical: 15),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      textStyle: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      backgroundColor: Colors.green, // Green for Excel
+                                      foregroundColor: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton.icon(
+                                    onPressed: () async { // Added async
+                                      final pdfBytes = await deliveryNoteController.exportToPdf(
+                                        deliveryNote: widget.deliveryNote!,
+                                        toBranchName: selectedToBranch?.name ?? 'N/A',
+                                        items: selectedProducts.toList(),
+                                      );
+                                      if (pdfBytes != null) {
+                                        await exportPdfAndExcel(
+                                          pdfBytes: pdfBytes,
+                                          pdfFileName: 'DeliveryNote_${widget.deliveryNote!.id}.pdf',
+                                          excelBytes: [], // No Excel bytes for PDF export
+                                          excelFileName: '', // No Excel file name
+                                        );
+                                      }
+                                    },
+                                    icon: const Icon(Icons.picture_as_pdf),
+                                    label: const Text('Export to PDF'),
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(vertical: 15),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      textStyle: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      backgroundColor: Colors.red, // Red for PDF
+                                      foregroundColor: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          } else {
+                            return const SizedBox.shrink();
+                          }
+                        }),
                       ],
                     ],
                   );

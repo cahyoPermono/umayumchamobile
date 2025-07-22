@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:umayumcha_ims/controllers/delivery_note_controller.dart';
 import 'package:umayumcha_ims/screens/delivery_note_form_screen.dart';
-import 'package:umayumcha_ims/controllers/auth_controller.dart'; // Import AuthController
+
 
 class DeliveryNoteListScreen extends StatelessWidget {
   const DeliveryNoteListScreen({super.key});
@@ -247,19 +247,12 @@ class DeliveryNoteListScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      trailing: Obx(() {
-                        final AuthController authController = Get.find();
-                        if (authController.userRole.value == 'admin') {
-                          return IconButton(
-                            icon: const Icon(Icons.edit),
-                            onPressed: () {
-                              Get.to(() => DeliveryNoteFormScreen(deliveryNote: note));
-                            },
-                          );
-                        } else {
-                          return const SizedBox.shrink();
-                        }
-                      }),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          Get.to(() => DeliveryNoteFormScreen(deliveryNote: note));
+                        },
+                      ),
                       children: [
                         const Divider(
                           height: 1,
