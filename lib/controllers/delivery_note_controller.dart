@@ -370,7 +370,8 @@ class DeliveryNoteController extends GetxController {
 
       // Keterangan
       sheet.cell(CellIndex.indexByString('A12')).value = 'Keterangan:';
-      sheet.cell(CellIndex.indexByString('B12')).value = deliveryNote.keterangan ?? '';
+      sheet.cell(CellIndex.indexByString('B12')).value =
+          deliveryNote.keterangan ?? '';
 
       // Items Table Header
       sheet.cell(CellIndex.indexByString('A14')).value = 'Items';
@@ -456,7 +457,8 @@ class DeliveryNoteController extends GetxController {
                 pdf_lib.Text(
                   'Tanggal: ${DateFormat('dd-MM-yyyy').format(deliveryNote.deliveryDate)}',
                 ),
-                if (deliveryNote.keterangan != null && deliveryNote.keterangan!.isNotEmpty)
+                if (deliveryNote.keterangan != null &&
+                    deliveryNote.keterangan!.isNotEmpty)
                   pdf_lib.Column(
                     crossAxisAlignment: pdf_lib.CrossAxisAlignment.start,
                     children: [
@@ -475,7 +477,7 @@ class DeliveryNoteController extends GetxController {
                             (item) => [
                               item['name'],
                               item['quantity'].toString(),
-                              '✓', // Auto checklist
+                              '', // Auto checklist
                               '', // Reason
                             ],
                           )
