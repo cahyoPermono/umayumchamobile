@@ -1,5 +1,6 @@
 class DeliveryNote {
   final String id;
+  final String? dnNumber; // Add this line
   final DateTime createdAt;
   final String? customerName;
   final String? destinationAddress;
@@ -15,6 +16,7 @@ class DeliveryNote {
 
   DeliveryNote({
     required this.id,
+    this.dnNumber, // Add this line
     required this.createdAt,
     this.customerName,
     this.destinationAddress,
@@ -32,6 +34,7 @@ class DeliveryNote {
   factory DeliveryNote.fromJson(Map<String, dynamic> json) {
     return DeliveryNote(
       id: json['id'] as String,
+      dnNumber: json['dn_number'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       customerName: json['customer_name'] as String?,
       destinationAddress: json['destination_address'] as String?,

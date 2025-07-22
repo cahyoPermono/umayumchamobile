@@ -261,6 +261,17 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (widget.deliveryNote?.dnNumber != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: Text(
+                  'DN Number: ${widget.deliveryNote!.dnNumber}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             // From Branch Selection (Hidden and pre-selected to UmayumchaHQ)
             Obx(() {
               if (branchController.isLoading.value) {

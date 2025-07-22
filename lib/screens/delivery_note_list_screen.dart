@@ -219,7 +219,7 @@ class DeliveryNoteListScreen extends StatelessWidget {
                         vertical: 10,
                       ),
                       title: Text(
-                        note.customerName ?? 'Internal Transfer',
+                        note.dnNumber ?? note.customerName ?? 'Internal Transfer',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
