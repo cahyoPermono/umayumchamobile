@@ -8,8 +8,7 @@ import 'package:umayumcha/models/delivery_note_model.dart';
 import 'package:excel/excel.dart';
 import 'package:pdf/pdf.dart' as pdf_colors; // New alias for PdfColors
 import 'package:pdf/widgets.dart' as pdf_lib; // Changed alias to pdf_lib
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
+
 import 'package:intl/intl.dart';
 
 class DeliveryNoteController extends GetxController {
@@ -322,7 +321,7 @@ class DeliveryNoteController extends GetxController {
     }
   }
 
-  Future<void> exportToExcel({
+  Future<List<int>?> exportToExcel({
     required DeliveryNote deliveryNote,
     required String toBranchName,
     required List<Map<String, dynamic>> items,
@@ -354,7 +353,8 @@ class DeliveryNoteController extends GetxController {
       );
 
       sheet.cell(CellIndex.indexByString('A9')).value = 'No. Surat Jalan:';
-      sheet.cell(CellIndex.indexByString('B9')).value = deliveryNote.id;
+      sheet.cell(CellIndex.indexByString('B9')).value =
+          deliveryNote.id.toString();
 
       sheet.cell(CellIndex.indexByString('A10')).value = 'Kepada:';
       sheet.cell(CellIndex.indexByString('B10')).value = toBranchName;
@@ -405,24 +405,15 @@ class DeliveryNoteController extends GetxController {
       sheet.cell(CellIndex.indexByString('D$rowIndex')).value =
           '(____________)';
 
-      final String dir = (await getDownloadsDirectory())!.path;
-      final String path = '$dir/DeliveryNote_${deliveryNote.id}.xlsx';
-      final List<int>? fileBytes = excel.save();
-      if (fileBytes != null) {
-        File(path)
-          ..createSync(recursive: true)
-          ..writeAsBytesSync(fileBytes);
-        Get.snackbar('Success', 'Excel exported to $path');
-        // Optionally open the file
-        // OpenFile.open(path);
-      }
+      return excel.save(); // Return bytes
     } catch (e) {
-      debugPrint('Error exporting to Excel: ${e.toString()}');
-      Get.snackbar('Error', 'Failed to export Excel: ${e.toString()}');
+      debugPrint('Error generating Excel: ${e.toString()}');
+      Get.snackbar('Error', 'Failed to generate Excel: ${e.toString()}');
+      return null;
     }
   }
 
-  Future<void> exportToPdf({
+  Future<List<int>?> exportToPdf({
     required DeliveryNote deliveryNote,
     required String toBranchName,
     required List<Map<String, dynamic>> items,
@@ -507,16 +498,11 @@ class DeliveryNoteController extends GetxController {
         ),
       );
 
-      final String dir = (await getDownloadsDirectory())!.path;
-      final String path = '$dir/DeliveryNote_${deliveryNote.id}.pdf';
-      final File file = File(path);
-      await file.writeAsBytes(await pdf.save());
-      Get.snackbar('Success', 'PDF exported to $path');
-      // Optionally open the file
-      // OpenFile.open(path);
+      return pdf.save(); // Return bytes
     } catch (e) {
-      debugPrint('Error exporting to PDF: ${e.toString()}');
-      Get.snackbar('Error', 'Failed to export PDF: ${e.toString()}');
+      debugPrint('Error generating PDF: ${e.toString()}');
+      Get.snackbar('Error', 'Failed to generate PDF: ${e.toString()}');
+      return null;
     }
   }
 }

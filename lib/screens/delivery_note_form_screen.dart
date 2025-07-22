@@ -9,6 +9,7 @@ import 'package:umayumcha/controllers/consumable_controller.dart'; // New: Impor
 import 'package:umayumcha/models/consumable_model.dart'; // New: Import Consumable model
 import 'package:umayumcha/widgets/item_selection_dialog.dart'; // New: Import ItemSelectionDialog
 import 'package:umayumcha/models/delivery_note_model.dart'; // Import DeliveryNote model
+import 'package:umayumcha/utils/file_exporter.dart'; // New: Import file_exporter
 
 // Helper class for selectable items (Moved to top-level)
 class SelectableItem {
@@ -55,7 +56,8 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
     null,
   ); // To hold the UmayumchaHQ branch
 
-  String? deliveryNoteId; // New: To store the ID of the delivery note being edited
+  String?
+  deliveryNoteId; // New: To store the ID of the delivery note being edited
 
   @override
   void initState() {
@@ -237,7 +239,9 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.deliveryNote == null ? 'Create Delivery Note' : 'Edit Delivery Note',
+          widget.deliveryNote == null
+              ? 'Create Delivery Note'
+              : 'Edit Delivery Note',
           style: const TextStyle(
             color: Colors.white, // White text for consistency
             fontWeight: FontWeight.bold,
@@ -254,8 +258,6 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            
-
             // From Branch Selection (Hidden and pre-selected to UmayumchaHQ)
             Obx(() {
               if (branchController.isLoading.value) {
@@ -462,67 +464,114 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
               return deliveryNoteController.isLoading.value
                   ? const Center(child: CircularProgressIndicator())
                   : Column(
-                      children: [
-                        SizedBox(
-                          width: double.infinity, // Make button full width
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              if (umayumchaHQBranch.value == null) {
-                                Get.snackbar(
-                                  'Error',
-                                  'UmayumchaHQ branch not found.',
-                                );
-                                return;
-                              }
-                              if (selectedToBranch == null) {
-                                Get.snackbar('Error', 'Please select a To Branch.');
-                                return;
-                              }
-                              if (selectedProducts.isEmpty) {
-                                Get.snackbar(
-                                  'Error',
-                                  'Please add at least one item to the delivery note.',
-                                );
-                                return;
-                              }
-                              if (umayumchaHQBranch.value!.id == null) {
-                                Get.snackbar(
-                                  'Error',
-                                  'UmayumchaHQ Branch ID is missing.',
-                                );
-                                return;
-                              }
-                              if (selectedToBranch!.id == null) {
-                                Get.snackbar('Error', 'To Branch ID is missing.');
-                                return;
-                              }
+                    children: [
+                      SizedBox(
+                        width: double.infinity, // Make button full width
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            if (umayumchaHQBranch.value == null) {
+                              Get.snackbar(
+                                'Error',
+                                'UmayumchaHQ branch not found.',
+                              );
+                              return;
+                            }
+                            if (selectedToBranch == null) {
+                              Get.snackbar(
+                                'Error',
+                                'Please select a To Branch.',
+                              );
+                              return;
+                            }
+                            if (selectedProducts.isEmpty) {
+                              Get.snackbar(
+                                'Error',
+                                'Please add at least one item to the delivery note.',
+                              );
+                              return;
+                            }
+                            if (umayumchaHQBranch.value!.id == null) {
+                              Get.snackbar(
+                                'Error',
+                                'UmayumchaHQ Branch ID is missing.',
+                              );
+                              return;
+                            }
+                            if (selectedToBranch!.id == null) {
+                              Get.snackbar('Error', 'To Branch ID is missing.');
+                              return;
+                            }
 
-                              if (widget.deliveryNote == null) {
-                                // Create new delivery note
-                                deliveryNoteController.createDeliveryNote(
-                                  customerName: 'Internal Transfer',
-                                  destinationAddress: 'Internal Transfer',
-                                  deliveryDate: selectedDeliveryDate,
-                                  fromBranchId: umayumchaHQBranch.value!.id!,
-                                  toBranchId: selectedToBranch!.id!,
-                                  items: selectedProducts.toList(),
-                                );
-                              } else {
-                                // Update existing delivery note
-                                deliveryNoteController.updateDeliveryNote(
-                                  deliveryNoteId: deliveryNoteId!,
-                                  customerName: 'Internal Transfer',
-                                  destinationAddress: 'Internal Transfer',
-                                  deliveryDate: selectedDeliveryDate,
-                                  fromBranchId: umayumchaHQBranch.value!.id!,
-                                  toBranchId: selectedToBranch!.id!,
-                                  newItems: selectedProducts.toList(),
-                                  originalItems: widget.deliveryNote!.productItems! + widget.deliveryNote!.consumableItems!,
+                            if (widget.deliveryNote == null) {
+                              // Create new delivery note
+                              deliveryNoteController.createDeliveryNote(
+                                customerName: 'Internal Transfer',
+                                destinationAddress: 'Internal Transfer',
+                                deliveryDate: selectedDeliveryDate,
+                                fromBranchId: umayumchaHQBranch.value!.id!,
+                                toBranchId: selectedToBranch!.id!,
+                                items: selectedProducts.toList(),
+                              );
+                            } else {
+                              // Update existing delivery note
+                              deliveryNoteController.updateDeliveryNote(
+                                deliveryNoteId: deliveryNoteId!,
+                                customerName: 'Internal Transfer',
+                                destinationAddress: 'Internal Transfer',
+                                deliveryDate: selectedDeliveryDate,
+                                fromBranchId: umayumchaHQBranch.value!.id!,
+                                toBranchId: selectedToBranch!.id!,
+                                newItems: selectedProducts.toList(),
+                                originalItems:
+                                    widget.deliveryNote!.productItems! +
+                                    widget.deliveryNote!.consumableItems!,
+                              );
+                            }
+                          },
+                          icon: Icon(
+                            widget.deliveryNote == null
+                                ? Icons.save
+                                : Icons.update,
+                          ),
+                          label: Text(
+                            widget.deliveryNote == null
+                                ? 'Save Delivery Note'
+                                : 'Update Delivery Note',
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (widget.deliveryNote != null) ...[
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: () async { // Added async
+                              final excelBytes = await deliveryNoteController.exportToExcel(
+                                deliveryNote: widget.deliveryNote!,
+                                toBranchName: selectedToBranch?.name ?? 'N/A',
+                                items: selectedProducts.toList(),
+                              );
+                              if (excelBytes != null) {
+                                await exportPdfAndExcel(
+                                  pdfBytes: [], // No PDF bytes for Excel export
+                                  pdfFileName: '', // No PDF file name
+                                  excelBytes: excelBytes,
+                                  excelFileName: 'DeliveryNote_${widget.deliveryNote!.id}.xlsx',
                                 );
                               }
                             },
-                            icon: Icon(widget.deliveryNote == null ? Icons.save : Icons.update),
-                            label: Text(widget.deliveryNote == null ? 'Save Delivery Note' : 'Update Delivery Note'),
+                            icon: const Icon(Icons.download),
+                            label: const Text('Export to Excel'),
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 15),
                               shape: RoundedRectangleBorder(
@@ -532,67 +581,49 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
+                              backgroundColor: Colors.green, // Green for Excel
+                              foregroundColor: Colors.white,
                             ),
                           ),
                         ),
-                        if (widget.deliveryNote != null) ...[
-                          const SizedBox(height: 16),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: () {
-                                deliveryNoteController.exportToExcel(
-                                  deliveryNote: widget.deliveryNote!,
-                                  toBranchName: selectedToBranch?.name ?? 'N/A',
-                                  items: selectedProducts.toList(),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: () async { // Added async
+                              final pdfBytes = await deliveryNoteController.exportToPdf(
+                                deliveryNote: widget.deliveryNote!,
+                                toBranchName: selectedToBranch?.name ?? 'N/A',
+                                items: selectedProducts.toList(),
+                              );
+                              if (pdfBytes != null) {
+                                await exportPdfAndExcel(
+                                  pdfBytes: pdfBytes,
+                                  pdfFileName: 'DeliveryNote_${widget.deliveryNote!.id}.pdf',
+                                  excelBytes: [], // No Excel bytes for PDF export
+                                  excelFileName: '', // No Excel file name
                                 );
-                              },
-                              icon: const Icon(Icons.download),
-                              label: const Text('Export to Excel'),
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 15),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                textStyle: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                backgroundColor: Colors.green, // Green for Excel
-                                foregroundColor: Colors.white,
+                              }
+                            },
+                            icon: const Icon(Icons.picture_as_pdf),
+                            label: const Text('Export to PDF'),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
                               ),
+                              textStyle: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              backgroundColor: Colors.red, // Red for PDF
+                              foregroundColor: Colors.white,
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: () {
-                                deliveryNoteController.exportToPdf(
-                                  deliveryNote: widget.deliveryNote!,
-                                  toBranchName: selectedToBranch?.name ?? 'N/A',
-                                  items: selectedProducts.toList(),
-                                );
-                              },
-                              icon: const Icon(Icons.picture_as_pdf),
-                              label: const Text('Export to PDF'),
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 15),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                textStyle: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                backgroundColor: Colors.red, // Red for PDF
-                                foregroundColor: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ],
-                    );
+                    ],
+                  );
             }),
           ],
         ),
