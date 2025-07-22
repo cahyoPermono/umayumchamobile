@@ -327,7 +327,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   IconButton(
-                                    icon: const Icon(Icons.edit),
+                                    icon: const Icon(
+                                      Icons.edit,
+                                      color: Colors.grey,
+                                    ),
                                     onPressed: () {
                                       Get.to(
                                         () =>
@@ -336,7 +339,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                     },
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.delete),
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: Colors.redAccent,
+                                    ),
                                     onPressed: () {
                                       showDeleteConfirmationDialog(
                                         title: 'Delete Product',
