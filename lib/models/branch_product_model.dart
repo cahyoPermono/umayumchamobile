@@ -1,5 +1,5 @@
 
-import 'package:umayumcha/models/product_model.dart';
+import 'package:umayumcha_ims/models/product_model.dart';
 
 class BranchProduct {
   final String id;

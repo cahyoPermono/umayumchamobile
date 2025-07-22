@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:umayumcha/controllers/auth_controller.dart';
-import 'package:umayumcha/screens/dashboard_screen.dart';
-import 'package:umayumcha/screens/sign_in_screen.dart';
-import 'package:umayumcha/screens/splash_screen.dart';
+import 'package:umayumcha_ims/controllers/auth_controller.dart';
+import 'package:umayumcha_ims/screens/dashboard_screen.dart';
+import 'package:umayumcha_ims/screens/sign_in_screen.dart';
+import 'package:umayumcha_ims/screens/splash_screen.dart';
 
 class AuthWrapper extends GetView<AuthController> {
   const AuthWrapper({super.key});

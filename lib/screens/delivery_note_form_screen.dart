@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:umayumcha/controllers/delivery_note_controller.dart';
-import 'package:umayumcha/controllers/inventory_controller.dart';
-import 'package:umayumcha/controllers/branch_controller.dart'; // Import BranchController
-import 'package:umayumcha/models/branch_model.dart'; // Import Branch model
-import 'package:umayumcha/models/branch_product_model.dart'; // Import BranchProduct model
-import 'package:umayumcha/controllers/consumable_controller.dart'; // New: Import ConsumableController
-import 'package:umayumcha/models/consumable_model.dart'; // New: Import Consumable model
-import 'package:umayumcha/widgets/item_selection_dialog.dart'; // New: Import ItemSelectionDialog
-import 'package:umayumcha/models/delivery_note_model.dart'; // Import DeliveryNote model
-import 'package:umayumcha/utils/file_exporter.dart'; // New: Import file_exporter
+import 'package:umayumcha_ims/controllers/delivery_note_controller.dart';
+import 'package:umayumcha_ims/controllers/inventory_controller.dart';
+import 'package:umayumcha_ims/controllers/branch_controller.dart'; // Import BranchController
+import 'package:umayumcha_ims/models/branch_model.dart'; // Import Branch model
+import 'package:umayumcha_ims/models/branch_product_model.dart'; // Import BranchProduct model
+import 'package:umayumcha_ims/controllers/consumable_controller.dart'; // New: Import ConsumableController
+import 'package:umayumcha_ims/models/consumable_model.dart'; // New: Import Consumable model
+import 'package:umayumcha_ims/widgets/item_selection_dialog.dart'; // New: Import ItemSelectionDialog
+import 'package:umayumcha_ims/models/delivery_note_model.dart'; // Import DeliveryNote model
+import 'package:umayumcha_ims/utils/file_exporter.dart'; // New: Import file_exporter
 
 // Helper class for selectable items (Moved to top-level)
 class SelectableItem {

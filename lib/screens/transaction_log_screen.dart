@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:umayumcha/controllers/transaction_log_controller.dart';
-import 'package:umayumcha/models/inventory_transaction_model.dart'; // Explicitly import the model
+import 'package:umayumcha_ims/controllers/transaction_log_controller.dart';
+import 'package:umayumcha_ims/models/inventory_transaction_model.dart'; // Explicitly import the model
 
 class TransactionLogScreen extends StatelessWidget {
   const TransactionLogScreen({super.key});

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:umayumcha/controllers/auth_controller.dart';
-import 'package:umayumcha/screens/consumable_list_screen.dart';
-import 'package:umayumcha/screens/inventory_screen.dart';
-import 'package:umayumcha/controllers/inventory_controller.dart'; // Import InventoryController
-import 'package:umayumcha/controllers/consumable_controller.dart';
-import 'package:umayumcha/screens/delivery_note_list_screen.dart';
+import 'package:umayumcha_ims/controllers/auth_controller.dart';
+import 'package:umayumcha_ims/screens/consumable_list_screen.dart';
+import 'package:umayumcha_ims/screens/inventory_screen.dart';
+import 'package:umayumcha_ims/controllers/inventory_controller.dart'; // Import InventoryController
+import 'package:umayumcha_ims/controllers/consumable_controller.dart';
+import 'package:umayumcha_ims/screens/delivery_note_list_screen.dart';
 
-import 'package:umayumcha/screens/transaction_log_screen.dart';
-import 'package:umayumcha/screens/consumable_transaction_log_screen.dart';
-import 'package:umayumcha/screens/user_list_screen.dart';
-import 'package:umayumcha/screens/branch_list_screen.dart';
+import 'package:umayumcha_ims/screens/transaction_log_screen.dart';
+import 'package:umayumcha_ims/screens/consumable_transaction_log_screen.dart';
+import 'package:umayumcha_ims/screens/user_list_screen.dart';
+import 'package:umayumcha_ims/screens/branch_list_screen.dart';
 import 'package:intl/intl.dart';
 
 class DashboardScreen extends StatefulWidget {

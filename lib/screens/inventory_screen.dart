@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:umayumcha/controllers/auth_controller.dart';
-import 'package:umayumcha/controllers/inventory_controller.dart';
-import 'package:umayumcha/controllers/branch_controller.dart';
-import 'package:umayumcha/models/branch_product_model.dart';
-import 'package:umayumcha/screens/product_form_screen.dart';
-import 'package:umayumcha/widgets/delete_confirmation_dialog.dart';
+import 'package:umayumcha_ims/controllers/auth_controller.dart';
+import 'package:umayumcha_ims/controllers/inventory_controller.dart';
+import 'package:umayumcha_ims/controllers/branch_controller.dart';
+import 'package:umayumcha_ims/models/branch_product_model.dart';
+import 'package:umayumcha_ims/screens/product_form_screen.dart';
+import 'package:umayumcha_ims/widgets/delete_confirmation_dialog.dart';
 
 void _showTransactionDialog(
   BuildContext context,

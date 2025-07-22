@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:umayumcha/controllers/inventory_controller.dart';
-import 'package:umayumcha/controllers/branch_controller.dart'; // Import BranchController
-import 'package:umayumcha/models/product_model.dart';
-import 'package:umayumcha/models/branch_model.dart'; // Import Branch model
+import 'package:umayumcha_ims/controllers/inventory_controller.dart';
+import 'package:umayumcha_ims/controllers/branch_controller.dart'; // Import BranchController
+import 'package:umayumcha_ims/models/product_model.dart';
+import 'package:umayumcha_ims/models/branch_model.dart'; // Import Branch model
 
 class ProductFormScreen extends StatefulWidget {
   final Product? product;

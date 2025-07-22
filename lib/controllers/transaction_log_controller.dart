@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart'; // For debugPrint
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:umayumcha/models/inventory_transaction_model.dart';
+import 'package:umayumcha_ims/models/inventory_transaction_model.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:excel/excel.dart'; // Import excel package

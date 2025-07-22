@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:umayumcha/controllers/consumable_controller.dart';
-import 'package:umayumcha/models/consumable_model.dart';
+import 'package:umayumcha_ims/controllers/consumable_controller.dart';
+import 'package:umayumcha_ims/models/consumable_model.dart';
 
 class ConsumableFormScreen extends StatefulWidget {
   final Consumable? consumable;

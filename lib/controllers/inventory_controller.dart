@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart'; // For debugPrint
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:umayumcha/controllers/auth_controller.dart';
-import 'package:umayumcha/models/branch_product_model.dart';
-import 'package:umayumcha/models/branch_model.dart';
-import 'package:umayumcha/models/product_model.dart';
+import 'package:umayumcha_ims/controllers/auth_controller.dart';
+import 'package:umayumcha_ims/models/branch_product_model.dart';
+import 'package:umayumcha_ims/models/branch_model.dart';
+import 'package:umayumcha_ims/models/product_model.dart';
 
 class InventoryController extends GetxController {
   final SupabaseClient supabase = Supabase.instance.client;
@@ -92,11 +92,12 @@ class InventoryController extends GetxController {
 
   Future<void> _fetchUmayumchaHQBranchId() async {
     try {
-      final response = await supabase
-          .from('branches')
-          .select('id')
-          .eq('name', 'UmayumchaHQ')
-          .single();
+      final response =
+          await supabase
+              .from('branches')
+              .select('id')
+              .eq('name', 'UmayumchaHQ')
+              .single();
       umayumchaHQBranchId = response['id'] as String;
       debugPrint('UmayumchaHQ branch ID fetched: $umayumchaHQBranchId');
     } catch (e) {
@@ -110,7 +111,9 @@ class InventoryController extends GetxController {
         await _fetchUmayumchaHQBranchId(); // Ensure branch ID is fetched
       }
       if (umayumchaHQBranchId == null) {
-        debugPrint('UmayumchaHQ branch ID is null, cannot fetch low stock products.');
+        debugPrint(
+          'UmayumchaHQ branch ID is null, cannot fetch low stock products.',
+        );
         return;
       }
 
@@ -120,7 +123,10 @@ class InventoryController extends GetxController {
             '*, products(*), branches(name)',
           ) // Join products and branches
           .lt('quantity', lowStockThreshold)
-          .eq('branch_id', umayumchaHQBranchId!); // Filter by UmayumchaHQ branch
+          .eq(
+            'branch_id',
+            umayumchaHQBranchId!,
+          ); // Filter by UmayumchaHQ branch
 
       // Filter by user's branch if not admin
       final authController = Get.find<AuthController>();

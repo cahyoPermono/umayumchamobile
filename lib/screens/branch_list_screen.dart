@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:umayumcha/controllers/auth_controller.dart';
-import 'package:umayumcha/controllers/branch_controller.dart';
-import 'package:umayumcha/screens/branch_form_screen.dart';
-import 'package:umayumcha/widgets/delete_confirmation_dialog.dart'; // Import the new dialog
+import 'package:umayumcha_ims/controllers/auth_controller.dart';
+import 'package:umayumcha_ims/controllers/branch_controller.dart';
+import 'package:umayumcha_ims/screens/branch_form_screen.dart';
+import 'package:umayumcha_ims/widgets/delete_confirmation_dialog.dart'; // Import the new dialog
 
 class BranchListScreen extends StatelessWidget {
   final BranchController controller = Get.find();

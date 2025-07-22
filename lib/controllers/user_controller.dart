@@ -2,7 +2,7 @@ import 'package:uuid/uuid.dart';
 import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:umayumcha/models/profile_model.dart';
+import 'package:umayumcha_ims/models/profile_model.dart';
 
 class UserController extends GetxController {
   final _supabase = Supabase.instance.client;

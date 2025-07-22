@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart'; // For debugPrint
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:umayumcha/controllers/branch_controller.dart';
+import 'package:umayumcha_ims/controllers/branch_controller.dart';
 
 class AuthController extends GetxController {
   final SupabaseClient supabase = Supabase.instance.client;

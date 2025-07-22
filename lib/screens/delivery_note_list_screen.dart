@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:umayumcha/controllers/delivery_note_controller.dart';
-import 'package:umayumcha/screens/delivery_note_form_screen.dart';
-import 'package:umayumcha/controllers/auth_controller.dart'; // Import AuthController
+import 'package:umayumcha_ims/controllers/delivery_note_controller.dart';
+import 'package:umayumcha_ims/screens/delivery_note_form_screen.dart';
+import 'package:umayumcha_ims/controllers/auth_controller.dart'; // Import AuthController
 
 class DeliveryNoteListScreen extends StatelessWidget {
   const DeliveryNoteListScreen({super.key});

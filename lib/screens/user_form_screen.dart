@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:umayumcha/controllers/user_controller.dart';
-import 'package:umayumcha/models/profile_model.dart';
+import 'package:umayumcha_ims/controllers/user_controller.dart';
+import 'package:umayumcha_ims/models/profile_model.dart';
 
 class UserFormScreen extends StatefulWidget {
   final Profile? user;

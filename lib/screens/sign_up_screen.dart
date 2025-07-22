@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:umayumcha/controllers/auth_controller.dart';
-import 'package:umayumcha/controllers/branch_controller.dart'; // Import BranchController
-import 'package:umayumcha/models/branch_model.dart'; // Import Branch model
+import 'package:umayumcha_ims/controllers/auth_controller.dart';
+import 'package:umayumcha_ims/controllers/branch_controller.dart'; // Import BranchController
+import 'package:umayumcha_ims/models/branch_model.dart'; // Import Branch model
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});

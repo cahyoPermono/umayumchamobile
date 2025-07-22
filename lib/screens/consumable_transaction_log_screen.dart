@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:umayumcha/controllers/consumable_transaction_log_controller.dart';
+import 'package:umayumcha_ims/controllers/consumable_transaction_log_controller.dart';
 
 class ConsumableTransactionLogScreen extends StatelessWidget {
   final ConsumableTransactionLogController controller = Get.put(

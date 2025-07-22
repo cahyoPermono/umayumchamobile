@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:umayumcha/controllers/auth_controller.dart';
-import 'package:umayumcha/controllers/branch_controller.dart';
-import 'package:umayumcha/screens/dashboard_screen.dart';
-import 'package:umayumcha/screens/sign_in_screen.dart';
+import 'package:umayumcha_ims/controllers/auth_controller.dart';
+import 'package:umayumcha_ims/controllers/branch_controller.dart';
+import 'package:umayumcha_ims/screens/dashboard_screen.dart';
+import 'package:umayumcha_ims/screens/sign_in_screen.dart';
 
-import 'package:umayumcha/bindings/dashboard_binding.dart';
-import 'package:umayumcha/supabase_credentials.dart';
-import 'package:umayumcha/controllers/inventory_controller.dart';
-import 'package:umayumcha/controllers/consumable_controller.dart';
-import 'package:umayumcha/controllers/user_controller.dart';
+import 'package:umayumcha_ims/bindings/dashboard_binding.dart';
+import 'package:umayumcha_ims/supabase_credentials.dart';
+import 'package:umayumcha_ims/controllers/inventory_controller.dart';
+import 'package:umayumcha_ims/controllers/consumable_controller.dart';
+import 'package:umayumcha_ims/controllers/user_controller.dart';
 
-import 'package:umayumcha/screens/auth_wrapper.dart';
+import 'package:umayumcha_ims/screens/auth_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Umayumcha',
+      title: 'Umayumcha IMS',
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: const ColorScheme(

@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import 'package:umayumcha/controllers/delivery_note_controller.dart';
-import 'package:umayumcha/controllers/consumable_transaction_log_controller.dart';
+import 'package:umayumcha_ims/controllers/delivery_note_controller.dart';
+import 'package:umayumcha_ims/controllers/consumable_transaction_log_controller.dart';
 
 class DashboardBinding extends Bindings {
   @override

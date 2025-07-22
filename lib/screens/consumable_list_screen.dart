@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:umayumcha/controllers/consumable_controller.dart';
-import 'package:umayumcha/models/consumable_model.dart';
-import 'package:umayumcha/screens/consumable_form_screen.dart';
-import 'package:umayumcha/widgets/delete_confirmation_dialog.dart';
+import 'package:umayumcha_ims/controllers/consumable_controller.dart';
+import 'package:umayumcha_ims/models/consumable_model.dart';
+import 'package:umayumcha_ims/screens/consumable_form_screen.dart';
+import 'package:umayumcha_ims/widgets/delete_confirmation_dialog.dart';
 
 void _showConsumableTransactionDialog(
   BuildContext context,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:umayumcha/controllers/auth_controller.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:umayumcha_ims/controllers/auth_controller.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});

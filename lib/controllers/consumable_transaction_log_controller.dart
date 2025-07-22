@@ -1,7 +1,7 @@
 
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:umayumcha/models/consumable_transaction_model.dart';
+import 'package:umayumcha_ims/models/consumable_transaction_model.dart';
 
 class ConsumableTransactionLogController extends GetxController {
   final _supabase = Supabase.instance.client;

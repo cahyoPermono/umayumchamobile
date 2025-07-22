@@ -1,10 +1,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:umayumcha/controllers/user_controller.dart';
-import 'package:umayumcha/controllers/auth_controller.dart';
-import 'package:umayumcha/screens/user_form_screen.dart';
-import 'package:umayumcha/widgets/delete_confirmation_dialog.dart'; // Import the new dialog
+import 'package:umayumcha_ims/controllers/user_controller.dart';
+import 'package:umayumcha_ims/controllers/auth_controller.dart';
+import 'package:umayumcha_ims/screens/user_form_screen.dart';
+import 'package:umayumcha_ims/widgets/delete_confirmation_dialog.dart'; // Import the new dialog
 
 class UserListScreen extends StatelessWidget {
 

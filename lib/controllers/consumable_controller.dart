@@ -1,8 +1,8 @@
 import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:umayumcha/controllers/auth_controller.dart';
-import 'package:umayumcha/models/consumable_model.dart';
+import 'package:umayumcha_ims/controllers/auth_controller.dart';
+import 'package:umayumcha_ims/models/consumable_model.dart';
 
 class ConsumableController extends GetxController {
   Future<void> addStock(int consumableId, int quantity, String reason) async {

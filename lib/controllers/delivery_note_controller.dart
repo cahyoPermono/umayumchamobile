@@ -2,9 +2,9 @@ import 'package:flutter/foundation.dart'; // For debugPrint
 import 'package:flutter/services.dart'; // For rootBundle
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:umayumcha/controllers/consumable_controller.dart';
-import 'package:umayumcha/controllers/inventory_controller.dart';
-import 'package:umayumcha/models/delivery_note_model.dart';
+import 'package:umayumcha_ims/controllers/consumable_controller.dart';
+import 'package:umayumcha_ims/controllers/inventory_controller.dart';
+import 'package:umayumcha_ims/models/delivery_note_model.dart';
 import 'package:excel/excel.dart';
 import 'package:pdf/pdf.dart' as pdf_colors; // New alias for PdfColors
 import 'package:pdf/widgets.dart' as pdf_lib; // Changed alias to pdf_lib

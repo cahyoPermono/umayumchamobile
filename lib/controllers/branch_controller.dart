@@ -1,9 +1,9 @@
-import 'package:umayumcha/controllers/auth_controller.dart'; // Import AuthController
+import 'package:umayumcha_ims/controllers/auth_controller.dart'; // Import AuthController
 import 'package:flutter/foundation.dart'; // For debugPrint
 import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:umayumcha/models/branch_model.dart';
+import 'package:umayumcha_ims/models/branch_model.dart';
 
 class BranchController extends GetxController {
   final SupabaseClient supabase = Supabase.instance.client;
@@ -44,7 +44,9 @@ class BranchController extends GetxController {
       branches.value =
           (response as List).map((item) => Branch.fromJson(item)).toList();
       debugPrint('Branches fetched: ${branches.length}');
-      debugPrint('Fetched branch names: ${branches.map((b) => b.name).toList()}');
+      debugPrint(
+        'Fetched branch names: ${branches.map((b) => b.name).toList()}',
+      );
     } catch (e) {
       log('Error fetching branches: ${e.toString()}');
       Get.snackbar('Error', 'Failed to fetch branches: ${e.toString()}');
@@ -108,11 +110,8 @@ class BranchController extends GetxController {
       isLoading.value = true;
 
       // Fetch the branch to check its name
-      final branchData = await supabase
-          .from('branches')
-          .select('name')
-          .eq('id', id)
-          .single();
+      final branchData =
+          await supabase.from('branches').select('name').eq('id', id).single();
 
       if (branchData['name'] == 'UmayumchaHQ') {
         Get.snackbar(
