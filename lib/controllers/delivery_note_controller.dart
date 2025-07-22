@@ -337,7 +337,7 @@ class DeliveryNoteController extends GetxController {
       // Header
       sheet.merge(CellIndex.indexByString('A5'), CellIndex.indexByString('F5'));
       sheet.cell(CellIndex.indexByString('A5')).value =
-          'Umayumcha Head Quarter';
+          'Umayumcha Head Quarter Malang';
       sheet.cell(CellIndex.indexByString('A5')).cellStyle = CellStyle(
         horizontalAlign: HorizontalAlign.Left,
         bold: true,
@@ -358,10 +358,10 @@ class DeliveryNoteController extends GetxController {
 
       sheet.cell(CellIndex.indexByString('A9')).value = 'No. Surat Jalan:';
       sheet.cell(CellIndex.indexByString('B9')).value =
-          deliveryNote.id.toString();
+          deliveryNote.dnNumber ?? deliveryNote.id.toString();
 
-      sheet.cell(CellIndex.indexByString('A10')).value = 'Kepada:';
-      sheet.cell(CellIndex.indexByString('B10')).value = toBranchName;
+      sheet.cell(CellIndex.indexByString('A10')).value = 'Penerima:';
+      sheet.cell(CellIndex.indexByString('B10')).value = 'Cabang $toBranchName';
 
       sheet.cell(CellIndex.indexByString('A11')).value = 'Tanggal:';
       sheet.cell(CellIndex.indexByString('B11')).value = DateFormat(
@@ -446,27 +446,20 @@ class DeliveryNoteController extends GetxController {
                 pdf_lib.Image(logoImage, width: 150, height: 50),
                 pdf_lib.SizedBox(height: 20),
                 pdf_lib.Text(
-                  'Umayumcha Head Quarter',
+                  'Umayumcha Head Quarter Malang',
                   style: pdf_lib.TextStyle(fontWeight: pdf_lib.FontWeight.bold),
                 ),
                 pdf_lib.Text('Jalan Dirgantara 4 no A5/11'),
                 pdf_lib.Text('Sawojajar Malang'),
                 pdf_lib.SizedBox(height: 20),
-                pdf_lib.Text('No. Surat Jalan: ${deliveryNote.id}'),
-                pdf_lib.Text('Kepada: $toBranchName'),
+                pdf_lib.Text(
+                  'No. Surat Jalan: ${deliveryNote.dnNumber ?? deliveryNote.id}',
+                ),
+                pdf_lib.Text('Penerima: Cabang $toBranchName'),
                 pdf_lib.Text(
                   'Tanggal: ${DateFormat('dd-MM-yyyy').format(deliveryNote.deliveryDate)}',
                 ),
-                if (deliveryNote.keterangan != null &&
-                    deliveryNote.keterangan!.isNotEmpty)
-                  pdf_lib.Column(
-                    crossAxisAlignment: pdf_lib.CrossAxisAlignment.start,
-                    children: [
-                      pdf_lib.SizedBox(height: 10),
-                      pdf_lib.Text('Keterangan:'),
-                      pdf_lib.Text(deliveryNote.keterangan!),
-                    ],
-                  ),
+
                 pdf_lib.SizedBox(height: 20),
                 pdf_lib.TableHelper.fromTextArray(
                   // Changed to TableHelper
@@ -491,6 +484,16 @@ class DeliveryNoteController extends GetxController {
                   cellAlignment: pdf_lib.Alignment.centerLeft,
                   cellPadding: const pdf_lib.EdgeInsets.all(5),
                 ),
+                if (deliveryNote.keterangan != null &&
+                    deliveryNote.keterangan!.isNotEmpty)
+                  pdf_lib.Column(
+                    crossAxisAlignment: pdf_lib.CrossAxisAlignment.start,
+                    children: [
+                      pdf_lib.SizedBox(height: 10),
+                      pdf_lib.Text('Catatan:'),
+                      pdf_lib.Text(deliveryNote.keterangan!),
+                    ],
+                  ),
                 pdf_lib.SizedBox(height: 50),
                 pdf_lib.Row(
                   mainAxisAlignment: pdf_lib.MainAxisAlignment.spaceAround,
