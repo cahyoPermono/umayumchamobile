@@ -101,17 +101,34 @@ class BranchController extends GetxController {
 
   Future<void> deleteBranch(String? id) async {
     if (id == null) {
-      Get.snackbar('Error', 'Cannot delete branch without an ID.');
+      Get.snackbar('Error', 'Tidak dapat menghapus cabang tanpa ID.');
       return;
     }
     try {
       isLoading.value = true;
+
+      // Fetch the branch to check its name
+      final branchData = await supabase
+          .from('branches')
+          .select('name')
+          .eq('id', id)
+          .single();
+
+      if (branchData['name'] == 'UmayumchaHQ') {
+        Get.snackbar(
+          'Peringatan',
+          'Cabang UmayumchaHQ tidak dapat dihapus.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+
       await supabase.from('branches').delete().eq('id', id);
       branches.removeWhere((b) => b.id == id);
-      Get.snackbar('Success', 'Branch deleted successfully!');
+      Get.snackbar('Sukses', 'Cabang berhasil dihapus!');
     } catch (e) {
       log('Error deleting branch: ${e.toString()}');
-      Get.snackbar('Error', 'Failed to delete branch: ${e.toString()}');
+      Get.snackbar('Error', 'Gagal menghapus cabang: ${e.toString()}');
     } finally {
       isLoading.value = false;
     }

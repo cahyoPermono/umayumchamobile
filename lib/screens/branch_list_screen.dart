@@ -85,22 +85,27 @@ class BranchListScreen extends StatelessWidget {
                       ),
                       Obx(() {
                         return authController.userRole.value == 'admin'
-                            ? IconButton(
-                                icon: Icon(Icons.delete, color: Colors.red[400]),
-                                onPressed: () {
-                                  if (branch.id != null) {
-                                    showDeleteConfirmationDialog(
-                                      title: "Delete Branch",
-                                      content: "Are you sure you want to delete branch '${branch.name}'?",
-                                      onConfirm: () {
-                                        controller.deleteBranch(branch.id!); 
-                                      },
-                                    );
-                                  } else {
-                                    Get.snackbar('Error', 'Branch ID is missing.');
-                                  }
-                                },
-                              )
+                            ? (branch.name == 'UmayumchaHQ'
+                                ? IconButton(
+                                    icon: Icon(Icons.delete, color: Colors.grey[400]), // Grey out icon
+                                    onPressed: null, // Disable button
+                                  )
+                                : IconButton(
+                                    icon: Icon(Icons.delete, color: Colors.red[400]),
+                                    onPressed: () {
+                                      if (branch.id != null) {
+                                        showDeleteConfirmationDialog(
+                                          title: "Hapus Cabang",
+                                          content: "Apakah Anda yakin ingin menghapus cabang '${branch.name}'?",
+                                          onConfirm: () {
+                                            controller.deleteBranch(branch.id!); 
+                                          },
+                                        );
+                                      } else {
+                                        Get.snackbar('Error', 'ID Cabang tidak ditemukan.');
+                                      }
+                                    },
+                                  ))
                             : const SizedBox.shrink();
                       }),
                     ],
