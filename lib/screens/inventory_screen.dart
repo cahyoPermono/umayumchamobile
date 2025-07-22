@@ -334,7 +334,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                     onPressed: () {
                                       Get.to(
                                         () =>
-                                            ProductFormScreen(product: product),
+                                            ProductFormScreen(product: product, locationName: inventoryController.selectedBranch.value?.name),
                                       );
                                     },
                                   ),

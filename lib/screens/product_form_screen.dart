@@ -7,7 +7,8 @@ import 'package:umayumcha_ims/models/branch_model.dart'; // Import Branch model
 
 class ProductFormScreen extends StatefulWidget {
   final Product? product;
-  const ProductFormScreen({super.key, this.product});
+  final String? locationName;
+  const ProductFormScreen({super.key, this.product, this.locationName});
 
   @override
   State<ProductFormScreen> createState() => _ProductFormScreenState();
@@ -197,6 +198,21 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   return null;
                 },
               ),
+              if (widget.product != null && widget.locationName != null) ...[
+                const SizedBox(height: 16),
+                TextFormField(
+                  initialValue: widget.locationName,
+                  decoration: const InputDecoration(
+                    labelText: 'Location',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 12.0,
+                      horizontal: 15.0,
+                    ),
+                  ),
+                  enabled: false,
+                ),
+              ],
               const SizedBox(height: 16),
               SwitchListTile(
                 title: const Text('Show Optional Fields'),
