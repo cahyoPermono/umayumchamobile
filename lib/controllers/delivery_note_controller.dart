@@ -369,15 +369,15 @@ class DeliveryNoteController extends GetxController {
       ).format(deliveryNote.deliveryDate);
 
       // Keterangan
-      sheet.cell(CellIndex.indexByString('A12')).value = 'Keterangan:';
+      sheet.cell(CellIndex.indexByString('A12')).value = 'Catatan:';
       sheet.cell(CellIndex.indexByString('B12')).value =
           deliveryNote.keterangan ?? '';
 
       // Items Table Header
-      sheet.cell(CellIndex.indexByString('A14')).value = 'Items';
+      sheet.cell(CellIndex.indexByString('A14')).value = 'Nama Barang';
       sheet.cell(CellIndex.indexByString('B14')).value = 'Quantity';
       sheet.cell(CellIndex.indexByString('C14')).value = 'Check';
-      sheet.cell(CellIndex.indexByString('D14')).value = 'Reason';
+      sheet.cell(CellIndex.indexByString('D14')).value = 'Keterangan';
 
       // Apply bold style to table headers
       final headerStyle = CellStyle(
@@ -395,7 +395,7 @@ class DeliveryNoteController extends GetxController {
       for (var item in items) {
         sheet.cell(CellIndex.indexByString('A$rowIndex')).value = item['name'];
         sheet.cell(CellIndex.indexByString('B$rowIndex')).value =
-            item['quantity'];
+            item['quantity'].abs();
         sheet.cell(CellIndex.indexByString('C$rowIndex')).value =
             '✓'; // Auto checklist
         sheet.cell(CellIndex.indexByString('D$rowIndex')).value =
@@ -463,13 +463,13 @@ class DeliveryNoteController extends GetxController {
                 pdf_lib.SizedBox(height: 20),
                 pdf_lib.TableHelper.fromTextArray(
                   // Changed to TableHelper
-                  headers: ['Items', 'Quantity', 'Check', 'Reason'],
+                  headers: ['Nama Barang', 'Quantity', 'Check', 'Keterangan'],
                   data:
                       items
                           .map(
                             (item) => [
                               item['name'],
-                              item['quantity'].toString(),
+                              item['quantity'].abs().toString(),
                               '', // Auto checklist
                               '', // Reason
                             ],
