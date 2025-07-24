@@ -73,10 +73,16 @@ class DeliveryNoteController extends GetxController {
       if (selectedToDate.value != null) {
         query = query.lte(
           'delivery_date',
-          selectedToDate.value!.toIso8601String().split('T').first,
+          selectedToDate.value!
+              .add(Duration(days: 1))
+              .toIso8601String()
+              .split('T')
+              .first,
         );
       }
+
       final response = await query.order('created_at', ascending: false);
+      debugPrint(response.toString());
 
       deliveryNotes.value =
           (response as List)
@@ -128,8 +134,7 @@ class DeliveryNoteController extends GetxController {
                 'customer_name': customerName ?? 'Internal Transfer',
                 'destination_address':
                     destinationAddress ?? 'Internal Transfer',
-                'delivery_date':
-                    deliveryDate.toIso8601String().split('T').first,
+                'delivery_date': deliveryDate.toUtc().toIso8601String(),
                 'from_branch_id': fromBranchId,
                 'to_branch_id': toBranchId,
                 'from_branch_name': fromBranchName, // Save branch name
@@ -261,7 +266,7 @@ class DeliveryNoteController extends GetxController {
           .update({
             'customer_name': customerName ?? 'Internal Transfer',
             'destination_address': destinationAddress ?? 'Internal Transfer',
-            'delivery_date': deliveryDate.toIso8601String().split('T').first,
+            'delivery_date': deliveryDate.toUtc().toIso8601String(),
             'from_branch_id': fromBranchId,
             'to_branch_id': toBranchId,
             'from_branch_name': fromBranchName,

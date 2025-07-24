@@ -11,6 +11,7 @@ import 'package:umayumcha_ims/widgets/item_selection_dialog.dart'; // New: Impor
 import 'package:umayumcha_ims/models/delivery_note_model.dart'; // Import DeliveryNote model
 import 'package:umayumcha_ims/utils/file_exporter.dart'; // New: Import file_exporter
 import 'package:umayumcha_ims/controllers/auth_controller.dart'; // Import AuthController
+import 'package:intl/intl.dart'; // Import intl package
 
 // Helper class for selectable items (Moved to top-level)
 class SelectableItem {
@@ -123,16 +124,30 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+    final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: selectedDeliveryDate,
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
     );
-    if (picked != null && picked != selectedDeliveryDate) {
-      setState(() {
-        selectedDeliveryDate = picked;
-      });
+
+    if (context.mounted && pickedDate != null) {
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(selectedDeliveryDate),
+      );
+
+      if (context.mounted && pickedTime != null) {
+        setState(() {
+          selectedDeliveryDate = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
+        });
+      }
     }
   }
 
@@ -354,8 +369,9 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
               child: AbsorbPointer(
                 child: TextFormField(
                   controller: TextEditingController(
-                    text:
-                        selectedDeliveryDate.toLocal().toString().split(' ')[0],
+                    text: DateFormat(
+                      'yyyy-MM-dd HH:mm',
+                    ).format(selectedDeliveryDate.toLocal()),
                   ),
                   decoration: InputDecoration(
                     labelText: 'Delivery Date',

@@ -11,8 +11,10 @@ class DeliveryNote {
   final String? fromBranchName; // Direct field from DB
   final String? toBranchName; // Direct field from DB
   final String? keterangan; // New field
-  final List<Map<String, dynamic>>? productItems; // For displaying product items in the note
-  final List<Map<String, dynamic>>? consumableItems; // For displaying consumable items in the note
+  final List<Map<String, dynamic>>?
+  productItems; // For displaying product items in the note
+  final List<Map<String, dynamic>>?
+  consumableItems; // For displaying consumable items in the note
 
   DeliveryNote({
     required this.id,
@@ -38,12 +40,14 @@ class DeliveryNote {
       createdAt: DateTime.parse(json['created_at'] as String),
       customerName: json['customer_name'] as String?,
       destinationAddress: json['destination_address'] as String?,
-      deliveryDate: DateTime.parse(json['delivery_date'] as String),
+      deliveryDate: DateTime.parse(json['delivery_date'] as String).toLocal(),
       userId: json['user_id'] as String?,
       fromBranchId: json['from_branch_id'] as String?,
       toBranchId: json['to_branch_id'] as String?,
-      fromBranchName: json['from_branch_name'] as String?, // Read directly from top-level
-      toBranchName: json['to_branch_name'] as String?, // Read directly from top-level
+      fromBranchName:
+          json['from_branch_name'] as String?, // Read directly from top-level
+      toBranchName:
+          json['to_branch_name'] as String?, // Read directly from top-level
       keterangan: json['keterangan'] as String?, // New field
       productItems:
           (json['inventory_transactions'] as List?)
@@ -51,7 +55,8 @@ class DeliveryNote {
                 (e) => {
                   'product_id': e['product_id'],
                   'quantity_change': e['quantity_change'],
-                  'product_name': e['product_name'], // Directly from transaction
+                  'product_name':
+                      e['product_name'], // Directly from transaction
                   'type': 'product',
                 },
               )
