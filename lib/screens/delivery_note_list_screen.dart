@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:umayumcha_ims/controllers/delivery_note_controller.dart';
 import 'package:umayumcha_ims/screens/delivery_note_form_screen.dart';
 
-
 class DeliveryNoteListScreen extends StatelessWidget {
   const DeliveryNoteListScreen({super.key});
 
@@ -219,7 +218,9 @@ class DeliveryNoteListScreen extends StatelessWidget {
                         vertical: 10,
                       ),
                       title: Text(
-                        note.dnNumber ?? note.customerName ?? 'Internal Transfer',
+                        note.dnNumber ??
+                            note.customerName ??
+                            'Internal Transfer',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
@@ -231,7 +232,7 @@ class DeliveryNoteListScreen extends StatelessWidget {
                         children: [
                           const SizedBox(height: 4),
                           Text(
-                            'Date: ${DateFormat('dd MMM yyyy').format(note.deliveryDate)}',
+                            'Date: ${DateFormat('dd-MMM-yyyy HH:mm').format(note.deliveryDate)}',
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.grey[600],
@@ -250,7 +251,9 @@ class DeliveryNoteListScreen extends StatelessWidget {
                       trailing: IconButton(
                         icon: const Icon(Icons.edit),
                         onPressed: () {
-                          Get.to(() => DeliveryNoteFormScreen(deliveryNote: note));
+                          Get.to(
+                            () => DeliveryNoteFormScreen(deliveryNote: note),
+                          );
                         },
                       ),
                       children: [
