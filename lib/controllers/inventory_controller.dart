@@ -27,7 +27,7 @@ class InventoryController extends GetxController {
           .toList()
           .obs;
 
-  static const int lowStockThreshold = 50; // Define your threshold here
+  
 
   Future<bool> updateProduct(Product product) async {
     isLoading.value = true;
@@ -117,34 +117,48 @@ class InventoryController extends GetxController {
         return;
       }
 
-      var query = supabase
-          .from('branch_products')
-          .select(
-            '*, products(*), branches(name)',
-          ) // Join products and branches
-          .lt('quantity', lowStockThreshold)
-          .eq(
-            'branch_id',
-            umayumchaHQBranchId!,
-          ); // Filter by UmayumchaHQ branch
-
-      // Filter by user's branch if not admin
-      final authController = Get.find<AuthController>();
-      if (authController.userRole.value != 'admin' &&
-          authController.userBranchId.value != null) {
-        // No need to filter by user's branch here, as we are specifically looking for UmayumchaHQ
-        // This block can be removed or modified if other global low stock views are needed.
-      }
-
-      final response = await query;
+      final response = await supabase.rpc(
+        'get_low_stock_products',
+        params: {'p_branch_id': umayumchaHQBranchId!},
+      );
 
       globalLowStockProducts.value =
           (response as List).map((item) {
-            // Manually attach branch name for display
-            final Map<String, dynamic> bpData = Map.from(item);
-            bpData['branches'] =
-                item['branches']; // Ensure branch data is passed
-            return BranchProduct.fromJson(bpData);
+            final product = Product(
+              id: item['product_id'] as String,
+              name: item['product_name'] as String,
+              code: item['product_code'] as String,
+              description: item['product_description'] as String?,
+              merk: item['product_merk'] as String?,
+              kondisi: item['product_kondisi'] as String?,
+              tahunPerolehan: item['product_tahun_perolehan'] as String?,
+              nilaiResidu: (item['product_nilai_residu'] as num?)?.toDouble(),
+              pengguna: item['product_pengguna'] as String?,
+              price: (item['product_price'] as num?)?.toDouble(),
+              lowStock: item['product_low_stock'] as int? ?? 50,
+              createdAt: item['created_at'] != null
+                  ? DateTime.parse(item['created_at'] as String)
+                  : null,
+              updatedAt: item['updated_at'] != null
+                  ? DateTime.parse(item['updated_at'] as String)
+                  : null,
+            );
+
+            final branch = Branch(
+              id: item['branch_id'] as String,
+              name: item['branch_name'] as String,
+              // Assuming other branch fields are not needed or can be null
+            );
+
+            return BranchProduct(
+              id: item['id'] as String,
+              productId: item['product_id'] as String,
+              branchId: item['branch_id'] as String,
+              quantity: item['quantity'] as int,
+              createdAt: DateTime.parse(item['created_at'] as String),
+              product: product,
+              branchName: branch.name,
+            );
           }).toList();
       debugPrint(
         'Global low stock products fetched: ${globalLowStockProducts.length}',
@@ -166,28 +180,11 @@ class InventoryController extends GetxController {
     }
     try {
       isLoading.value = true;
-      var query = supabase
+      final response = await supabase
           .from('branch_products')
           .select('*, products(*)')
           .eq('branch_id', selectedBranch.value!.id!)
           .order('created_at', ascending: true);
-
-      // Allow all users to view UmayumchaHQ inventory
-      final authController = Get.find<AuthController>();
-      if (authController.userRole.value != 'admin' &&
-          selectedBranch.value?.name != 'UmayumchaHQ' &&
-          authController.userBranchId.value != selectedBranch.value!.id) {
-        // If a non-admin user tries to select a branch that is not theirs, clear products and show error
-        branchProducts.clear();
-        Get.snackbar(
-          'Access Denied',
-          'You can only view products for your assigned branch or UmayumchaHQ.',
-        );
-        isLoading.value = false;
-        return;
-      }
-
-      final response = await query;
 
       debugPrint('Raw response from Supabase: $response');
 

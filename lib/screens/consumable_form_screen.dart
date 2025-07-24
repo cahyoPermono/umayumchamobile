@@ -22,6 +22,7 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
   late TextEditingController _nameController;
   late TextEditingController _quantityController;
   late TextEditingController _descriptionController;
+  late TextEditingController _lowStockController; // New: Low Stock Controller
   final TextEditingController _locationController = TextEditingController(text: 'UmayumchaHQ');
   DateTime? _expiredDate;
   bool _isSubmitting = false; // New: State variable for submission status
@@ -35,6 +36,8 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
         TextEditingController(text: widget.consumable?.quantity.toString() ?? '0');
     _descriptionController = TextEditingController(
         text: widget.consumable?.description ?? '');
+    _lowStockController = TextEditingController(
+        text: widget.consumable?.lowStock.toString() ?? '50'); // Initialize with existing or default 50
     _expiredDate = widget.consumable?.expiredDate;
   }
 
@@ -44,6 +47,7 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
     _nameController.dispose();
     _quantityController.dispose();
     _descriptionController.dispose();
+    _lowStockController.dispose(); // Dispose low stock controller
     _locationController.dispose();
     super.dispose();
   }
@@ -145,6 +149,26 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
               ),
               const SizedBox(height: 16),
               TextFormField(
+                controller: _lowStockController,
+                decoration: const InputDecoration(
+                  labelText: 'Low Stock Threshold',
+                  hintText: 'e.g., 50',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a low stock threshold';
+                  }
+                  if (int.tryParse(value) == null) {
+                    return 'Please enter a valid number';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
                 controller: _locationController,
                 decoration: const InputDecoration(
                   labelText: 'Location',
@@ -191,6 +215,7 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
                               int.parse(_quantityController.text),
                           description: _descriptionController.text,
                           expiredDate: _expiredDate,
+                          lowStock: int.parse(_lowStockController.text),
                         );
                         if (widget.consumable == null) {
                           await controller.addConsumable(newConsumable);

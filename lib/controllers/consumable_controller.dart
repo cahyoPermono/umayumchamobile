@@ -72,7 +72,7 @@ class ConsumableController extends GetxController {
   var searchQuery = ''.obs; // New: Search query observable
   String? umayumchaHQBranchId;
 
-  static const int lowStockThreshold = 50; // Define your threshold here
+  
 
   // New: Filtered consumables list
   RxList<Consumable> get filteredConsumables =>
@@ -151,10 +151,7 @@ class ConsumableController extends GetxController {
         return;
       }
 
-      final response = await _supabase
-          .from('consumables')
-          .select('*')
-          .lt('quantity', lowStockThreshold); // Filter by UmayumchaHQ branch
+      final response = await _supabase.rpc('get_low_stock_consumables');
 
       globalLowStockConsumables.value =
           (response as List).map((item) => Consumable.fromJson(item)).toList();

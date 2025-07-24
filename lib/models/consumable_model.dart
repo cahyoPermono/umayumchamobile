@@ -6,6 +6,7 @@ class Consumable {
   final int quantity;
   final String? description; // Optional description
   final DateTime? expiredDate;
+  final int lowStock; // Added lowStock field
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final String? updatedBy;
@@ -17,6 +18,7 @@ class Consumable {
     required this.quantity,
     this.description,
     this.expiredDate,
+    required this.lowStock, // Made lowStock required
     this.createdAt,
     this.updatedAt,
     this.updatedBy,
@@ -32,6 +34,7 @@ class Consumable {
       expiredDate: json['expired_date'] != null
           ? DateTime.parse(json['expired_date'])
           : null,
+      lowStock: json['low_stock'] as int, // lowStock is now required
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : null,
@@ -49,6 +52,7 @@ class Consumable {
       'quantity': quantity,
       'description': description,
       'expired_date': expiredDate?.toIso8601String(),
+      'low_stock': lowStock, // Add low_stock to toJson
       'updated_by': updatedBy,
     };
     if (id != null) {

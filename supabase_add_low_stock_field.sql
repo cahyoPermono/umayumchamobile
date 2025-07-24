@@ -1,0 +1,6 @@
+
+ALTER TABLE products
+ADD COLUMN low_stock INT NOT NULL DEFAULT 50;
+
+ALTER TABLE consumables
+ADD COLUMN low_stock INT NOT NULL DEFAULT 50;

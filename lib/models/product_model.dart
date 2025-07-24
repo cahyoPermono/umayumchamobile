@@ -10,6 +10,7 @@ class Product {
   final double? nilaiResidu;
   final String? pengguna;
   final double? price;
+  final int lowStock; // Added lowStock field
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final String? updatedBy;
@@ -25,6 +26,7 @@ class Product {
     this.nilaiResidu,
     this.pengguna,
     this.price,
+    required this.lowStock, // Made lowStock required
     this.createdAt,
     this.updatedAt,
     this.updatedBy,
@@ -42,7 +44,8 @@ class Product {
       nilaiResidu: (json['nilai_residu'] as num?)?.toDouble(),
       pengguna: json['pengguna'] as String?,
       price: (json['price'] as num?)?.toDouble(),
-      createdAt: json['created_at'] != null
+              lowStock: json['low_stock'] as int, // lowStock is now required
+              createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,
       updatedAt: json['updated_at'] != null
@@ -63,6 +66,7 @@ class Product {
       'nilai_residu': nilaiResidu,
       'pengguna': pengguna,
       'price': price,
+      'low_stock': lowStock, // Add low_stock to toJson
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
       'updated_by': updatedBy,
@@ -84,6 +88,7 @@ class Product {
     double? nilaiResidu,
     String? pengguna,
     double? price,
+    required int lowStock, // Made lowStock required
     DateTime? createdAt,
     DateTime? updatedAt,
     String? updatedBy,
@@ -99,6 +104,7 @@ class Product {
       nilaiResidu: nilaiResidu ?? this.nilaiResidu,
       pengguna: pengguna ?? this.pengguna,
       price: price ?? this.price,
+      lowStock: lowStock, // Update lowStock in copyWith
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       updatedBy: updatedBy ?? this.updatedBy,

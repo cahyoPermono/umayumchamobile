@@ -31,6 +31,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   TextEditingController nilaiResiduController = TextEditingController(); // New
   TextEditingController penggunaController = TextEditingController(); // New
   TextEditingController priceController = TextEditingController();
+  TextEditingController lowStockController =
+      TextEditingController(); // New: Low Stock Controller
   TextEditingController initialQuantityController = TextEditingController();
 
   bool _showOptionalFields = false; // New state variable
@@ -63,6 +65,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     priceController = TextEditingController(
       text: widget.product?.price?.toString() ?? '',
     );
+    lowStockController = TextEditingController(
+      text: widget.product?.lowStock.toString() ?? '50',
+    ); // Initialize with existing or default 50
 
     if (widget.product == null) {
       initialQuantityController.text = '1';
@@ -214,6 +219,30 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 ),
               ],
               const SizedBox(height: 16),
+              TextFormField(
+                controller: lowStockController,
+                decoration: const InputDecoration(
+                  labelText: 'Low Stock Threshold',
+                  hintText: 'e.g., 50',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 12.0,
+                    horizontal: 15.0,
+                  ),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a low stock threshold';
+                  }
+                  if (int.tryParse(value) == null) {
+                    return 'Please enter a valid number';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
               SwitchListTile(
                 title: const Text('Show Optional Fields'),
                 value: _showOptionalFields,
@@ -416,6 +445,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                                     ? null
                                     : penggunaController.text.trim(),
                             price: double.tryParse(priceController.text.trim()),
+                            lowStock: int.parse(
+                              lowStockController.text.trim(),
+                            ), // Add lowStock
                             createdAt:
                                 widget.product?.createdAt ?? DateTime.now(),
                           );
