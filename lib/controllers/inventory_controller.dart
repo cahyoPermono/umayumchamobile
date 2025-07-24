@@ -5,6 +5,7 @@ import 'package:umayumcha_ims/controllers/auth_controller.dart';
 import 'package:umayumcha_ims/models/branch_product_model.dart';
 import 'package:umayumcha_ims/models/branch_model.dart';
 import 'package:umayumcha_ims/models/product_model.dart';
+import 'package:umayumcha_ims/controllers/consumable_controller.dart'; // Import ConsumableController
 
 class InventoryController extends GetxController {
   final SupabaseClient supabase = Supabase.instance.client;
@@ -170,7 +171,9 @@ class InventoryController extends GetxController {
 
   Future<void> refreshDashboardData() async {
     await fetchGlobalLowStockProducts();
-    // Add other dashboard-related data fetches here if needed
+    final consumableController = Get.find<ConsumableController>();
+    await consumableController.fetchGlobalLowStockConsumables();
+    await consumableController.fetchConsumables();
   }
 
   Future<void> fetchBranchProducts() async {

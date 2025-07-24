@@ -34,8 +34,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       inventoryController.refreshDashboardData();
       consumableController.fetchConsumables();
-      consumableController
-          .fetchGlobalLowStockConsumables(); // Fetch low stock consumables
     });
   }
 
