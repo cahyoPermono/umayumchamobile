@@ -1,7 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha_ims/controllers/consumable_controller.dart';
 import 'package:umayumcha_ims/models/consumable_model.dart';
 
@@ -17,28 +17,51 @@ class ConsumableFormScreen extends StatefulWidget {
 class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
   final ConsumableController controller = Get.find();
   final _formKey = GlobalKey<FormState>();
+  final SupabaseClient supabase = Supabase.instance.client;
 
   late TextEditingController _codeController;
   late TextEditingController _nameController;
   late TextEditingController _quantityController;
   late TextEditingController _descriptionController;
   late TextEditingController _lowStockController; // New: Low Stock Controller
-  final TextEditingController _locationController = TextEditingController(text: 'UmayumchaHQ');
+  final TextEditingController _locationController = TextEditingController();
   DateTime? _expiredDate;
   bool _isSubmitting = false; // New: State variable for submission status
+  String umayumchaHQBranchId = '2e109b1a-12c6-4572-87ab-6c96add8a603';
 
   @override
   void initState() {
     super.initState();
-    _codeController = TextEditingController(text: widget.consumable?.code ?? '');
-    _nameController = TextEditingController(text: widget.consumable?.name ?? '');
-    _quantityController =
-        TextEditingController(text: widget.consumable?.quantity.toString() ?? '0');
+    _codeController = TextEditingController(
+      text: widget.consumable?.code ?? '',
+    );
+    _nameController = TextEditingController(
+      text: widget.consumable?.name ?? '',
+    );
+    _quantityController = TextEditingController(
+      text: widget.consumable?.quantity.toString() ?? '0',
+    );
     _descriptionController = TextEditingController(
-        text: widget.consumable?.description ?? '');
+      text: widget.consumable?.description ?? '',
+    );
     _lowStockController = TextEditingController(
-        text: widget.consumable?.lowStock.toString() ?? '50'); // Initialize with existing or default 50
+      text: widget.consumable?.lowStock.toString() ?? '50',
+    ); // Initialize with existing or default 50
     _expiredDate = widget.consumable?.expiredDate;
+    fetchBranch();
+  }
+
+  void fetchBranch() async {
+    //get branch by id
+    final branch =
+        await supabase
+            .from('branches')
+            .select()
+            .eq('id', umayumchaHQBranchId)
+            .single();
+
+    _locationController.text =
+        branch['name'] ?? 'Headquarter'; // Set location to branch name
   }
 
   @override
@@ -74,15 +97,19 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
           widget.consumable == null ? 'Add Consumable' : 'Edit Consumable',
           style: const TextStyle(color: Colors.white), // Ensure title is white
         ),
-        backgroundColor: Theme.of(context).primaryColor, // Use primary color for app bar
-        iconTheme: const IconThemeData(color: Colors.white), // White back button
+        backgroundColor:
+            Theme.of(context).primaryColor, // Use primary color for app bar
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ), // White back button
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0), // Increased padding
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch, // Stretch fields horizontally
+            crossAxisAlignment:
+                CrossAxisAlignment.stretch, // Stretch fields horizontally
             children: [
               TextFormField(
                 controller: _codeController,
@@ -90,7 +117,10 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
                   labelText: 'Code',
                   hintText: 'e.g., C001',
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 12.0,
+                    horizontal: 15.0,
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -106,7 +136,10 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
                   labelText: 'Name',
                   hintText: 'e.g., Kopi Bubuk',
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 12.0,
+                    horizontal: 15.0,
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -122,7 +155,10 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
                   labelText: 'Quantity',
                   hintText: 'e.g., 100',
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 12.0,
+                    horizontal: 15.0,
+                  ),
                 ),
                 keyboardType: TextInputType.number,
                 enabled: widget.consumable == null,
@@ -143,7 +179,10 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
                   labelText: 'Description (Optional)',
                   hintText: 'e.g., Kopi robusta kualitas premium',
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 12.0,
+                    horizontal: 15.0,
+                  ),
                 ),
                 maxLines: 3,
               ),
@@ -154,7 +193,10 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
                   labelText: 'Low Stock Threshold',
                   hintText: 'e.g., 50',
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 12.0,
+                    horizontal: 15.0,
+                  ),
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
@@ -174,7 +216,10 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
                   labelText: 'Location',
                   hintText: 'e.g., Gudang Utama',
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 12.0,
+                    horizontal: 15.0,
+                  ),
                 ),
                 enabled: false, // Disabled as requested
               ),
@@ -185,7 +230,10 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
                   decoration: InputDecoration(
                     labelText: 'Expiration Date (Optional)',
                     border: const OutlineInputBorder(),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 15.0),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 12.0,
+                      horizontal: 15.0,
+                    ),
                     suffixIcon: const Icon(Icons.calendar_today),
                   ),
                   child: Text(
@@ -193,7 +241,10 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
                         ? 'Choose Expiration Date'
                         : DateFormat.yMd().format(_expiredDate!),
                     style: TextStyle(
-                      color: _expiredDate == null ? Colors.grey[700] : Colors.black,
+                      color:
+                          _expiredDate == null
+                              ? Colors.grey[700]
+                              : Colors.black,
                       fontSize: 16,
                     ),
                   ),
@@ -201,54 +252,74 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
               ),
               const SizedBox(height: 32),
               ElevatedButton(
-                  onPressed: _isSubmitting ? null : () async { // Disable button when submitting
-                    if (_formKey.currentState!.validate()) {
-                      setState(() {
-                        _isSubmitting = true; // Set submitting state to true
-                      });
-                      try {
-                        final newConsumable = Consumable(
-                          id: widget.consumable?.id,
-                          code: _codeController.text,
-                          name: _nameController.text,
-                          quantity: widget.consumable?.quantity ??
-                              int.parse(_quantityController.text),
-                          description: _descriptionController.text,
-                          expiredDate: _expiredDate,
-                          lowStock: int.parse(_lowStockController.text),
-                        );
-                        if (widget.consumable == null) {
-                          await controller.addConsumable(newConsumable);
-                        } else {
-                          await controller.updateConsumable(newConsumable);
-                        }
-                      } finally {
-                        setState(() {
-                          _isSubmitting = false; // Reset submitting state
-                        });
-                      }
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 15.0), // Larger button
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0), // Rounded corners
-                    ),
-                    backgroundColor: Theme.of(context).primaryColor, // Use primary color
-                    foregroundColor: Colors.white, // White text
-                    elevation: 5, // Add shadow
+                onPressed:
+                    _isSubmitting
+                        ? null
+                        : () async {
+                          // Disable button when submitting
+                          if (_formKey.currentState!.validate()) {
+                            setState(() {
+                              _isSubmitting =
+                                  true; // Set submitting state to true
+                            });
+                            try {
+                              final newConsumable = Consumable(
+                                id: widget.consumable?.id,
+                                code: _codeController.text,
+                                name: _nameController.text,
+                                quantity:
+                                    widget.consumable?.quantity ??
+                                    int.parse(_quantityController.text),
+                                description: _descriptionController.text,
+                                expiredDate: _expiredDate,
+                                lowStock: int.parse(_lowStockController.text),
+                              );
+                              if (widget.consumable == null) {
+                                await controller.addConsumable(newConsumable);
+                              } else {
+                                await controller.updateConsumable(
+                                  newConsumable,
+                                );
+                              }
+                            } finally {
+                              setState(() {
+                                _isSubmitting = false; // Reset submitting state
+                              });
+                            }
+                          }
+                        },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 15.0,
+                  ), // Larger button
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      10.0,
+                    ), // Rounded corners
                   ),
-                  child: _isSubmitting
-                      ? const SizedBox(
+                  backgroundColor:
+                      Theme.of(context).primaryColor, // Use primary color
+                  foregroundColor: Colors.white, // White text
+                  elevation: 5, // Add shadow
+                ),
+                child:
+                    _isSubmitting
+                        ? const SizedBox(
                           height: 24,
                           width: 24,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
                         )
-                      : Text(
+                        : Text(
                           widget.consumable == null ? 'Add' : 'Update',
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold), // Bold text
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ), // Bold text
                         ),
-                ),
+              ),
             ],
           ),
         ),

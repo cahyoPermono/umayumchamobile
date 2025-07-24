@@ -15,7 +15,8 @@ class InventoryController extends GetxController {
   var selectedBranch = Rx<Branch?>(null);
   var globalLowStockProducts = <BranchProduct>[].obs; // Renamed and now global
   var searchQuery = ''.obs;
-  String? umayumchaHQBranchId; // To store UmayumchaHQ branch ID
+  String umayumchaHQBranchId =
+      '2e109b1a-12c6-4572-87ab-6c96add8a603'; // To store UmayumchaHQ branch ID
 
   // Filtered list based on search query
   RxList<BranchProduct> get filteredBranchProducts =>
@@ -27,8 +28,6 @@ class InventoryController extends GetxController {
           })
           .toList()
           .obs;
-
-  
 
   Future<bool> updateProduct(Product product) async {
     isLoading.value = true;
@@ -86,41 +85,16 @@ class InventoryController extends GetxController {
   void onInit() {
     // Listen for changes in selectedBranch and refetch products
     ever(selectedBranch, (_) => fetchBranchProducts());
-    _fetchUmayumchaHQBranchId(); // Fetch UmayumchaHQ branch ID on init
+
     fetchGlobalLowStockProducts(); // Fetch global low stock on init
     super.onInit();
   }
 
-  Future<void> _fetchUmayumchaHQBranchId() async {
-    try {
-      final response =
-          await supabase
-              .from('branches')
-              .select('id')
-              .eq('name', 'UmayumchaHQ')
-              .single();
-      umayumchaHQBranchId = response['id'] as String;
-      debugPrint('UmayumchaHQ branch ID fetched: $umayumchaHQBranchId');
-    } catch (e) {
-      debugPrint('Error fetching UmayumchaHQ branch ID: $e');
-    }
-  }
-
   Future<void> fetchGlobalLowStockProducts() async {
     try {
-      if (umayumchaHQBranchId == null) {
-        await _fetchUmayumchaHQBranchId(); // Ensure branch ID is fetched
-      }
-      if (umayumchaHQBranchId == null) {
-        debugPrint(
-          'UmayumchaHQ branch ID is null, cannot fetch low stock products.',
-        );
-        return;
-      }
-
       final response = await supabase.rpc(
         'get_low_stock_products',
-        params: {'p_branch_id': umayumchaHQBranchId!},
+        params: {'p_branch_id': umayumchaHQBranchId},
       );
 
       globalLowStockProducts.value =
@@ -137,12 +111,14 @@ class InventoryController extends GetxController {
               pengguna: item['product_pengguna'] as String?,
               price: (item['product_price'] as num?)?.toDouble(),
               lowStock: item['product_low_stock'] as int? ?? 50,
-              createdAt: item['created_at'] != null
-                  ? DateTime.parse(item['created_at'] as String)
-                  : null,
-              updatedAt: item['updated_at'] != null
-                  ? DateTime.parse(item['updated_at'] as String)
-                  : null,
+              createdAt:
+                  item['created_at'] != null
+                      ? DateTime.parse(item['created_at'] as String)
+                      : null,
+              updatedAt:
+                  item['updated_at'] != null
+                      ? DateTime.parse(item['updated_at'] as String)
+                      : null,
             );
 
             final branch = Branch(

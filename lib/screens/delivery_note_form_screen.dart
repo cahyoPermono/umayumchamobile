@@ -46,7 +46,8 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
   final TextEditingController customerNameController = TextEditingController();
   final TextEditingController destinationAddressController =
       TextEditingController();
-  final TextEditingController keteranganController = TextEditingController(); // New: Keterangan controller
+  final TextEditingController keteranganController =
+      TextEditingController(); // New: Keterangan controller
   DateTime selectedDeliveryDate = DateTime.now();
 
   Branch? selectedToBranch; // New: Selected destination branch
@@ -72,7 +73,8 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
       selectedToBranch = branchController.branches.firstWhereOrNull(
         (branch) => branch.id == widget.deliveryNote!.toBranchId,
       );
-      keteranganController.text = widget.deliveryNote!.keterangan ?? ''; // Initialize keterangan
+      keteranganController.text =
+          widget.deliveryNote!.keterangan ?? ''; // Initialize keterangan
 
       // Populate selectedProducts from existing productItems and consumableItems
       if (widget.deliveryNote!.productItems != null) {
@@ -108,14 +110,14 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
 
   void _findAndSetUmayumchaHQBranch() {
     final foundBranch = branchController.branches.firstWhereOrNull(
-      (branch) => branch.name == 'UmayumchaHQ',
+      (branch) => branch.id == '2e109b1a-12c6-4572-87ab-6c96add8a603',
     );
     if (foundBranch != null) {
       umayumchaHQBranch.value = foundBranch;
     } else if (!branchController.isLoading.value) {
       Get.snackbar(
         'Error',
-        'UmayumchaHQ branch not found. Please ensure it exists.',
+        'HeadQuarter branch not found. Please ensure it exists.',
       );
     }
   }
@@ -136,12 +138,12 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
 
   void _addProductToNote() async {
     if (umayumchaHQBranch.value == null) {
-      Get.snackbar('Error', 'UmayumchaHQ branch not found. Cannot add item.');
+      Get.snackbar('Error', 'HeadQuarter branch not found. Cannot add item.');
       return;
     }
 
     if (umayumchaHQBranch.value!.id == null) {
-      Get.snackbar('Error', 'UmayumchaHQ branch ID is missing.');
+      Get.snackbar('Error', 'HeadQuarter branch ID is missing.');
       return;
     }
 
@@ -279,7 +281,7 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
               }
               if (umayumchaHQBranch.value == null) {
                 return const Text(
-                  'UmayumchaHQ branch not found. Please ensure it exists.',
+                  'Headquarter branch not found. Please ensure it exists.',
                   style: TextStyle(color: Colors.red),
                 );
               }
@@ -316,7 +318,10 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
               }
               final List<Branch> otherBranches =
                   branchController.branches
-                      .where((branch) => branch.name != 'UmayumchaHQ')
+                      .where(
+                        (branch) =>
+                            branch.id != '2e109b1a-12c6-4572-87ab-6c96add8a603',
+                      )
                       .toList();
               return DropdownButtonFormField<Branch>(
                 decoration: InputDecoration(
@@ -498,7 +503,7 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                             if (umayumchaHQBranch.value == null) {
                               Get.snackbar(
                                 'Error',
-                                'UmayumchaHQ branch not found.',
+                                'Headquarter branch not found.',
                               );
                               return;
                             }
@@ -519,7 +524,7 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                             if (umayumchaHQBranch.value!.id == null) {
                               Get.snackbar(
                                 'Error',
-                                'UmayumchaHQ Branch ID is missing.',
+                                'Headquarter Branch ID is missing.',
                               );
                               return;
                             }
@@ -588,25 +593,36 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                                 SizedBox(
                                   width: double.infinity,
                                   child: ElevatedButton.icon(
-                                    onPressed: () async { // Added async
-                                      final excelBytes = await deliveryNoteController.exportToExcel(
-                                        deliveryNote: widget.deliveryNote!,
-                                        toBranchName: selectedToBranch?.name ?? 'N/A',
-                                        items: selectedProducts.toList(),
-                                      );
+                                    onPressed: () async {
+                                      // Added async
+                                      final excelBytes =
+                                          await deliveryNoteController
+                                              .exportToExcel(
+                                                deliveryNote:
+                                                    widget.deliveryNote!,
+                                                toBranchName:
+                                                    selectedToBranch?.name ??
+                                                    'N/A',
+                                                items:
+                                                    selectedProducts.toList(),
+                                              );
                                       if (excelBytes != null) {
                                         await exportPdfAndExcel(
-                                          pdfBytes: [], // No PDF bytes for Excel export
+                                          pdfBytes:
+                                              [], // No PDF bytes for Excel export
                                           pdfFileName: '', // No PDF file name
                                           excelBytes: excelBytes,
-                                          excelFileName: 'DeliveryNote_${(widget.deliveryNote!.dnNumber ?? widget.deliveryNote!.id).replaceAll('/', '_')}.xlsx',
+                                          excelFileName:
+                                              'DeliveryNote_${(widget.deliveryNote!.dnNumber ?? widget.deliveryNote!.id).replaceAll('/', '_')}.xlsx',
                                         );
                                       }
                                     },
                                     icon: const Icon(Icons.download),
                                     label: const Text('Export to Excel'),
                                     style: ElevatedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(vertical: 15),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 15,
+                                      ),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(10),
                                       ),
@@ -614,7 +630,8 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
                                       ),
-                                      backgroundColor: Colors.green, // Green for Excel
+                                      backgroundColor:
+                                          Colors.green, // Green for Excel
                                       foregroundColor: Colors.white,
                                     ),
                                   ),
@@ -623,25 +640,37 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                                 SizedBox(
                                   width: double.infinity,
                                   child: ElevatedButton.icon(
-                                    onPressed: () async { // Added async
-                                      final pdfBytes = await deliveryNoteController.exportToPdf(
-                                        deliveryNote: widget.deliveryNote!,
-                                        toBranchName: selectedToBranch?.name ?? 'N/A',
-                                        items: selectedProducts.toList(),
-                                      );
+                                    onPressed: () async {
+                                      // Added async
+                                      final pdfBytes =
+                                          await deliveryNoteController
+                                              .exportToPdf(
+                                                deliveryNote:
+                                                    widget.deliveryNote!,
+                                                toBranchName:
+                                                    selectedToBranch?.name ??
+                                                    'N/A',
+                                                items:
+                                                    selectedProducts.toList(),
+                                              );
                                       if (pdfBytes != null) {
                                         await exportPdfAndExcel(
                                           pdfBytes: pdfBytes,
-                                          pdfFileName: 'DeliveryNote_${(widget.deliveryNote!.dnNumber ?? widget.deliveryNote!.id).replaceAll('/', '_')}.pdf',
-                                          excelBytes: [], // No Excel bytes for PDF export
-                                          excelFileName: '', // No Excel file name
+                                          pdfFileName:
+                                              'DeliveryNote_${(widget.deliveryNote!.dnNumber ?? widget.deliveryNote!.id).replaceAll('/', '_')}.pdf',
+                                          excelBytes:
+                                              [], // No Excel bytes for PDF export
+                                          excelFileName:
+                                              '', // No Excel file name
                                         );
                                       }
                                     },
                                     icon: const Icon(Icons.picture_as_pdf),
                                     label: const Text('Export to PDF'),
                                     style: ElevatedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(vertical: 15),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 15,
+                                      ),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(10),
                                       ),
@@ -649,7 +678,8 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
                                       ),
-                                      backgroundColor: Colors.red, // Red for PDF
+                                      backgroundColor:
+                                          Colors.red, // Red for PDF
                                       foregroundColor: Colors.white,
                                     ),
                                   ),

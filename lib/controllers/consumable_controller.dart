@@ -5,64 +5,6 @@ import 'package:umayumcha_ims/controllers/auth_controller.dart';
 import 'package:umayumcha_ims/models/consumable_model.dart';
 
 class ConsumableController extends GetxController {
-  Future<void> addStock(int consumableId, int quantity, String reason) async {
-    try {
-      isLoading.value = true;
-      final consumable = consumables.firstWhere((c) => c.id == consumableId);
-      // Hanya log transaksi, update quantity dilakukan oleh trigger Supabase
-      await _logTransaction(
-        consumableId: consumableId,
-        consumableName: consumable.name,
-        quantityChange: quantity,
-        type: 'in',
-        reason: reason,
-        branchSourceId: umayumchaHQBranchId, // Set source to UmayumchaHQ
-        branchSourceName: 'UmayumchaHQ', // Set destination name
-        branchDestinationId:
-            umayumchaHQBranchId, // Set destination to UmayumchaHQ
-        branchDestinationName: 'UmayumchaHQ',
-      );
-      await fetchConsumables();
-      Get.snackbar('Success', 'Stock added successfully!');
-    } catch (e) {
-      log('Error adding stock: $e');
-      Get.snackbar('Error', 'Failed to add stock: ${e.toString()}');
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> removeStock(
-    int consumableId,
-    int quantity,
-    String reason,
-  ) async {
-    try {
-      isLoading.value = true;
-      final consumable = consumables.firstWhere((c) => c.id == consumableId);
-      // Hanya log transaksi, update quantity dilakukan oleh trigger Supabase
-      await _logTransaction(
-        consumableId: consumableId,
-        consumableName: consumable.name,
-        quantityChange: -quantity,
-        type: 'out',
-        reason: reason,
-        branchSourceId: umayumchaHQBranchId, // Set source to UmayumchaHQ
-        branchSourceName: 'UmayumchaHQ', // Set source name
-        branchDestinationId:
-            umayumchaHQBranchId, // Set destination to UmayumchaHQ
-        branchDestinationName: 'UmayumchaHQ',
-      );
-      await fetchConsumables();
-      Get.snackbar('Success', 'Stock removed successfully!');
-    } catch (e) {
-      log('Error removing stock: $e');
-      Get.snackbar('Error', 'Failed to remove stock: ${e.toString()}');
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
   final _supabase = Supabase.instance.client;
   var consumables = <Consumable>[].obs;
   var expiringConsumables = <Consumable>[].obs;
@@ -70,9 +12,8 @@ class ConsumableController extends GetxController {
       <Consumable>[].obs; // New: Global low stock consumables
   var isLoading = false.obs;
   var searchQuery = ''.obs; // New: Search query observable
-  String? umayumchaHQBranchId;
-
-  
+  String umayumchaHQBranchId =
+      '2e109b1a-12c6-4572-87ab-6c96add8a603'; // Hardcoded UmayumchaHQ branch ID
 
   // New: Filtered consumables list
   RxList<Consumable> get filteredConsumables =>
@@ -91,27 +32,83 @@ class ConsumableController extends GetxController {
           })
           .toList()
           .obs;
+  Future<void> addStock(int consumableId, int quantity, String reason) async {
+    try {
+      //get branch by id
+      final branch =
+          await _supabase
+              .from('branches')
+              .select()
+              .eq('id', umayumchaHQBranchId)
+              .single();
+
+      isLoading.value = true;
+      final consumable = consumables.firstWhere((c) => c.id == consumableId);
+      // Hanya log transaksi, update quantity dilakukan oleh trigger Supabase
+      await _logTransaction(
+        consumableId: consumableId,
+        consumableName: consumable.name,
+        quantityChange: quantity,
+        type: 'in',
+        reason: reason,
+        branchSourceId: branch['id'], // Set source to UmayumchaHQ
+        branchSourceName: branch['name'], // Set destination name
+        branchDestinationId: branch['id'], // Set destination to UmayumchaHQ
+        branchDestinationName: branch['name'],
+      );
+      await fetchConsumables();
+      Get.snackbar('Success', 'Stock added successfully!');
+    } catch (e) {
+      log('Error adding stock: $e');
+      Get.snackbar('Error', 'Failed to add stock: ${e.toString()}');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> removeStock(
+    int consumableId,
+    int quantity,
+    String reason,
+  ) async {
+    try {
+      //get branch by id
+      final branch =
+          await _supabase
+              .from('branches')
+              .select()
+              .eq('id', umayumchaHQBranchId)
+              .single();
+
+      isLoading.value = true;
+      final consumable = consumables.firstWhere((c) => c.id == consumableId);
+      // Hanya log transaksi, update quantity dilakukan oleh trigger Supabase
+      await _logTransaction(
+        consumableId: consumableId,
+        consumableName: consumable.name,
+        quantityChange: -quantity,
+        type: 'out',
+        reason: reason,
+        branchSourceId: branch['id'], // Set source to UmayumchaHQ
+        branchSourceName: branch['name'], // Set source name
+        branchDestinationId: branch['id'], // Set destination to UmayumchaHQ
+        branchDestinationName: branch['name'],
+      );
+      await fetchConsumables();
+      Get.snackbar('Success', 'Stock removed successfully!');
+    } catch (e) {
+      log('Error removing stock: $e');
+      Get.snackbar('Error', 'Failed to remove stock: ${e.toString()}');
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   @override
   void onInit() {
     super.onInit();
     fetchConsumables();
-    _fetchUmayumchaHQBranchId();
     fetchGlobalLowStockConsumables(); // Fetch global low stock consumables on init
-  }
-
-  Future<void> _fetchUmayumchaHQBranchId() async {
-    try {
-      final response =
-          await _supabase
-              .from('branches')
-              .select('id')
-              .eq('name', 'UmayumchaHQ')
-              .single();
-      umayumchaHQBranchId = response['id'] as String;
-    } catch (e) {
-      log('Error fetching UmayumchaHQ branch ID: $e');
-    }
   }
 
   Future<void> fetchConsumables() async {
@@ -141,16 +138,6 @@ class ConsumableController extends GetxController {
 
   Future<void> fetchGlobalLowStockConsumables() async {
     try {
-      if (umayumchaHQBranchId == null) {
-        await _fetchUmayumchaHQBranchId(); // Ensure branch ID is fetched
-      }
-      if (umayumchaHQBranchId == null) {
-        log(
-          'UmayumchaHQ branch ID is null, cannot fetch low stock consumables.',
-        );
-        return;
-      }
-
       final response = await _supabase.rpc('get_low_stock_consumables');
 
       globalLowStockConsumables.value =

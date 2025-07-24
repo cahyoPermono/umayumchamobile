@@ -101,21 +101,21 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       'ProductFormScreen: Current branches in controller: ${branchController.branches.map((b) => b.name).toList()}',
     ); // Add this line
     final foundBranch = branchController.branches.firstWhereOrNull(
-      (branch) => branch.name == 'UmayumchaHQ',
+      (branch) => branch.id == '2e109b1a-12c6-4572-87ab-6c96add8a603',
     );
     if (foundBranch != null) {
       umayumchaHQBranch.value = foundBranch;
       debugPrint(
-        'ProductFormScreen: UmayumchaHQ branch found and set: ${foundBranch.name}',
+        'ProductFormScreen: Headquarter branch found and set: ${foundBranch.name}',
       );
     } else if (!branchController.isLoading.value) {
       // Only show error if not loading and branch not found
       Get.snackbar(
         'Error',
-        'UmayumchaHQ branch not found. Please ensure it exists.',
+        'HeadQuarter branch not found. Please ensure it exists.',
       );
       debugPrint(
-        'ProductFormScreen: UmayumchaHQ branch not found after branches loaded.',
+        'ProductFormScreen: HeadQuarter branch not found after branches loaded.',
       );
     }
   }
@@ -456,7 +456,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                             if (umayumchaHQBranch.value == null) {
                               Get.snackbar(
                                 'Error',
-                                'UmayumchaHQ branch not found. Cannot save product.',
+                                'Headquarter branch not found. Cannot save product.',
                               );
                               return;
                             }
@@ -478,7 +478,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                                     reason: 'Initial stock for new product',
                                     toBranchId: umayumchaHQBranch.value!.id,
                                     toBranchName:
-                                        'UmayumchaHQ', // Set destination name
+                                        umayumchaHQBranch
+                                            .value!
+                                            .name, // Set destination name
                                   );
                               if (transactionSuccess) {
                                 Get.back();

@@ -85,7 +85,7 @@ class BranchListScreen extends StatelessWidget {
                       ),
                       Obx(() {
                         return authController.userRole.value == 'admin'
-                            ? (branch.name == 'UmayumchaHQ'
+                            ? (branch.id == '2e109b1a-12c6-4572-87ab-6c96add8a603'
                                 ? IconButton(
                                     icon: Icon(Icons.delete, color: Colors.grey[400]), // Grey out icon
                                     onPressed: null, // Disable button

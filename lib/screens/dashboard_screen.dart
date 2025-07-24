@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha_ims/controllers/auth_controller.dart';
 import 'package:umayumcha_ims/screens/consumable_list_screen.dart';
 import 'package:umayumcha_ims/screens/inventory_screen.dart';
@@ -24,6 +25,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final AuthController authController = Get.find();
   late final InventoryController inventoryController;
   late final ConsumableController consumableController;
+  Map<String, dynamic> branch = {};
+  final SupabaseClient supabase = Supabase.instance.client;
+  String umayumchaHQBranchId = '2e109b1a-12c6-4572-87ab-6c96add8a603';
 
   @override
   void initState() {
@@ -35,6 +39,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       inventoryController.refreshDashboardData();
       consumableController.fetchConsumables();
     });
+    initiateBranch();
   }
 
   @override
@@ -164,63 +169,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              // Welcome Section
-              // Obx(() {
-              //   final user = authController.currentUser.value;
-              //   final role = authController.userRole.value;
-              //   return Card(
-              //     color: Theme.of(context).colorScheme.primaryContainer,
-              //     child: Padding(
-              //       padding: const EdgeInsets.all(20.0),
-              //       child: SizedBox(
-              //         width: double.infinity,
-              //         child: Column(
-              //           crossAxisAlignment: CrossAxisAlignment.start,
-              //           children: [
-              //             Text(
-              //               'Hello, ${user?.email?.split('@').first ?? 'User'}!',
-              //               style: Theme.of(
-              //                 context,
-              //               ).textTheme.headlineSmall?.copyWith(
-              //                 color:
-              //                     Theme.of(
-              //                       context,
-              //                     ).colorScheme.onPrimaryContainer,
-              //                 fontWeight: FontWeight.bold,
-              //               ),
-              //             ),
-              //             const SizedBox(height: 8),
-              //             Text(
-              //               'Your role: $role',
-              //               style: Theme.of(
-              //                 context,
-              //               ).textTheme.titleMedium?.copyWith(
-              //                 color: Theme.of(context)
-              //                     .colorScheme
-              //                     .onPrimaryContainer
-              //                     .withValues(alpha: 0.8),
-              //               ),
-              //             ),
-              //             const SizedBox(height: 16),
-              //             Text(
-              //               'Manage your dimsum business efficiently.',
-              //               style: Theme.of(
-              //                 context,
-              //               ).textTheme.bodyLarge?.copyWith(
-              //                 color:
-              //                     Theme.of(
-              //                       context,
-              //                     ).colorScheme.onPrimaryContainer,
-              //               ),
-              //             ),
-              //           ],
-              //         ),
-              //       ),
-              //     ),
-              //   );
-              // }),
-              // const SizedBox(height: 24),
-
               // Combined Low Stock Warning Section
               Obx(() {
                 final lowStockProducts =
@@ -269,7 +217,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                'Low Stock Alert (UmayumchaHQ)!',
+                                'Low Stock Alert ${branch['name']}!',
                                 style: Theme.of(
                                   context,
                                 ).textTheme.titleLarge?.copyWith(
@@ -547,5 +495,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
     );
+  }
+
+  void initiateBranch() async {
+    branch =
+        await supabase
+            .from('branches')
+            .select()
+            .eq('id', umayumchaHQBranchId)
+            .single();
   }
 }

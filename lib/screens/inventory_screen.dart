@@ -20,10 +20,10 @@ void _showTransactionDialog(
 
   // Find UmayumchaHQ branch details
   final umayumchaHQBranch = branchController.branches.firstWhereOrNull(
-    (branch) => branch.name == 'UmayumchaHQ',
+    (branch) => branch.id == '2e109b1a-12c6-4572-87ab-6c96add8a603',
   );
   final String? umayumchaHQBranchId = umayumchaHQBranch?.id;
-  const String umayumchaHQBranchName = 'UmayumchaHQ'; // Assuming constant name
+  final String? umayumchaHQBranchName = umayumchaHQBranch?.name;
 
   Get.dialog(
     AlertDialog(
@@ -224,7 +224,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
             }
             WidgetsBinding.instance.addPostFrameCallback((_) {
               final umayumchaHQBranch = branchController.branches
-                  .firstWhereOrNull((branch) => branch.name == 'UmayumchaHQ');
+                  .firstWhereOrNull(
+                    (branch) =>
+                        branch.id == '2e109b1a-12c6-4572-87ab-6c96add8a603',
+                  );
               if (umayumchaHQBranch != null &&
                   inventoryController.selectedBranch.value == null) {
                 inventoryController.selectedBranch.value = umayumchaHQBranch;
@@ -333,8 +336,14 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                     ),
                                     onPressed: () {
                                       Get.to(
-                                        () =>
-                                            ProductFormScreen(product: product, locationName: inventoryController.selectedBranch.value?.name),
+                                        () => ProductFormScreen(
+                                          product: product,
+                                          locationName:
+                                              inventoryController
+                                                  .selectedBranch
+                                                  .value
+                                                  ?.name,
+                                        ),
                                       );
                                     },
                                   ),

@@ -113,11 +113,12 @@ class BranchController extends GetxController {
       final branchData =
           await supabase.from('branches').select('name').eq('id', id).single();
 
-      if (branchData['name'] == 'UmayumchaHQ') {
+      const String umayumchaHQBranchIdConstant =
+          '2e109b1a-12c6-4572-87ab-6c96add8a603';
+      if (branchData['id'] == umayumchaHQBranchIdConstant) {
         Get.snackbar(
-          'Peringatan',
-          'Cabang UmayumchaHQ tidak dapat dihapus.',
-          snackPosition: SnackPosition.BOTTOM,
+          'Error',
+          "Cabang ${branchData['name']} tidak boleh dapat dihapus.",
         );
         return;
       }
