@@ -33,6 +33,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   TextEditingController priceController = TextEditingController();
   TextEditingController lowStockController =
       TextEditingController(); // New: Low Stock Controller
+  TextEditingController fromController = TextEditingController(); // New: From Controller
   TextEditingController initialQuantityController = TextEditingController();
 
   bool _showOptionalFields = false; // New state variable
@@ -68,6 +69,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     lowStockController = TextEditingController(
       text: widget.product?.lowStock.toString() ?? '50',
     ); // Initialize with existing or default 50
+    fromController = TextEditingController(text: widget.product?.from ?? ''); // Initialize fromController
 
     if (widget.product == null) {
       initialQuantityController.text = '1';
@@ -180,6 +182,25 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a code';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: fromController,
+                decoration: const InputDecoration(
+                  labelText: 'From (Vendor Name)',
+                  hintText: 'e.g., PT. ABC, Supplier XYZ',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 12.0,
+                    horizontal: 15.0,
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter vendor name';
                   }
                   return null;
                 },
@@ -415,10 +436,11 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                         );
                         debugPrint('Pengguna: ${penggunaController.text}');
                         debugPrint('Price: ${priceController.text}');
+                        debugPrint('From: ${fromController.text}'); // New debug print
 
                         if (isValid) {
                           final product = Product(
-                            id: widget.product?.id, // Now nullable
+                            id: widget.product?.id,
                             name: nameController.text.trim(),
                             code: codeController.text.trim(),
                             description:
@@ -447,7 +469,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                             price: double.tryParse(priceController.text.trim()),
                             lowStock: int.parse(
                               lowStockController.text.trim(),
-                            ), // Add lowStock
+                            ),
+                            from: fromController.text.trim(), // Save 'from' field
                             createdAt:
                                 widget.product?.createdAt ?? DateTime.now(),
                           );

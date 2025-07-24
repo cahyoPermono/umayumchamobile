@@ -1,4 +1,3 @@
-
 class Product {
   final String? id;
   final String name;
@@ -11,6 +10,7 @@ class Product {
   final String? pengguna;
   final double? price;
   final int lowStock; // Added lowStock field
+  final String from; // New field
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final String? updatedBy;
@@ -27,6 +27,7 @@ class Product {
     this.pengguna,
     this.price,
     required this.lowStock, // Made lowStock required
+    required this.from, // Make it required
     this.createdAt,
     this.updatedAt,
     this.updatedBy,
@@ -44,13 +45,16 @@ class Product {
       nilaiResidu: (json['nilai_residu'] as num?)?.toDouble(),
       pengguna: json['pengguna'] as String?,
       price: (json['price'] as num?)?.toDouble(),
-              lowStock: json['low_stock'] as int, // lowStock is now required
-              createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
-          : null,
+      lowStock: json['low_stock'] as int, // lowStock is now required
+      from: json['from'] ?? '', // Parse from JSON
+      createdAt:
+          json['created_at'] != null
+              ? DateTime.parse(json['created_at'] as String)
+              : null,
+      updatedAt:
+          json['updated_at'] != null
+              ? DateTime.parse(json['updated_at'] as String)
+              : null,
       updatedBy: json['updated_by'] as String?,
     );
   }
@@ -67,6 +71,7 @@ class Product {
       'pengguna': pengguna,
       'price': price,
       'low_stock': lowStock, // Add low_stock to toJson
+      'from': from, // Include in JSON
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
       'updated_by': updatedBy,
@@ -88,7 +93,8 @@ class Product {
     double? nilaiResidu,
     String? pengguna,
     double? price,
-    required int lowStock, // Made lowStock required
+    required int lowStock,
+    required String from, // Make it required
     DateTime? createdAt,
     DateTime? updatedAt,
     String? updatedBy,
@@ -105,6 +111,7 @@ class Product {
       pengguna: pengguna ?? this.pengguna,
       price: price ?? this.price,
       lowStock: lowStock, // Update lowStock in copyWith
+      from: from, // Update from in copyWith
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       updatedBy: updatedBy ?? this.updatedBy,

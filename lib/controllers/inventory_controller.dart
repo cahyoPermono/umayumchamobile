@@ -111,6 +111,9 @@ class InventoryController extends GetxController {
               pengguna: item['product_pengguna'] as String?,
               price: (item['product_price'] as num?)?.toDouble(),
               lowStock: item['product_low_stock'] as int? ?? 50,
+              from:
+                  item['product_from'] as String? ??
+                  'Unknown', // Add from field
               createdAt:
                   item['created_at'] != null
                       ? DateTime.parse(item['created_at'] as String)

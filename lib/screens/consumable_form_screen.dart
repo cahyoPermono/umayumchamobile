@@ -24,6 +24,7 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
   late TextEditingController _quantityController;
   late TextEditingController _descriptionController;
   late TextEditingController _lowStockController; // New: Low Stock Controller
+  late TextEditingController _fromController; // New: From Controller
   final TextEditingController _locationController = TextEditingController();
   DateTime? _expiredDate;
   bool _isSubmitting = false; // New: State variable for submission status
@@ -47,6 +48,9 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
     _lowStockController = TextEditingController(
       text: widget.consumable?.lowStock.toString() ?? '50',
     ); // Initialize with existing or default 50
+    _fromController = TextEditingController(
+      text: widget.consumable?.from ?? '',
+    ); // Initialize fromController
     _expiredDate = widget.consumable?.expiredDate;
     fetchBranch();
   }
@@ -71,6 +75,7 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
     _quantityController.dispose();
     _descriptionController.dispose();
     _lowStockController.dispose(); // Dispose low stock controller
+    _fromController.dispose(); // Dispose from controller
     _locationController.dispose();
     super.dispose();
   }
@@ -144,6 +149,25 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a name';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _fromController,
+                decoration: const InputDecoration(
+                  labelText: 'From (Vendor Name)',
+                  hintText: 'e.g., PT. Kopi Jaya, Supplier Biji Kopi',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 12.0,
+                    horizontal: 15.0,
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter vendor name';
                   }
                   return null;
                 },
@@ -273,6 +297,7 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
                                 description: _descriptionController.text,
                                 expiredDate: _expiredDate,
                                 lowStock: int.parse(_lowStockController.text),
+                                from: _fromController.text, // Save 'from' field
                               );
                               if (widget.consumable == null) {
                                 await controller.addConsumable(newConsumable);
