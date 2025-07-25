@@ -93,7 +93,23 @@ class DeliveryNoteController extends GetxController {
       debugPrint('Error fetching delivery notes: ${e.toString()}');
       Get.snackbar('Error', 'Failed to fetch delivery notes: ${e.toString()}');
     } finally {
-      isLoading.value = false;
+      isLoading(false);
+    }
+  }
+
+  Future<void> deleteDeliveryNote(String deliveryNoteId) async {
+    try {
+      isLoading(true);
+      await supabase.rpc(
+        'delete_delivery_note_and_restock',
+        params: {'p_delivery_note_id': deliveryNoteId},
+      );
+      Get.snackbar('Success', 'Delivery Note deleted and stock restored');
+      fetchDeliveryNotes(); // Refresh the list
+    } catch (e) {
+      Get.snackbar('Error', 'Error deleting Delivery Note: $e');
+    } finally {
+      isLoading(false);
     }
   }
 

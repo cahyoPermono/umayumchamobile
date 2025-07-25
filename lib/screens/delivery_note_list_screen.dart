@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:umayumcha_ims/controllers/consumable_controller.dart';
 import 'package:umayumcha_ims/controllers/delivery_note_controller.dart';
+import 'package:umayumcha_ims/controllers/inventory_controller.dart';
 import 'package:umayumcha_ims/screens/delivery_note_form_screen.dart';
 
 class DeliveryNoteListScreen extends StatelessWidget {
@@ -10,6 +12,8 @@ class DeliveryNoteListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final DeliveryNoteController controller = Get.put(DeliveryNoteController());
+    final InventoryController inventoryController = Get.find();
+    final ConsumableController consumableController = Get.find();
 
     return Scaffold(
       appBar: AppBar(
@@ -248,13 +252,39 @@ class DeliveryNoteListScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () {
-                          Get.to(
-                            () => DeliveryNoteFormScreen(deliveryNote: note),
-                          );
-                        },
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () {
+                              Get.to(
+                                () =>
+                                    DeliveryNoteFormScreen(deliveryNote: note),
+                              );
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () {
+                              Get.defaultDialog(
+                                title: "Delete Delivery Note",
+                                middleText:
+                                    "Are you sure you want to delete this delivery note? This action cannot be undone and will restore product quantities.",
+                                textConfirm: "Delete",
+                                textCancel: "Cancel",
+                                confirmTextColor: Colors.white,
+                                buttonColor: Colors.red,
+                                onConfirm: () {
+                                  controller.deleteDeliveryNote(note.id);
+                                  inventoryController.fetchBranchProducts();
+                                  consumableController.fetchConsumables();
+                                  Get.back(); // Close the dialog
+                                },
+                              );
+                            },
+                          ),
+                        ],
                       ),
                       children: [
                         const Divider(
