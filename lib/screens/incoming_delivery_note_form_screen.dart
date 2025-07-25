@@ -252,7 +252,7 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
               fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, void Function() onFieldSubmitted) {
                 // Use the _fromVendorNameController directly
                 return TextFormField(
-                  controller: _fromVendorNameController,
+                  controller: textEditingController,
                   focusNode: focusNode,
                   decoration: InputDecoration(
                     labelText: 'From (Vendor Name)',
