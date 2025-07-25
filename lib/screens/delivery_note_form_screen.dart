@@ -209,20 +209,34 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
 
     if (selectedItem != null) {
       final TextEditingController quantityController = TextEditingController();
+      final TextEditingController descriptionController = TextEditingController(); // New: Description controller
       Get.dialog(
         AlertDialog(
-          title: Text('Enter Quantity for ${selectedItem.name}'),
-          content: TextField(
-            controller: quantityController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: 'Quantity (Max: ${selectedItem.quantity})',
-            ),
+          title: Text('Add Item: ${selectedItem.name}'), // Changed title
+          content: Column( // Use Column to hold multiple text fields
+            mainAxisSize: MainAxisSize.min, // Make column take minimum space
+            children: [
+              TextField(
+                controller: quantityController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Quantity (Max: ${selectedItem.quantity})',
+                ),
+              ),
+              const SizedBox(height: 16), // Add some spacing
+              TextField(
+                controller: descriptionController, // New: Description text field
+                decoration: const InputDecoration(
+                  labelText: 'Keterangan (Optional)',
+                ),
+                maxLines: 3, // Allow multiple lines for description
+              ),
+            ],
           ),
           actions: [
             TextButton(
               onPressed: () {
-                Get.back(); // Close quantity dialog
+                Get.back(); // Close dialog
               },
               child: const Text('Cancel'),
             ),
@@ -236,9 +250,10 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                     'id': selectedItem.id,
                     'name': selectedItem.name,
                     'quantity': quantity,
-                    'type': selectedItem.type, // Store type
+                    'type': selectedItem.type,
+                    'description': descriptionController.text, // New: Add description
                   });
-                  Get.back(); // Close quantity dialog
+                  Get.back(); // Close dialog
                 } else {
                   Get.snackbar(
                     'Error',
@@ -430,57 +445,76 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      leading: Icon(
-                        item['type'] == 'product'
-                            ? Icons.inventory_2_outlined
-                            : Icons.category_outlined,
-                        color:
+                    child: Column(
+                      children: [
+                        ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          leading: Icon(
                             item['type'] == 'product'
-                                ? Colors.blueGrey
-                                : Colors.teal,
-                      ),
-                      title: Text(
-                        '${item['name']}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      subtitle: Text(
-                        'Type: ${(item['type'] as String).capitalizeFirst} | Quantity: x${item['quantity']}',
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () {
-                          Get.dialog(
-                            AlertDialog(
-                              title: const Text('Remove Item?'),
-                              content: Text(
-                                'Do you want to remove ${item['name']}?',
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Get.back(),
-                                  child: const Text('Cancel'),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    selectedProducts.removeAt(index);
-                                    Get.back();
-                                  },
-                                  child: const Text('Remove'),
-                                ),
-                              ],
+                                ? Icons.inventory_2_outlined
+                                : Icons.category_outlined,
+                            color:
+                                item['type'] == 'product'
+                                    ? Colors.blueGrey
+                                    : Colors.teal,
+                          ),
+                          title: Text(
+                            '${item['name']}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                          subtitle: Text(
+                            'Type: ${(item['type'] as String).capitalizeFirst} | Quantity: x${item['quantity']}',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              Get.dialog(
+                                AlertDialog(
+                                  title: const Text('Remove Item?'),
+                                  content: Text(
+                                    'Do you want to remove ${item['name']}?',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Get.back(),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        selectedProducts.removeAt(index);
+                                        Get.back();
+                                      },
+                                      child: const Text('Remove'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        if (item['description'] != null && item['description'].isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(72.0, 0.0, 16.0, 8.0), // Adjust padding to align with subtitle
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Keterangan: ${item['description']}',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey[600],
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   );
                 },

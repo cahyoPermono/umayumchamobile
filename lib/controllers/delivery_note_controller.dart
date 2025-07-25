@@ -57,7 +57,7 @@ class DeliveryNoteController extends GetxController {
       var query = supabase
           .from('delivery_notes')
           .select(
-            '*, inventory_transactions(product_id, product_name, quantity_change), consumable_transactions(consumable_id, consumable_name, quantity_change), keterangan',
+            '*, inventory_transactions(product_id, product_name, quantity_change, reason), consumable_transactions(consumable_id, consumable_name, quantity_change, reason), keterangan',
           );
 
       // Apply filters
@@ -176,7 +176,7 @@ class DeliveryNoteController extends GetxController {
             productId: itemId as String, // Cast to String for products
             type: 'out',
             quantityChange: quantity,
-            reason: 'Delivery Note: $customerName',
+            reason: 'Delivery Note: $customerName - ${item['description']}',
             deliveryNoteId: deliveryNoteId,
             fromBranchId: fromBranchId,
             toBranchId: toBranchId,
@@ -189,7 +189,7 @@ class DeliveryNoteController extends GetxController {
             consumableId: int.parse(itemId), // Cast to int for consumables
             consumableName: itemName,
             quantityChange: quantity,
-            reason: 'Delivery Note: $customerName',
+            reason: 'Delivery Note: $customerName - ${item['description']}',
             deliveryNoteId: deliveryNoteId,
             fromBranchId: fromBranchId,
             toBranchId: toBranchId,
@@ -304,7 +304,7 @@ class DeliveryNoteController extends GetxController {
             productId: itemId as String, // Cast to String for products
             type: 'out',
             quantityChange: quantity,
-            reason: 'Delivery Note: ${customerName ?? 'Internal Transfer'}',
+            reason: 'Delivery Note: ${customerName ?? 'Internal Transfer'} - ${item['description']}',
             deliveryNoteId: deliveryNoteId,
             fromBranchId: fromBranchId,
             toBranchId: toBranchId,
@@ -317,7 +317,7 @@ class DeliveryNoteController extends GetxController {
             consumableId: int.parse(itemId), // Cast to int for consumables
             consumableName: itemName,
             quantityChange: quantity,
-            reason: 'Delivery Note: ${customerName ?? 'Internal Transfer'}',
+            reason: 'Delivery Note: ${customerName ?? 'Internal Transfer'} - ${item['description']}',
             deliveryNoteId: deliveryNoteId,
             fromBranchId: fromBranchId,
             toBranchId: toBranchId,

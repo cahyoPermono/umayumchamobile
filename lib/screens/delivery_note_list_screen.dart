@@ -310,23 +310,40 @@ class DeliveryNoteListScreen extends StatelessWidget {
                                 ...note.productItems!.map(
                                   (item) => Padding(
                                     padding: const EdgeInsets.only(bottom: 5.0),
-                                    child: Row(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Icon(
-                                          Icons.inventory_2_outlined,
-                                          size: 18,
-                                          color: Colors.blueGrey,
+                                        Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.inventory_2_outlined,
+                                              size: 18,
+                                              color: Colors.blueGrey,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                '${item['product_name']} (x${item['quantity_change']})',
+                                                style: TextStyle(
+                                                  fontSize: 15,
+                                                  color: Colors.grey[800],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            '${item['product_name']} (x${item['quantity_change']})',
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              color: Colors.grey[800],
+                                        if (item['reason'] != null && item['reason'].isNotEmpty)
+                                          Padding(
+                                            padding: const EdgeInsets.only(left: 26.0, top: 2.0),
+                                            child: Text(
+                                              'Keterangan: ${item['reason']}',
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                color: Colors.grey[600],
+                                                fontStyle: FontStyle.italic,
+                                              ),
                                             ),
                                           ),
-                                        ),
                                       ],
                                     ),
                                   ),
@@ -336,23 +353,40 @@ class DeliveryNoteListScreen extends StatelessWidget {
                                 ...note.consumableItems!.map(
                                   (item) => Padding(
                                     padding: const EdgeInsets.only(bottom: 5.0),
-                                    child: Row(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Icon(
-                                          Icons.category_outlined,
-                                          size: 18,
-                                          color: Colors.teal,
+                                        Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.category_outlined,
+                                              size: 18,
+                                              color: Colors.teal,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                '${item['consumable_name']} (x${item['quantity_change']})',
+                                                style: TextStyle(
+                                                  fontSize: 15,
+                                                  color: Colors.grey[800],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            '${item['consumable_name']} (x${item['quantity_change']})',
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              color: Colors.grey[800],
+                                        if (item['reason'] != null && item['reason'].isNotEmpty)
+                                          Padding(
+                                            padding: const EdgeInsets.only(left: 26.0, top: 2.0),
+                                            child: Text(
+                                              'Keterangan: ${item['reason']}',
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                color: Colors.grey[600],
+                                                fontStyle: FontStyle.italic,
+                                              ),
                                             ),
                                           ),
-                                        ),
                                       ],
                                     ),
                                   ),

@@ -55,8 +55,8 @@ class DeliveryNote {
                 (e) => {
                   'product_id': e['product_id'],
                   'quantity_change': e['quantity_change'],
-                  'product_name':
-                      e['product_name'], // Directly from transaction
+                  'product_name': e['product_name'], // Directly from transaction
+                  'reason': e['reason'], // New: Add reason
                   'type': 'product',
                 },
               )
@@ -68,6 +68,7 @@ class DeliveryNote {
                   'consumable_id': e['consumable_id'],
                   'quantity_change': e['quantity_change'],
                   'consumable_name': e['consumable_name'],
+                  'reason': e['reason'], // New: Add reason
                   'type': 'consumable',
                 },
               )
