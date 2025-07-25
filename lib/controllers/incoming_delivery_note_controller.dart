@@ -142,4 +142,43 @@ class IncomingDeliveryNoteController extends GetxController {
       isLoading(false);
     }
   }
+
+  Future<void> updateIncomingDeliveryNote({
+    required String incomingDeliveryNoteId,
+    String? fromVendorName,
+    required DateTime deliveryDate,
+    required String toBranchId,
+    required String toBranchName,
+    required List<Map<String, dynamic>> newItems,
+    required List<Map<String, dynamic>> originalItems,
+    String? keterangan,
+  }) async {
+    try {
+      isLoading.value = true;
+
+      await supabase.rpc(
+        'update_incoming_delivery_note_and_transactions',
+        params: {
+          'p_incoming_delivery_note_id': incomingDeliveryNoteId,
+          'p_from_vendor_name': fromVendorName,
+          'p_delivery_date': deliveryDate.toUtc().toIso8601String(),
+          'p_to_branch_id': toBranchId,
+          'p_to_branch_name': toBranchName,
+          'p_keterangan': keterangan,
+          'p_new_items': newItems,
+          'p_original_items': originalItems,
+        },
+      );
+
+      fetchIncomingDeliveryNotes();
+      Get.back();
+      Get.snackbar('Success', 'Incoming delivery note updated successfully!');
+    } catch (e) {
+      debugPrint('Error updating incoming delivery note: ${e.toString()}');
+      Get.snackbar('Error',
+          'Failed to update incoming delivery note: ${e.toString()}');
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

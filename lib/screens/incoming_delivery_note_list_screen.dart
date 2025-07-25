@@ -244,7 +244,16 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // No edit button for now, as update functionality is not yet implemented
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () {
+                              Get.to(
+                                () => IncomingDeliveryNoteFormScreen(
+                                  incomingDeliveryNote: note,
+                                ),
+                              );
+                            },
+                          ),
                           IconButton(
                             icon: const Icon(Icons.delete),
                             onPressed: () {

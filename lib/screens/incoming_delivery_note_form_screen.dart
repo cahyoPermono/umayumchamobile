@@ -480,8 +480,21 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
                               keterangan: keteranganController.text,
                             );
                           } else {
-                            // TODO: Implement update functionality for incoming delivery notes
-                            Get.snackbar('Info', 'Update functionality not yet implemented.');
+                            // Update existing incoming delivery note
+                            incomingDeliveryNoteController.updateIncomingDeliveryNote(
+                              incomingDeliveryNoteId: incomingDeliveryNoteId!,
+                              fromVendorName: fromVendorNameController.text,
+                              deliveryDate: selectedDeliveryDate,
+                              toBranchId: selectedToBranch!.id!,
+                              toBranchName: selectedToBranch!.name,
+                              newItems: selectedProducts.toList(),
+                              originalItems: (
+                                  widget.incomingDeliveryNote!.productItems ?? []
+                                ) + (
+                                  widget.incomingDeliveryNote!.consumableItems ?? []
+                                ),
+                              keterangan: keteranganController.text,
+                            );
                           }
                         },
                         icon: Icon(
