@@ -420,7 +420,7 @@ class DeliveryNoteController extends GetxController {
         sheet.cell(CellIndex.indexByString('C$rowIndex')).value =
             '✓'; // Auto checklist
         sheet.cell(CellIndex.indexByString('D$rowIndex')).value =
-            ''; // Reason column
+            item['reason'] ?? ''; // Reason column
         rowIndex++;
       }
 
@@ -492,7 +492,7 @@ class DeliveryNoteController extends GetxController {
                               item['name'],
                               item['quantity'].abs().toString(),
                               '', // Auto checklist
-                              '', // Reason
+                              item['reason'] ?? '', // Reason
                             ],
                           )
                           .toList(),

@@ -85,6 +85,7 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
             'name': item['product_name'],
             'quantity': item['quantity_change'],
             'type': 'product',
+            'description': item['reason'], // Add description
           });
         }
       }
@@ -95,6 +96,7 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
             'name': item['consumable_name'],
             'quantity': item['quantity_change'],
             'type': 'consumable',
+            'description': item['reason'], // Add description
           });
         }
       }
