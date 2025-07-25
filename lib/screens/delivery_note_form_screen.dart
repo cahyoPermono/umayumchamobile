@@ -12,21 +12,7 @@ import 'package:umayumcha_ims/models/delivery_note_model.dart'; // Import Delive
 import 'package:umayumcha_ims/utils/file_exporter.dart'; // New: Import file_exporter
 import 'package:umayumcha_ims/controllers/auth_controller.dart'; // Import AuthController
 import 'package:intl/intl.dart'; // Import intl package
-
-// Helper class for selectable items (Moved to top-level)
-class SelectableItem {
-  final String id;
-  final String name;
-  final int quantity;
-  final String type; // 'product' or 'consumable'
-
-  SelectableItem({
-    required this.id,
-    required this.name,
-    required this.quantity,
-    required this.type,
-  });
-}
+import 'package:umayumcha_ims/models/selectable_item.dart'; // Import SelectableItem
 
 class DeliveryNoteFormScreen extends StatefulWidget {
   final DeliveryNote? deliveryNote;

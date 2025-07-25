@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:umayumcha_ims/screens/delivery_note_form_screen.dart'; // Import SelectableItem
+import 'package:umayumcha_ims/models/selectable_item.dart'; // Import SelectableItem
 
 class ItemSelectionDialog extends StatefulWidget {
   final List<SelectableItem> items;
