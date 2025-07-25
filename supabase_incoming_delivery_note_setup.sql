@@ -166,31 +166,29 @@ BEGIN
     FROM public.incoming_delivery_notes
     WHERE id = p_incoming_delivery_note_id;
 
-    -- Reverse product transactions associated with this incoming delivery note
-    FOR r IN SELECT * FROM public.inventory_transactions WHERE incoming_delivery_note_id = p_incoming_delivery_note_id AND type = 'in'
+    -- Reverse product transactions
+    FOR r IN SELECT * FROM public.inventory_transactions
+             WHERE incoming_delivery_note_id = p_incoming_delivery_note_id
     LOOP
-        -- Update branch_products quantity (subtract original quantity_change)
         UPDATE public.branch_products
         SET quantity = quantity - r.quantity_change
         WHERE branch_id = v_to_branch_id AND product_id = r.product_id;
 
-        -- Insert a reversal transaction (type 'out') to log the reversal
         INSERT INTO public.inventory_transactions (
             product_id,
             product_name,
             quantity_change,
             reason,
             type,
-            from_branch_id, -- The branch that received it (now sending out for reversal)
-            to_branch_id,   -- No specific 'to' branch for reversal out
+            from_branch_id,
+            to_branch_id,
             from_branch_name,
             to_branch_name
-            -- No incoming_delivery_note_id for reversal transactions
         )
         VALUES (
             r.product_id,
             r.product_name,
-            r.quantity_change,
+            -1 * r.quantity_change,
             'Reversal of Incoming DN: ' || r.reason,
             'out',
             v_to_branch_id,
@@ -200,46 +198,48 @@ BEGIN
         );
     END LOOP;
 
-    -- Delete the original 'in' inventory transactions associated with this incoming delivery note
-    DELETE FROM public.inventory_transactions WHERE incoming_delivery_note_id = p_incoming_delivery_note_id AND type = 'in';
+    DELETE FROM public.inventory_transactions
+    WHERE incoming_delivery_note_id = p_incoming_delivery_note_id;
 
-    -- Reverse consumable transactions associated with this incoming delivery note
-    FOR r IN SELECT * FROM public.consumable_transactions WHERE incoming_delivery_note_id = p_incoming_delivery_note_id AND type = 'in'
+    -- Reverse consumable transactions
+    FOR r IN SELECT * FROM public.consumable_transactions
+             WHERE incoming_delivery_note_id = p_incoming_delivery_note_id
     LOOP
-        -- Update consumables quantity (subtract original quantity_change)
         UPDATE public.consumables
         SET quantity = quantity - r.quantity_change
         WHERE id = r.consumable_id;
 
-        -- Insert a reversal transaction (type 'out') to log the reversal
         INSERT INTO public.consumable_transactions (
             consumable_id,
             consumable_name,
             quantity_change,
             reason,
             type,
-            branch_destination_id, -- Use existing column
-            branch_destination_name, -- Use existing column
-            delivery_note_id, -- Explicitly include and set to NULL)
+            branch_destination_id,
+            branch_destination_name,
+            delivery_note_id
+        )
         VALUES (
             r.consumable_id,
             r.consumable_name,
-            r.quantity_change,
+            -1 * r.quantity_change,
             'Reversal of Incoming DN: ' || r.reason,
             'out',
-            v_to_branch_id, -- This is the branch that received it (now sending out for reversal)
-            v_to_branch_name, -- This is the name of the branch that received it (now sending out for reversal)
-            NULL, -- Not associated with an outgoing delivery note
+            v_to_branch_id,
+            v_to_branch_name,
+            NULL
         );
     END LOOP;
 
-    -- Delete the original 'in' consumable transactions associated with this incoming delivery note
-    DELETE FROM public.consumable_transactions WHERE incoming_delivery_note_id = p_incoming_delivery_note_id AND type = 'in';
+    DELETE FROM public.consumable_transactions
+    WHERE incoming_delivery_note_id = p_incoming_delivery_note_id;
 
-    -- Finally, delete the incoming delivery note itself
-    DELETE FROM public.incoming_delivery_notes WHERE id = p_incoming_delivery_note_id;
+    DELETE FROM public.incoming_delivery_notes
+    WHERE id = p_incoming_delivery_note_id;
 END;
 $function$;
+
+
 
 -- New RPC function for updating incoming delivery notes
 CREATE OR REPLACE FUNCTION public.update_incoming_delivery_note_and_transactions(
@@ -332,7 +332,7 @@ BEGIN
                 'out',
                 p_to_branch_id,
                 p_to_branch_name,
-                NULL, -- Not associated with an outgoing delivery note
+                NULL -- Not associated with an outgoing delivery note
             );
         END IF;
     END LOOP;
@@ -414,7 +414,7 @@ BEGIN
                 p_incoming_delivery_note_id,
                 p_to_branch_id,
                 p_to_branch_name,
-                NULL, -- Not associated with an outgoing delivery note
+                NULL -- Not associated with an outgoing delivery note
             );
 
             -- Update consumables quantity (add quantity)

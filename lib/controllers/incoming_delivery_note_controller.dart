@@ -116,6 +116,8 @@ class IncomingDeliveryNoteController extends GetxController {
       );
 
       fetchIncomingDeliveryNotes();
+      inventoryController.fetchBranchProducts();
+      consumableController.fetchConsumables();
       Get.back();
       Get.snackbar('Success', 'Incoming delivery note created successfully!');
     } catch (e) {
@@ -136,6 +138,8 @@ class IncomingDeliveryNoteController extends GetxController {
       );
       Get.snackbar('Success', 'Incoming Delivery Note deleted and stock reversed');
       fetchIncomingDeliveryNotes();
+      inventoryController.fetchBranchProducts();
+      consumableController.fetchConsumables();
     } catch (e) {
       Get.snackbar('Error', 'Error deleting Incoming Delivery Note: $e');
     } finally {
@@ -171,6 +175,8 @@ class IncomingDeliveryNoteController extends GetxController {
       );
 
       fetchIncomingDeliveryNotes();
+      inventoryController.fetchBranchProducts();
+      consumableController.fetchConsumables();
       Get.back();
       Get.snackbar('Success', 'Incoming delivery note updated successfully!');
     } catch (e) {
