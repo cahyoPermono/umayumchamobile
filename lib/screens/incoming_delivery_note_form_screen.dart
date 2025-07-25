@@ -11,6 +11,7 @@ import 'package:umayumcha_ims/widgets/item_selection_dialog.dart';
 import 'package:umayumcha_ims/models/incoming_delivery_note_model.dart';
 import 'package:intl/intl.dart';
 import 'package:umayumcha_ims/models/selectable_item.dart'; // Import SelectableItem
+import 'package:umayumcha_ims/utils/app_constants.dart';
 
 class IncomingDeliveryNoteFormScreen extends StatefulWidget {
   final IncomingDeliveryNote? incomingDeliveryNote;
@@ -72,6 +73,11 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
           });
         }
       }
+    } else {
+      // Default to headquarter branch for new incoming delivery notes
+      selectedToBranch = branchController.branches.firstWhereOrNull(
+        (branch) => branch.id == headquarterId,
+      );
     }
   }
 
@@ -261,18 +267,15 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
                   prefixIcon: const Icon(Icons.store),
                 ),
                 value: selectedToBranch,
-                onChanged: (Branch? newValue) {
-                  setState(() {
-                    selectedToBranch = newValue;
-                  });
-                },
-                items:
-                    branchController.branches.map((branch) {
-                      return DropdownMenuItem<Branch>(
-                        value: branch,
-                        child: Text(branch.name),
-                      );
-                    }).toList(),
+                onChanged: null, // Disable the dropdown
+                items: selectedToBranch != null
+                    ? [
+                        DropdownMenuItem<Branch>(
+                          value: selectedToBranch,
+                          child: Text(selectedToBranch!.name),
+                        ),
+                      ]
+                    : [],
               );
             }),
             const SizedBox(height: 16),
