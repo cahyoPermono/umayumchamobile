@@ -257,7 +257,6 @@ LANGUAGE plpgsql
 AS $function$
 DECLARE
     item_data jsonb;
-    r record;
     v_product_id uuid;
     v_consumable_id int;
     v_quantity_change int;
@@ -265,83 +264,38 @@ DECLARE
     v_item_name text;
     v_reason text;
 BEGIN
-    -- 1. Reverse stock for original items and delete original 'in' transactions
+    -- 1. Reverse stock for all original items.
     FOR item_data IN SELECT * FROM jsonb_array_elements(p_original_items)
     LOOP
         v_item_type := item_data->>'type';
-        v_quantity_change := (item_data->>'quantity_change')::int; -- Use quantity_change from original items
-        v_item_name := item_data->>'product_name'; -- Or consumable_name
-        v_reason := item_data->>'reason';
+        v_quantity_change := (item_data->>'quantity_change')::int;
 
         IF v_item_type = 'product' THEN
             v_product_id := (item_data->>'product_id')::uuid;
-
-            -- Update branch_products quantity (subtract original quantity_change)
+            -- Subtract original quantity from branch_products
             UPDATE public.branch_products
             SET quantity = quantity - v_quantity_change
             WHERE branch_id = p_to_branch_id AND product_id = v_product_id;
 
-            -- Insert a reversal transaction (type 'out')
-            INSERT INTO public.inventory_transactions (
-                product_id,
-                product_name,
-                quantity_change,
-                reason,
-                type,
-                from_branch_id,
-                to_branch_id,
-                from_branch_name,
-                to_branch_name
-            )
-            VALUES (
-                v_product_id,
-                v_item_name,
-                v_quantity_change,
-                'Reversal for Incoming DN Update: ' || v_reason,
-                'out',
-                p_to_branch_id,
-                NULL,
-                p_to_branch_name,
-                NULL
-            );
-
         ELSIF v_item_type = 'consumable' THEN
             v_consumable_id := (item_data->>'consumable_id')::int;
-
-            -- Update consumables quantity (subtract original quantity_change)
+            -- Subtract original quantity from consumables
             UPDATE public.consumables
             SET quantity = quantity - v_quantity_change
             WHERE id = v_consumable_id;
-
-            -- Insert a reversal transaction (type 'out')
-            INSERT INTO public.consumable_transactions (
-                consumable_id,
-                consumable_name,
-                quantity_change,
-                reason,
-                type,
-                branch_destination_id,
-                branch_destination_name,
-                delivery_note_id, -- Explicitly include and set to NULL
-            )
-            VALUES (
-                v_consumable_id,
-                v_item_name,
-                v_quantity_change,
-                'Reversal for Incoming DN Update: ' || v_reason,
-                'out',
-                p_to_branch_id,
-                p_to_branch_name,
-                NULL -- Not associated with an outgoing delivery note
-            );
         END IF;
     END LOOP;
 
-    -- Delete the original 'in' transactions associated with this incoming delivery note
-    DELETE FROM public.inventory_transactions WHERE incoming_delivery_note_id = p_incoming_delivery_note_id AND type = 'in';
-    DELETE FROM public.consumable_transactions WHERE incoming_delivery_note_id = p_incoming_delivery_note_id AND type = 'in';
+    -- 2. Unlink the old transactions by setting their foreign key to NULL.
+    UPDATE public.inventory_transactions
+    SET incoming_delivery_note_id = NULL
+    WHERE incoming_delivery_note_id = p_incoming_delivery_note_id;
 
-    -- 2. Update the incoming_delivery_notes entry itself
+    UPDATE public.consumable_transactions
+    SET incoming_delivery_note_id = NULL
+    WHERE incoming_delivery_note_id = p_incoming_delivery_note_id;
+
+    -- 3. Update the incoming_delivery_notes entry itself.
     UPDATE public.incoming_delivery_notes
     SET
         from_vendor_name = p_from_vendor_name,
@@ -351,7 +305,7 @@ BEGIN
         keterangan = p_keterangan
     WHERE id = p_incoming_delivery_note_id;
 
-    -- 3. Create new 'in' transactions for the updated items and update stock
+    -- 4. Create new 'in' transactions for the updated items and update stock.
     FOR item_data IN SELECT * FROM jsonb_array_elements(p_new_items)
     LOOP
         v_item_type := item_data->>'type';
@@ -362,29 +316,17 @@ BEGIN
         IF v_item_type = 'product' THEN
             v_product_id := (item_data->>'id')::uuid;
 
-            -- Insert into existing inventory_transactions table with type 'in'
+            -- Insert new inventory transaction
             INSERT INTO public.inventory_transactions (
-                product_id,
-                product_name,
-                quantity_change,
-                reason,
-                type,
-                incoming_delivery_note_id,
-                to_branch_id,
-                to_branch_name
+                product_id, product_name, quantity_change, reason, type,
+                incoming_delivery_note_id, to_branch_id, to_branch_name
             )
             VALUES (
-                v_product_id,
-                v_item_name,
-                v_quantity_change,
-                v_reason,
-                'in',
-                p_incoming_delivery_note_id,
-                p_to_branch_id,
-                p_to_branch_name
+                v_product_id, v_item_name, v_quantity_change, v_reason, 'in',
+                p_incoming_delivery_note_id, p_to_branch_id, p_to_branch_name
             );
 
-            -- Update branch_products quantity (add quantity)
+            -- Update branch_products quantity
             INSERT INTO public.branch_products (branch_id, product_id, quantity)
             VALUES (p_to_branch_id, v_product_id, v_quantity_change)
             ON CONFLICT (branch_id, product_id) DO UPDATE
@@ -393,31 +335,17 @@ BEGIN
         ELSIF v_item_type = 'consumable' THEN
             v_consumable_id := (item_data->>'id')::int;
 
-            -- Insert into existing consumable_transactions table with type 'in'
+            -- Insert new consumable transaction
             INSERT INTO public.consumable_transactions (
-                consumable_id,
-                consumable_name,
-                quantity_change,
-                reason,
-                type,
-                incoming_delivery_note_id,
-                branch_destination_id,
-                branch_destination_name,
-                delivery_note_id, -- Explicitly include and set to NULL
+                consumable_id, consumable_name, quantity_change, reason, type,
+                incoming_delivery_note_id, branch_destination_id, branch_destination_name
             )
             VALUES (
-                v_consumable_id,
-                v_item_name,
-                v_quantity_change,
-                v_reason,
-                'in',
-                p_incoming_delivery_note_id,
-                p_to_branch_id,
-                p_to_branch_name,
-                NULL -- Not associated with an outgoing delivery note
+                v_consumable_id, v_item_name, v_quantity_change, v_reason, 'in',
+                p_incoming_delivery_note_id, p_to_branch_id, p_to_branch_name
             );
 
-            -- Update consumables quantity (add quantity)
+            -- Update consumables quantity
             UPDATE public.consumables
             SET quantity = quantity + v_quantity_change
             WHERE id = v_consumable_id;

@@ -454,6 +454,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     subtitle: 'Manage consumables',
                     onTap: () => Get.to(() => ConsumableListScreen()),
                   ),
+                  _buildDashboardCard(
+                    context,
+                    icon: Icons.local_shipping_outlined,
+                    title: 'Delivery Notes (In)',
+                    subtitle: 'Receive stock',
+                    onTap: () => Get.to(() => const IncomingDeliveryNoteListScreen()),
+                  ),
                 ],
               ),
             ],
