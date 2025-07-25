@@ -209,11 +209,13 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
 
     if (selectedItem != null) {
       final TextEditingController quantityController = TextEditingController();
-      final TextEditingController descriptionController = TextEditingController(); // New: Description controller
+      final TextEditingController descriptionController =
+          TextEditingController(); // New: Description controller
       Get.dialog(
         AlertDialog(
           title: Text('Add Item: ${selectedItem.name}'), // Changed title
-          content: Column( // Use Column to hold multiple text fields
+          content: Column(
+            // Use Column to hold multiple text fields
             mainAxisSize: MainAxisSize.min, // Make column take minimum space
             children: [
               TextField(
@@ -225,7 +227,8 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
               ),
               const SizedBox(height: 16), // Add some spacing
               TextField(
-                controller: descriptionController, // New: Description text field
+                controller:
+                    descriptionController, // New: Description text field
                 decoration: const InputDecoration(
                   labelText: 'Keterangan (Optional)',
                 ),
@@ -251,7 +254,8 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                     'name': selectedItem.name,
                     'quantity': quantity,
                     'type': selectedItem.type,
-                    'description': descriptionController.text, // New: Add description
+                    'description':
+                        descriptionController.text, // New: Add description
                   });
                   Get.back(); // Close dialog
                 } else {
@@ -402,7 +406,7 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
             TextFormField(
               controller: keteranganController,
               decoration: InputDecoration(
-                labelText: 'Keterangan',
+                labelText: 'Catatan',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -499,9 +503,15 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                             },
                           ),
                         ),
-                        if (item['description'] != null && item['description'].isNotEmpty)
+                        if (item['description'] != null &&
+                            item['description'].isNotEmpty)
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(72.0, 0.0, 16.0, 8.0), // Adjust padding to align with subtitle
+                            padding: const EdgeInsets.fromLTRB(
+                              72.0,
+                              0.0,
+                              16.0,
+                              8.0,
+                            ), // Adjust padding to align with subtitle
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
