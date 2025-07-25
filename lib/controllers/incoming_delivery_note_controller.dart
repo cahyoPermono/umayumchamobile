@@ -13,6 +13,7 @@ class IncomingDeliveryNoteController extends GetxController {
   var incomingDeliveryNotes = <IncomingDeliveryNote>[].obs;
   var isLoading = false.obs;
   var distinctToBranchNames = <String>[].obs;
+  var distinctVendorNames = <String>[].obs; // New: For autocomplete
   var selectedToBranchName = Rx<String?>(null);
   var selectedFromDate = Rx<DateTime?>(null);
   var selectedToDate = Rx<DateTime?>(null);
@@ -21,7 +22,21 @@ class IncomingDeliveryNoteController extends GetxController {
   void onInit() {
     _initializeFiltersAndFetch();
     fetchDistinctToBranchNames();
+    fetchDistinctVendorNames(); // New: Fetch distinct vendor names
     super.onInit();
+  }
+
+  Future<void> fetchDistinctVendorNames() async {
+    try {
+      final response = await supabase
+          .from('distinct_incoming_delivery_note_vendors')
+          .select('from_vendor_name');
+      distinctVendorNames.value = (response as List)
+          .map((e) => e['from_vendor_name'] as String)
+          .toList();
+    } catch (e) {
+      debugPrint('Error fetching distinct vendor names: ${e.toString()}');
+    }
   }
 
   void _initializeFiltersAndFetch() {

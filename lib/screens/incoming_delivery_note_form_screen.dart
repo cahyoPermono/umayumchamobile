@@ -27,7 +27,7 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
   final BranchController branchController = Get.find();
   final ConsumableController consumableController = Get.find();
 
-  final TextEditingController fromVendorNameController = TextEditingController();
+  final TextEditingController _fromVendorNameController = TextEditingController();
   final TextEditingController keteranganController = TextEditingController();
   DateTime selectedDeliveryDate = DateTime.now();
 
@@ -43,7 +43,7 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
     if (widget.incomingDeliveryNote != null) {
       incomingDeliveryNoteId = widget.incomingDeliveryNote!.id;
       selectedDeliveryDate = widget.incomingDeliveryNote!.deliveryDate;
-      fromVendorNameController.text = widget.incomingDeliveryNote!.fromVendorName ?? '';
+      _fromVendorNameController.text = widget.incomingDeliveryNote!.fromVendorName ?? '';
       keteranganController.text = widget.incomingDeliveryNote!.keterangan ?? '';
 
       selectedProducts.clear();
@@ -237,16 +237,39 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextFormField(
-              controller: fromVendorNameController,
-              decoration: InputDecoration(
-                labelText: 'From (Vendor Name)',
-                hintText: 'e.g., Supplier A, Main Warehouse',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                prefixIcon: const Icon(Icons.business),
-              ),
+            Autocomplete<String>(
+              optionsBuilder: (TextEditingValue textEditingValue) {
+                if (textEditingValue.text == '') {
+                  return const Iterable<String>.empty();
+                }
+                return incomingDeliveryNoteController.distinctVendorNames.where((String option) {
+                  return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                });
+              },
+              onSelected: (String selection) {
+                _fromVendorNameController.text = selection;
+              },
+              fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, void Function() onFieldSubmitted) {
+                // Use the _fromVendorNameController directly
+                return TextFormField(
+                  controller: _fromVendorNameController,
+                  focusNode: focusNode,
+                  decoration: InputDecoration(
+                    labelText: 'From (Vendor Name)',
+                    hintText: 'e.g., Supplier A, Main Warehouse',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    prefixIcon: const Icon(Icons.business),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'From (Vendor Name) cannot be empty';
+                    }
+                    return null;
+                  },
+                );
+              },
             ),
             const SizedBox(height: 16),
 
@@ -475,7 +498,7 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
                           if (widget.incomingDeliveryNote == null) {
                             // Create new incoming delivery note
                             incomingDeliveryNoteController.createIncomingDeliveryNote(
-                              fromVendorName: fromVendorNameController.text,
+                              fromVendorName: _fromVendorNameController.text,
                               deliveryDate: selectedDeliveryDate,
                               toBranchId: selectedToBranch!.id!,
                               toBranchName: selectedToBranch!.name,
@@ -486,7 +509,7 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
                             // Update existing incoming delivery note
                             incomingDeliveryNoteController.updateIncomingDeliveryNote(
                               incomingDeliveryNoteId: incomingDeliveryNoteId!,
-                              fromVendorName: fromVendorNameController.text,
+                              fromVendorName: _fromVendorNameController.text,
                               deliveryDate: selectedDeliveryDate,
                               toBranchId: selectedToBranch!.id!,
                               toBranchName: selectedToBranch!.name,
