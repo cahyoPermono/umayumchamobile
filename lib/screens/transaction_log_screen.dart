@@ -27,12 +27,10 @@ class TransactionLogScreen extends StatelessWidget {
                       child: Obx(
                         () => TextFormField(
                           controller: TextEditingController(
-                            text:
-                                controller.startDate.value == null
-                                    ? ''
-                                    : DateFormat(
-                                      'yyyy-MM-dd',
-                                    ).format(controller.startDate.value!),
+                            text: controller.startDate.value == null
+                                ? ''
+                                : DateFormat('yyyy-MM-dd')
+                                    .format(controller.startDate.value!),
                           ),
                           readOnly: true,
                           decoration: const InputDecoration(
@@ -59,12 +57,10 @@ class TransactionLogScreen extends StatelessWidget {
                       child: Obx(
                         () => TextFormField(
                           controller: TextEditingController(
-                            text:
-                                controller.endDate.value == null
-                                    ? ''
-                                    : DateFormat(
-                                      'yyyy-MM-dd',
-                                    ).format(controller.endDate.value!),
+                            text: controller.endDate.value == null
+                                ? ''
+                                : DateFormat('yyyy-MM-dd')
+                                    .format(controller.endDate.value!),
                           ),
                           readOnly: true,
                           decoration: const InputDecoration(
@@ -88,7 +84,7 @@ class TransactionLogScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(height: 16),
                 TextFormField(
                   decoration: const InputDecoration(
                     labelText: 'Search (Product, From Branch, To Branch)',
