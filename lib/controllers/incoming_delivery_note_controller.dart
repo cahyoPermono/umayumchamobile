@@ -89,7 +89,6 @@ class IncomingDeliveryNoteController extends GetxController {
       }
 
       final response = await query.order('created_at', ascending: false);
-      debugPrint(response.toString());
 
       incomingDeliveryNotes.value =
           (response as List)
