@@ -123,19 +123,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.local_shipping),
-              title: const Text('Delivery Notes (Out)'),
-              onTap: () {
-                Get.back(); // Close the drawer
-                Get.to(() => const DeliveryNoteListScreen());
-              },
-            ),
-            ListTile(
               leading: const Icon(Icons.local_shipping_outlined),
               title: const Text('Delivery Notes (In)'),
               onTap: () {
                 Get.back(); // Close the drawer
                 Get.to(() => const IncomingDeliveryNoteListScreen());
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.local_shipping),
+              title: const Text('Delivery Notes (Out)'),
+              onTap: () {
+                Get.back(); // Close the drawer
+                Get.to(() => const DeliveryNoteListScreen());
               },
             ),
             ListTile(
