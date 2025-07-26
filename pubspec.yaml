@@ -43,6 +43,7 @@ dependencies:
   uuid: ^4.5.1
   package_info_plus: ^8.0.0
   android_path_provider: ^0.3.1 # For public Downloads folder on Android
+  blue_thermal_printer: ^1.2.3
   
 
 dev_dependencies:

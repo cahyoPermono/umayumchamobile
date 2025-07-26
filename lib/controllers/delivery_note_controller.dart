@@ -10,6 +10,9 @@ import 'package:pdf/pdf.dart' as pdf_colors; // New alias for PdfColors
 import 'package:pdf/widgets.dart' as pdf_lib; // Changed alias to pdf_lib
 
 import 'package:intl/intl.dart';
+import 'package:blue_thermal_printer/blue_thermal_printer.dart'
+    as blue_printer; // Alias to avoid conflict
+import 'package:permission_handler/permission_handler.dart';
 
 class DeliveryNoteController extends GetxController {
   final SupabaseClient supabase = Supabase.instance.client;
@@ -304,7 +307,8 @@ class DeliveryNoteController extends GetxController {
             productId: itemId as String, // Cast to String for products
             type: 'out',
             quantityChange: quantity,
-            reason: 'Delivery Note: ${customerName ?? 'Internal Transfer'} - ${item['description']}',
+            reason:
+                'Delivery Note: ${customerName ?? 'Internal Transfer'} - ${item['description']}',
             deliveryNoteId: deliveryNoteId,
             fromBranchId: fromBranchId,
             toBranchId: toBranchId,
@@ -317,7 +321,8 @@ class DeliveryNoteController extends GetxController {
             consumableId: int.parse(itemId), // Cast to int for consumables
             consumableName: itemName,
             quantityChange: quantity,
-            reason: 'Delivery Note: ${customerName ?? 'Internal Transfer'} - ${item['description']}',
+            reason:
+                'Delivery Note: ${customerName ?? 'Internal Transfer'} - ${item['description']}',
             deliveryNoteId: deliveryNoteId,
             fromBranchId: fromBranchId,
             toBranchId: toBranchId,
@@ -546,6 +551,117 @@ class DeliveryNoteController extends GetxController {
       debugPrint('Error generating PDF: ${e.toString()}');
       Get.snackbar('Error', 'Failed to generate PDF: ${e.toString()}');
       return null;
+    }
+  }
+
+  Future<void> printDeliveryNote({
+    required DeliveryNote deliveryNote,
+    required String toBranchName,
+    required List<Map<String, dynamic>> items,
+    required blue_printer.BluetoothDevice selectedDevice,
+  }) async {
+    try {
+      isLoading.value = true;
+
+      // 1. Request Bluetooth permissions (already handled in UI)
+      var bluetoothStatus = await Permission.bluetooth.status;
+      var bluetoothConnectStatus = await Permission.bluetoothConnect.status;
+      var bluetoothScanStatus = await Permission.bluetoothScan.status;
+
+      if (!bluetoothStatus.isGranted ||
+          !bluetoothConnectStatus.isGranted ||
+          !bluetoothScanStatus.isGranted) {
+        Map<Permission, PermissionStatus> statuses =
+            await [
+              Permission.bluetooth,
+              Permission.bluetoothConnect,
+              Permission.bluetoothScan,
+            ].request();
+
+        if (statuses[Permission.bluetooth] != PermissionStatus.granted ||
+            statuses[Permission.bluetoothConnect] != PermissionStatus.granted ||
+            statuses[Permission.bluetoothScan] != PermissionStatus.granted) {
+          Get.snackbar('Error', 'Bluetooth permissions not granted.');
+          return;
+        }
+      }
+
+      blue_printer.BlueThermalPrinter bluetooth =
+          blue_printer.BlueThermalPrinter.instance;
+
+      // 2. Connect to the selected device
+      bool? isConnected = await bluetooth.isConnected;
+      if (isConnected == true) {
+        await bluetooth.disconnect();
+      }
+
+      await bluetooth.connect(selectedDevice);
+      isConnected = await bluetooth.isConnected;
+
+      if (isConnected == false) {
+        Get.snackbar('Error', 'Failed to connect to printer.');
+        return;
+      }
+
+      // 3. Format and print data
+      bluetooth.printNewLine();
+      bluetooth.printCustom('Umayumcha Head Quarter Malang', 1, 1);
+      bluetooth.printCustom('Jalan Dirgantara 4 no A5/11', 0, 1);
+      bluetooth.printCustom('Sawojajar Malang', 0, 1);
+      bluetooth.printNewLine();
+
+      bluetooth.printLeftRight(
+        'No. Surat Jalan:',
+        deliveryNote.dnNumber ?? deliveryNote.id,
+        0,
+      );
+      bluetooth.printLeftRight('Penerima:', 'Cabang $toBranchName', 0);
+      bluetooth.printLeftRight(
+        'Tanggal:',
+        DateFormat('dd-MM-yyyy HH:mm').format(deliveryNote.deliveryDate),
+        0,
+      );
+      bluetooth.printNewLine();
+
+      if (deliveryNote.keterangan != null &&
+          deliveryNote.keterangan!.isNotEmpty) {
+        bluetooth.printCustom('Catatan:', 0, 0);
+        bluetooth.printCustom(deliveryNote.keterangan!, 0, 0);
+        bluetooth.printNewLine();
+      }
+
+      bluetooth.printCustom('--------------------------------', 0, 1);
+      bluetooth.printCustom('Nama Barang      Qty', 0, 0);
+      bluetooth.printCustom('--------------------------------', 0, 1);
+
+      for (var item in items) {
+        String itemName = item['name'];
+        int quantity = item['quantity'].abs();
+        String description = item['description'] ?? '';
+
+        bluetooth.printLeftRight(itemName, 'x$quantity', 0);
+        if (description.isNotEmpty) {
+          bluetooth.printCustom('  Keterangan: $description', 0, 0);
+        }
+      }
+      bluetooth.printCustom('--------------------------------', 0, 1);
+      bluetooth.printNewLine();
+
+      bluetooth.printLeftRight('Pengirim', 'Penerima', 0);
+      bluetooth.printNewLine();
+      bluetooth.printNewLine();
+      bluetooth.printLeftRight('(____________)', '(____________)', 0);
+      bluetooth.printNewLine();
+      bluetooth.printNewLine();
+      bluetooth.printNewLine();
+
+      await bluetooth.disconnect();
+      Get.snackbar('Success', 'Delivery note sent to printer!');
+    } catch (e) {
+      debugPrint('Error printing delivery note: ${e.toString()}');
+      Get.snackbar('Error', 'Failed to print delivery note: ${e.toString()}');
+    } finally {
+      isLoading.value = false;
     }
   }
 }
