@@ -10,45 +10,34 @@ class ConsumableTransactionLogController extends GetxController {
   var fromDate = Rx<DateTime?>(null);
   var toDate = Rx<DateTime?>(null);
   var selectedBranchDestination = Rx<String?>(null);
-  var distinctBranchDestinations = <String>[].obs;
+  var searchQuery = ''.obs; // New: For free-text search
 
   @override
   void onInit() {
     super.onInit();
-    fetchDistinctBranchDestinations();
+    // Set default date range (e.g., last 30 days)
+    toDate.value = DateTime.now();
+    fromDate.value = toDate.value!.subtract(const Duration(days: 30));
+    // Listen to date range changes
+    ever(fromDate, (_) => fetchTransactions());
+    ever(toDate, (_) => fetchTransactions());
+    // New: Listen to search query changes with debounce
+    debounce(searchQuery, (_) => fetchTransactions(), time: const Duration(milliseconds: 500));
     fetchTransactions();
   }
 
   void setFromDate(DateTime date) {
     fromDate.value = date;
+    filterTransactions();
   }
 
   void setToDate(DateTime date) {
     toDate.value = date;
-  }
-
-  void setSelectedBranchDestination(String? branchName) {
-    selectedBranchDestination.value = branchName;
     filterTransactions();
   }
 
-  Future<void> fetchDistinctBranchDestinations() async {
-    try {
-      final response = await _supabase
-          .from('consumable_transactions_with_user_email_view')
-          .select('branch_destination_name')
-          .neq('branch_destination_name', '')
-          .order('branch_destination_name', ascending: true);
-
-      distinctBranchDestinations.value = (response as List)
-          .map((item) => item['branch_destination_name'] as String)
-          .where((name) => name.isNotEmpty)
-          .toSet()
-          .toList();
-      distinctBranchDestinations.sort();
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to fetch distinct branch destinations: ${e.toString()}');
-    }
+  void setSelectedBranchDestination(String? branchName) {
+    // This method is no longer needed as the filter is removed
   }
 
   Future<void> fetchTransactions() async {
@@ -65,9 +54,11 @@ class ConsumableTransactionLogController extends GetxController {
         query = query.lte(
             'created_at', toDate.value!.add(const Duration(days: 1)).toIso8601String());
       }
-      if (selectedBranchDestination.value != null &&
-          selectedBranchDestination.value!.isNotEmpty) {
-        query = query.eq('branch_destination_name', selectedBranchDestination.value!);
+
+      // New: Apply free-text search filter
+      if (searchQuery.value.isNotEmpty) {
+        final String searchPattern = '%${searchQuery.value.toLowerCase()}%';
+        query = query.or('consumable_name.ilike.$searchPattern,branch_source_name.ilike.$searchPattern,branch_destination_name.ilike.$searchPattern');
       }
 
       final response = await query.order('created_at', ascending: false);

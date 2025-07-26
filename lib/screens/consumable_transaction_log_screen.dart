@@ -86,31 +86,18 @@ class ConsumableTransactionLogScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                Obx(
-                  () => DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(
-                      labelText: 'Filter by Destination Branch',
-                      border: OutlineInputBorder(),
-                    ),
-                    value: controller.selectedBranchDestination.value,
-                    hint: const Text('Select a branch'),
-                    onChanged: (String? newValue) {
-                      controller.setSelectedBranchDestination(newValue);
-                    },
-                    items: [
-                      const DropdownMenuItem(
-                        value: null,
-                        child: Text('All Branches'),
-                      ),
-                      ...controller.distinctBranchDestinations.map((branch) {
-                        return DropdownMenuItem(
-                          value: branch,
-                          child: Text(branch),
-                        );
-                      }),
-                    ],
+                TextFormField(
+                  decoration: const InputDecoration(
+                    labelText: 'Search (Consumable, From Branch, To Branch)',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.search),
                   ),
+                  onChanged: (value) {
+                    controller.searchQuery.value = value;
+                  },
                 ),
+                const SizedBox(height: 16),
+                
                 const SizedBox(height: 16),
                 
               ],

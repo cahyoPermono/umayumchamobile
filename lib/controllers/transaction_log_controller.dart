@@ -2,11 +2,6 @@ import 'package:flutter/foundation.dart'; // For debugPrint
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha_ims/models/inventory_transaction_model.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:path_provider/path_provider.dart';
-import 'package:excel/excel.dart'; // Import excel package
-import 'dart:io';
-import 'package:intl/intl.dart';
 
 class TransactionLogController extends GetxController {
   final SupabaseClient supabase = Supabase.instance.client;
@@ -15,8 +10,7 @@ class TransactionLogController extends GetxController {
   var isLoading = false.obs;
   var startDate = Rx<DateTime?>(null);
   var endDate = Rx<DateTime?>(null);
-  var distinctBranchDestinations = <String>[].obs;
-  var selectedBranchDestination = Rx<String?>(null);
+  var searchQuery = ''.obs; // New: For free-text search
 
   @override
   void onInit() {
@@ -27,8 +21,8 @@ class TransactionLogController extends GetxController {
     // Listen to date range changes
     ever(startDate, (_) => fetchTransactions());
     ever(endDate, (_) => fetchTransactions());
-    fetchDistinctBranchDestinations(); // New: Fetch distinct branches
-    ever(selectedBranchDestination, (_) => fetchTransactions()); // New: Listen to branch filter
+    // New: Listen to search query changes with debounce
+    debounce(searchQuery, (_) => fetchTransactions(), time: const Duration(milliseconds: 500));
     super.onInit();
   }
 
@@ -46,8 +40,10 @@ class TransactionLogController extends GetxController {
         query = query.lte('created_at', endDate.value!.add(const Duration(days: 1)).toIso8601String());
       }
 
-      if (selectedBranchDestination.value != null) {
-        query = query.eq('to_branch_name', selectedBranchDestination.value!); // Apply branch filter
+      // New: Apply free-text search filter
+      if (searchQuery.value.isNotEmpty) {
+        final String searchPattern = '%${searchQuery.value.toLowerCase()}%';
+        query = query.or('product_name.ilike.$searchPattern,from_branch_name.ilike.$searchPattern,to_branch_name.ilike.$searchPattern');
       }
 
       final response = await query
@@ -66,156 +62,6 @@ class TransactionLogController extends GetxController {
     } catch (e) {
       debugPrint('Error fetching transactions: ${e.toString()}');
       Get.snackbar('Error', 'Failed to fetch transactions: ${e.toString()}');
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> fetchDistinctBranchDestinations() async {
-    try {
-      final response = await supabase
-          .from('inventory_distinct_to_branch_names')
-          .select('to_branch_name');
-      distinctBranchDestinations.value = (response as List)
-          .map((item) => item['to_branch_name'] as String)
-          .toList();
-    } catch (e) {
-      debugPrint('Error fetching distinct branch destinations: ${e.toString()}');
-    }
-  }
-
-  Future<void> exportTransactionsToPdf() async {
-    if (transactions.isEmpty) {
-      Get.snackbar('Info', 'No transactions to export.');
-      return;
-    }
-
-    isLoading.value = true;
-    try {
-      final pdf = pw.Document();
-
-      pdf.addPage(
-        pw.Page(
-          build: (pw.Context context) {
-            return pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Text(
-                  'Transaction Log Report',
-                  style: pw.TextStyle(
-                    fontSize: 24,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-                pw.SizedBox(height: 10),
-                pw.Text(
-                  'Date Range: ${startDate.value != null ? DateFormat('dd/MM/yyyy').format(startDate.value!) : 'N/A'} - ${endDate.value != null ? DateFormat('dd/MM/yyyy').format(endDate.value!) : 'N/A'}',
-                ),
-                pw.SizedBox(height: 20),
-                pw.TableHelper.fromTextArray(
-                  headers: [
-                    'Date',
-                    'Product',
-                    'Type',
-                    'Qty',
-                    'From',
-                    'To',
-                    'Reason',
-                  ],
-                  data:
-                      transactions
-                          .map(
-                            (t) => [
-                              DateFormat(
-                                'dd/MM/yyyy HH:mm',
-                              ).format(t.createdAt),
-                              t.productName ?? t.productId,
-                              t.type?.capitalizeFirst,
-                              t.quantityChange.toString(),
-                              t.fromBranchName ?? '-',
-                              t.toBranchName ?? '-',
-                              t.reason ?? '-',
-                            ],
-                          )
-                          .toList(),
-                ),
-              ],
-            );
-          },
-        ),
-      );
-
-      final directory = await getDownloadsDirectory(); // Use getDownloadsDirectory()
-      if (directory == null) {
-        Get.snackbar('Error', 'Could not find downloads directory.');
-        isLoading.value = false;
-        return;
-      }
-      final filePath =
-          '${directory.path}/transaction_log_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.pdf';
-      final file = File(filePath);
-      await file.writeAsBytes(await pdf.save());
-
-      Get.snackbar('Success', 'PDF exported to $filePath');
-      debugPrint('PDF exported to: $filePath');
-    } catch (e) {
-      debugPrint('Error exporting PDF: ${e.toString()}');
-      Get.snackbar('Error', 'Failed to export PDF: ${e.toString()}');
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> exportTransactionsToExcel() async {
-    if (transactions.isEmpty) {
-      Get.snackbar('Info', 'No transactions to export.');
-      return;
-    }
-
-    isLoading.value = true;
-    try {
-      final excel = Excel.createExcel();
-      final sheet = excel['Transaction Log'];
-
-      // Add headers
-      sheet.appendRow([
-        'Date',
-        'Product',
-        'Type',
-        'Qty',
-        'From',
-        'To',
-        'Reason',
-      ]);
-
-      // Add data
-      for (var t in transactions) {
-        sheet.appendRow([
-          DateFormat('dd/MM/yyyy HH:mm').format(t.createdAt),
-          t.productName ?? t.productId,
-          t.type?.capitalizeFirst,
-          t.quantityChange.toString(),
-          t.fromBranchName ?? '-',
-          t.toBranchName ?? '-',
-          t.reason ?? '-',
-        ]);
-      }
-
-      final directory = await getDownloadsDirectory();
-      if (directory == null) {
-        Get.snackbar('Error', 'Could not find downloads directory.');
-        isLoading.value = false;
-        return;
-      }
-      final filePath = '${directory.path}/transaction_log_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.xlsx';
-      final file = File(filePath);
-      await file.writeAsBytes(excel.encode()!); // Use excel.encode() to get bytes
-
-      Get.snackbar('Success', 'Excel exported to $filePath');
-      debugPrint('Excel exported to: $filePath');
-    } catch (e) {
-      debugPrint('Error exporting Excel: ${e.toString()}');
-      Get.snackbar('Error', 'Failed to export Excel: ${e.toString()}');
     } finally {
       isLoading.value = false;
     }
