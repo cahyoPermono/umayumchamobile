@@ -18,23 +18,28 @@ class IncomingDeliveryNoteFormScreen extends StatefulWidget {
   const IncomingDeliveryNoteFormScreen({super.key, this.incomingDeliveryNote});
 
   @override
-  State<IncomingDeliveryNoteFormScreen> createState() => _IncomingDeliveryNoteFormScreenState();
+  State<IncomingDeliveryNoteFormScreen> createState() =>
+      _IncomingDeliveryNoteFormScreenState();
 }
 
-class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFormScreen> {
+class _IncomingDeliveryNoteFormScreenState
+    extends State<IncomingDeliveryNoteFormScreen> {
   final _formKey = GlobalKey<FormState>();
-  final IncomingDeliveryNoteController incomingDeliveryNoteController = Get.find();
+  final IncomingDeliveryNoteController incomingDeliveryNoteController =
+      Get.find();
   final InventoryController inventoryController = Get.find();
   final BranchController branchController = Get.find();
   final ConsumableController consumableController = Get.find();
 
-  final TextEditingController _fromVendorNameController = TextEditingController();
+  final TextEditingController _fromVendorNameController =
+      TextEditingController();
   final TextEditingController keteranganController = TextEditingController();
   DateTime selectedDeliveryDate = DateTime.now();
 
   Branch? selectedToBranch;
 
-  final RxList<Map<String, dynamic>> selectedProducts = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> selectedProducts =
+      <Map<String, dynamic>>[].obs;
 
   String? incomingDeliveryNoteId;
 
@@ -44,7 +49,8 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
     if (widget.incomingDeliveryNote != null) {
       incomingDeliveryNoteId = widget.incomingDeliveryNote!.id;
       selectedDeliveryDate = widget.incomingDeliveryNote!.deliveryDate;
-      _fromVendorNameController.text = widget.incomingDeliveryNote!.fromVendorName ?? '';
+      _fromVendorNameController.text =
+          widget.incomingDeliveryNote!.fromVendorName ?? '';
       keteranganController.text = widget.incomingDeliveryNote!.keterangan ?? '';
 
       selectedProducts.clear();
@@ -113,20 +119,19 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
   void _addItemToNote() async {
     // For incoming notes, we can add any product/consumable, not just from HQ
     // So we fetch all products and consumables
-    final List<BranchProduct> allProducts = [];
-    for (var branch in branchController.branches) {
-      allProducts.addAll(await inventoryController.fetchBranchProductsById(branch.id!));
-    }
-    final List<Consumable> allConsumables = consumableController.consumables.toList();
+    final List<BranchProduct> headquarterProducts = await inventoryController
+        .fetchBranchProductsById(headquarterId);
+    final List<Consumable> allConsumables =
+        consumableController.consumables.toList();
 
     // Combine into a single list of SelectableItem
     final List<SelectableItem> selectableItems = [];
-    for (var bp in allProducts) {
+    for (var bp in headquarterProducts) {
       selectableItems.add(
         SelectableItem(
           id: bp.productId,
           name: bp.product?.name ?? 'N/A',
-          quantity: 999999, // Set a very high quantity for incoming, as we are not limited by current stock
+          quantity: bp.quantity, // Use actual quantity
           type: 'product',
         ),
       );
@@ -136,17 +141,14 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
         SelectableItem(
           id: c.id.toString(),
           name: c.name,
-          quantity: 999999, // Set a very high quantity for incoming
+          quantity: c.quantity, // Use actual stock
           type: 'consumable',
         ),
       );
     }
 
     if (selectableItems.isEmpty) {
-      Get.snackbar(
-        'Info',
-        'No products or consumables available to add.',
-      );
+      Get.snackbar('Info', 'No products or consumables available to add.');
       return;
     }
 
@@ -156,7 +158,8 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
 
     if (selectedItem != null) {
       final TextEditingController quantityController = TextEditingController();
-      final TextEditingController descriptionController = TextEditingController();
+      final TextEditingController descriptionController =
+          TextEditingController();
       Get.dialog(
         AlertDialog(
           title: Text('Add Item: ${selectedItem.name}'),
@@ -166,9 +169,7 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
               TextField(
                 controller: quantityController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Quantity',
-                ),
+                decoration: const InputDecoration(labelText: 'Quantity'),
               ),
               const SizedBox(height: 16),
               TextField(
@@ -200,10 +201,7 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
                   });
                   Get.back();
                 } else {
-                  Get.snackbar(
-                    'Error',
-                    'Please enter a valid quantity.',
-                  );
+                  Get.snackbar('Error', 'Please enter a valid quantity.');
                 }
               },
               child: const Text('Accept'),
@@ -228,9 +226,7 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
           ),
         ),
         backgroundColor: Theme.of(context).primaryColor,
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
+        iconTheme: const IconThemeData(color: Colors.white),
         elevation: 4,
       ),
       body: SingleChildScrollView(
@@ -247,18 +243,20 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
                   }
                   return incomingDeliveryNoteController.distinctVendorNames
                       .where((String option) {
-                    return option
-                        .toLowerCase()
-                        .contains(textEditingController.text.toLowerCase());
-                  });
+                        return option.toLowerCase().contains(
+                          textEditingController.text.toLowerCase(),
+                        );
+                      });
                 },
                 onSelected: (String selection) {
                   _fromVendorNameController.text = selection;
                 },
-                fieldViewBuilder: (BuildContext context,
-                    TextEditingController textEditingController,
-                    FocusNode focusNode,
-                    void Function() onFieldSubmitted) {
+                fieldViewBuilder: (
+                  BuildContext context,
+                  TextEditingController textEditingController,
+                  FocusNode focusNode,
+                  void Function() onFieldSubmitted,
+                ) {
                   textEditingController.text = _fromVendorNameController.text;
                   return TextFormField(
                     controller: textEditingController,
@@ -303,14 +301,15 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
                   ),
                   value: selectedToBranch,
                   onChanged: null, // Disable the dropdown
-                  items: selectedToBranch != null
-                      ? [
-                          DropdownMenuItem<Branch>(
-                            value: selectedToBranch,
-                            child: Text(selectedToBranch!.name),
-                          ),
-                        ]
-                      : [],
+                  items:
+                      selectedToBranch != null
+                          ? [
+                            DropdownMenuItem<Branch>(
+                              value: selectedToBranch,
+                              child: Text(selectedToBranch!.name),
+                            ),
+                          ]
+                          : [],
                 );
               }),
               const SizedBox(height: 16),
@@ -352,7 +351,9 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
               // Items for Delivery Section
               Text(
                 'Items for Incoming Delivery:',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 10),
               Obx(() {
@@ -485,81 +486,90 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
                 return incomingDeliveryNoteController.isLoading.value
                     ? const Center(child: CircularProgressIndicator())
                     : SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              _formKey.currentState!.save();
-                              if (selectedToBranch == null) {
-                                Get.snackbar(
-                                  'Error',
-                                  'Please select a To Branch.',
-                                );
-                                return;
-                              }
-                              if (selectedProducts.isEmpty) {
-                                Get.snackbar(
-                                  'Error',
-                                  'Please add at least one item to the incoming delivery note.',
-                                );
-                                return;
-                              }
-                              if (selectedToBranch!.id == null) {
-                                Get.snackbar('Error', 'To Branch ID is missing.');
-                                return;
-                              }
-
-                              if (widget.incomingDeliveryNote == null) {
-                                // Create new incoming delivery note
-                                incomingDeliveryNoteController.createIncomingDeliveryNote(
-                                  fromVendorName: _fromVendorNameController.text,
-                                  deliveryDate: selectedDeliveryDate,
-                                  toBranchId: selectedToBranch!.id!,
-                                  toBranchName: selectedToBranch!.name,
-                                  items: selectedProducts.toList(),
-                                  keterangan: keteranganController.text,
-                                );
-                              } else {
-                                // Update existing incoming delivery note
-                                incomingDeliveryNoteController.updateIncomingDeliveryNote(
-                                  incomingDeliveryNoteId: incomingDeliveryNoteId!,
-                                  fromVendorName: _fromVendorNameController.text,
-                                  deliveryDate: selectedDeliveryDate,
-                                  toBranchId: selectedToBranch!.id!,
-                                  toBranchName: selectedToBranch!.name,
-                                  newItems: selectedProducts.toList(),
-                                  originalItems: (
-                                      widget.incomingDeliveryNote!.productItems ?? []
-                                    ) + (
-                                      widget.incomingDeliveryNote!.consumableItems ?? []
-                                    ),
-                                  keterangan: keteranganController.text,
-                                );
-                              }
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            _formKey.currentState!.save();
+                            if (selectedToBranch == null) {
+                              Get.snackbar(
+                                'Error',
+                                'Please select a To Branch.',
+                              );
+                              return;
                             }
-                          },
-                          icon: Icon(
-                            widget.incomingDeliveryNote == null
-                                ? Icons.save
-                                : Icons.update,
+                            if (selectedProducts.isEmpty) {
+                              Get.snackbar(
+                                'Error',
+                                'Please add at least one item to the incoming delivery note.',
+                              );
+                              return;
+                            }
+                            if (selectedToBranch!.id == null) {
+                              Get.snackbar('Error', 'To Branch ID is missing.');
+                              return;
+                            }
+
+                            if (widget.incomingDeliveryNote == null) {
+                              // Create new incoming delivery note
+                              incomingDeliveryNoteController
+                                  .createIncomingDeliveryNote(
+                                    fromVendorName:
+                                        _fromVendorNameController.text,
+                                    deliveryDate: selectedDeliveryDate,
+                                    toBranchId: selectedToBranch!.id!,
+                                    toBranchName: selectedToBranch!.name,
+                                    items: selectedProducts.toList(),
+                                    keterangan: keteranganController.text,
+                                  );
+                            } else {
+                              // Update existing incoming delivery note
+                              incomingDeliveryNoteController
+                                  .updateIncomingDeliveryNote(
+                                    incomingDeliveryNoteId:
+                                        incomingDeliveryNoteId!,
+                                    fromVendorName:
+                                        _fromVendorNameController.text,
+                                    deliveryDate: selectedDeliveryDate,
+                                    toBranchId: selectedToBranch!.id!,
+                                    toBranchName: selectedToBranch!.name,
+                                    newItems: selectedProducts.toList(),
+                                    originalItems:
+                                        (widget
+                                                .incomingDeliveryNote!
+                                                .productItems ??
+                                            []) +
+                                        (widget
+                                                .incomingDeliveryNote!
+                                                .consumableItems ??
+                                            []),
+                                    keterangan: keteranganController.text,
+                                  );
+                            }
+                          }
+                        },
+                        icon: Icon(
+                          widget.incomingDeliveryNote == null
+                              ? Icons.save
+                              : Icons.update,
+                        ),
+                        label: Text(
+                          widget.incomingDeliveryNote == null
+                              ? 'Save Incoming Delivery Note'
+                              : 'Update Incoming Delivery Note',
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          label: Text(
-                            widget.incomingDeliveryNote == null
-                                ? 'Save Incoming Delivery Note'
-                                : 'Update Incoming Delivery Note',
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            textStyle: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          textStyle: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      );
+                      ),
+                    );
               }),
             ],
           ), // Closing parenthesis for Column
