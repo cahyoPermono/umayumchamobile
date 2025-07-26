@@ -235,7 +235,7 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.edit),
+                            icon: const Icon(Icons.edit, color: Colors.grey),
                             onPressed: () {
                               Get.to(
                                 () => IncomingDeliveryNoteFormScreen(
@@ -245,7 +245,7 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
                             },
                           ),
                           IconButton(
-                            icon: const Icon(Icons.delete),
+                            icon: const Icon(Icons.delete, color: Colors.red),
                             onPressed: () {
                               Get.defaultDialog(
                                 title: "Delete Incoming Delivery Note",

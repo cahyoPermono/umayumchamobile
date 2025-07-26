@@ -256,7 +256,7 @@ class DeliveryNoteListScreen extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.edit),
+                            icon: const Icon(Icons.edit, color: Colors.grey),
                             onPressed: () {
                               Get.to(
                                 () =>
@@ -265,7 +265,7 @@ class DeliveryNoteListScreen extends StatelessWidget {
                             },
                           ),
                           IconButton(
-                            icon: const Icon(Icons.delete),
+                            icon: const Icon(Icons.delete, color: Colors.red),
                             onPressed: () {
                               Get.defaultDialog(
                                 title: "Delete Delivery Note",
@@ -311,7 +311,8 @@ class DeliveryNoteListScreen extends StatelessWidget {
                                   (item) => Padding(
                                     padding: const EdgeInsets.only(bottom: 5.0),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Row(
                                           children: [
@@ -332,9 +333,13 @@ class DeliveryNoteListScreen extends StatelessWidget {
                                             ),
                                           ],
                                         ),
-                                        if (item['reason'] != null && item['reason'].isNotEmpty)
+                                        if (item['reason'] != null &&
+                                            item['reason'].isNotEmpty)
                                           Padding(
-                                            padding: const EdgeInsets.only(left: 26.0, top: 2.0),
+                                            padding: const EdgeInsets.only(
+                                              left: 26.0,
+                                              top: 2.0,
+                                            ),
                                             child: Text(
                                               'Keterangan: ${item['reason']}',
                                               style: TextStyle(
@@ -354,7 +359,8 @@ class DeliveryNoteListScreen extends StatelessWidget {
                                   (item) => Padding(
                                     padding: const EdgeInsets.only(bottom: 5.0),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Row(
                                           children: [
@@ -375,9 +381,13 @@ class DeliveryNoteListScreen extends StatelessWidget {
                                             ),
                                           ],
                                         ),
-                                        if (item['reason'] != null && item['reason'].isNotEmpty)
+                                        if (item['reason'] != null &&
+                                            item['reason'].isNotEmpty)
                                           Padding(
-                                            padding: const EdgeInsets.only(left: 26.0, top: 2.0),
+                                            padding: const EdgeInsets.only(
+                                              left: 26.0,
+                                              top: 2.0,
+                                            ),
                                             child: Text(
                                               'Keterangan: ${item['reason']}',
                                               style: TextStyle(
