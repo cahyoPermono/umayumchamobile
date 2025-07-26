@@ -158,7 +158,7 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
                 controller: _fromController,
                 decoration: const InputDecoration(
                   labelText: 'From (Vendor Name)',
-                  hintText: 'e.g., PT. Kopi Jaya, Supplier Biji Kopi',
+                  hintText: 'e.g., Toko ABC, Supplier XYZ',
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(
                     vertical: 12.0,

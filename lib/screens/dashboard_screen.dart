@@ -442,10 +442,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   _buildDashboardCard(
                     context,
-                    icon: Icons.local_shipping,
-                    title: 'Delivery Notes',
-                    subtitle: 'Track shipments',
-                    onTap: () => Get.to(() => const DeliveryNoteListScreen()),
+                    icon: Icons.local_shipping_outlined,
+                    title: 'Delivery Notes (In)',
+                    subtitle: 'Receive stock',
+                    onTap:
+                        () => Get.to(
+                          () => const IncomingDeliveryNoteListScreen(),
+                        ),
                   ),
                   _buildDashboardCard(
                     context,
@@ -456,10 +459,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   _buildDashboardCard(
                     context,
-                    icon: Icons.local_shipping_outlined,
-                    title: 'Delivery Notes (In)',
-                    subtitle: 'Receive stock',
-                    onTap: () => Get.to(() => const IncomingDeliveryNoteListScreen()),
+                    icon: Icons.local_shipping,
+                    title: 'Delivery Notes',
+                    subtitle: 'Track shipments',
+                    onTap: () => Get.to(() => const DeliveryNoteListScreen()),
                   ),
                 ],
               ),
