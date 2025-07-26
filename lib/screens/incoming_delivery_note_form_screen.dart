@@ -22,6 +22,7 @@ class IncomingDeliveryNoteFormScreen extends StatefulWidget {
 }
 
 class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFormScreen> {
+  final _formKey = GlobalKey<FormState>();
   final IncomingDeliveryNoteController incomingDeliveryNoteController = Get.find();
   final InventoryController inventoryController = Get.find();
   final BranchController branchController = Get.find();
@@ -234,321 +235,326 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Autocomplete<String>(
-              optionsBuilder: (TextEditingValue textEditingValue) {
-                if (textEditingValue.text == '') {
-                  return const Iterable<String>.empty();
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Autocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  if (textEditingValue.text == '') {
+                    return const Iterable<String>.empty();
+                  }
+                  return incomingDeliveryNoteController.distinctVendorNames.where((String option) {
+                    return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+                onSelected: (String selection) {
+                  _fromVendorNameController.text = selection;
+                },
+                fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, void Function() onFieldSubmitted) {
+                  // Use the _fromVendorNameController directly
+                  return TextFormField(
+                    controller: textEditingController,
+                    focusNode: focusNode,
+                    decoration: InputDecoration(
+                      labelText: 'From (Vendor Name)',
+                      hintText: 'e.g., Supplier A, Main Warehouse',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: const Icon(Icons.business),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'From (Vendor Name) cannot be empty';
+                      }
+                      return null;
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // To Branch Selection
+              Obx(() {
+                if (branchController.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
                 }
-                return incomingDeliveryNoteController.distinctVendorNames.where((String option) {
-                  return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
-                });
-              },
-              onSelected: (String selection) {
-                _fromVendorNameController.text = selection;
-              },
-              fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, void Function() onFieldSubmitted) {
-                // Use the _fromVendorNameController directly
-                return TextFormField(
-                  controller: textEditingController,
-                  focusNode: focusNode,
+                if (branchController.branches.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                return DropdownButtonFormField<Branch>(
                   decoration: InputDecoration(
-                    labelText: 'From (Vendor Name)',
-                    hintText: 'e.g., Supplier A, Main Warehouse',
+                    labelText: 'To Branch',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    prefixIcon: const Icon(Icons.business),
+                    prefixIcon: const Icon(Icons.store),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'From (Vendor Name) cannot be empty';
-                    }
-                    return null;
-                  },
+                  value: selectedToBranch,
+                  onChanged: null, // Disable the dropdown
+                  items: selectedToBranch != null
+                      ? [
+                          DropdownMenuItem<Branch>(
+                            value: selectedToBranch,
+                            child: Text(selectedToBranch!.name),
+                          ),
+                        ]
+                      : [],
                 );
-              },
-            ),
-            const SizedBox(height: 16),
+              }),
+              const SizedBox(height: 16),
 
-            // To Branch Selection
-            Obx(() {
-              if (branchController.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (branchController.branches.isEmpty) {
-                return const SizedBox.shrink();
-              }
-              return DropdownButtonFormField<Branch>(
+              // Delivery Date
+              GestureDetector(
+                onTap: () => _selectDate(context),
+                child: AbsorbPointer(
+                  child: TextFormField(
+                    controller: TextEditingController(
+                      text: DateFormat(
+                        'yyyy-MM-dd HH:mm',
+                      ).format(selectedDeliveryDate.toLocal()),
+                    ),
+                    decoration: InputDecoration(
+                      labelText: 'Delivery Date',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: const Icon(Icons.calendar_today),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: keteranganController,
                 decoration: InputDecoration(
-                  labelText: 'To Branch',
+                  labelText: 'Catatan',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  prefixIcon: const Icon(Icons.store),
+                  prefixIcon: const Icon(Icons.description),
                 ),
-                value: selectedToBranch,
-                onChanged: null, // Disable the dropdown
-                items: selectedToBranch != null
-                    ? [
-                        DropdownMenuItem<Branch>(
-                          value: selectedToBranch,
-                          child: Text(selectedToBranch!.name),
-                        ),
-                      ]
-                    : [],
-              );
-            }),
-            const SizedBox(height: 16),
-
-            // Delivery Date
-            GestureDetector(
-              onTap: () => _selectDate(context),
-              child: AbsorbPointer(
-                child: TextFormField(
-                  controller: TextEditingController(
-                    text: DateFormat(
-                      'yyyy-MM-dd HH:mm',
-                    ).format(selectedDeliveryDate.toLocal()),
-                  ),
-                  decoration: InputDecoration(
-                    labelText: 'Delivery Date',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    prefixIcon: const Icon(Icons.calendar_today),
-                  ),
-                ),
+                maxLines: 3,
               ),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: keteranganController,
-              decoration: InputDecoration(
-                labelText: 'Catatan',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                prefixIcon: const Icon(Icons.description),
-              ),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-            // Items for Delivery Section
-            Text(
-              'Items for Incoming Delivery:',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Obx(() {
-              if (selectedProducts.isEmpty) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20.0),
-                  child: Center(
-                    child: Text(
-                      'No items added yet. Tap "Add Item" to begin.',
-                      style: TextStyle(color: Colors.grey[600]),
+              // Items for Delivery Section
+              Text(
+                'Items for Incoming Delivery:',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              Obx(() {
+                if (selectedProducts.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20.0),
+                    child: Center(
+                      child: Text(
+                        'No items added yet. Tap "Add Item" to begin.',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
                     ),
-                  ),
-                );
-              }
-              return ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: selectedProducts.length,
-                itemBuilder: (context, index) {
-                  final item = selectedProducts[index];
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8.0),
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Column(
-                      children: [
-                        ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          leading: Icon(
-                            item['type'] == 'product'
-                                ? Icons.inventory_2_outlined
-                                : Icons.category_outlined,
-                            color:
-                                item['type'] == 'product'
-                                    ? Colors.blueGrey
-                                    : Colors.teal,
-                          ),
-                          title: Text(
-                            '${item['name']}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                  );
+                }
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: selectedProducts.length,
+                  itemBuilder: (context, index) {
+                    final item = selectedProducts[index];
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 8.0),
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Column(
+                        children: [
+                          ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
                             ),
-                          ),
-                          subtitle: Text(
-                            'Type: ${(item['type'] as String).capitalizeFirst} | Quantity: x${item['quantity']}',
-                            style: TextStyle(color: Colors.grey[600]),
-                          ),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {
-                              Get.dialog(
-                                AlertDialog(
-                                  title: const Text('Remove Item?'),
-                                  content: Text(
-                                    'Do you want to remove ${item['name']}?',
+                            leading: Icon(
+                              item['type'] == 'product'
+                                  ? Icons.inventory_2_outlined
+                                  : Icons.category_outlined,
+                              color:
+                                  item['type'] == 'product'
+                                      ? Colors.blueGrey
+                                      : Colors.teal,
+                            ),
+                            title: Text(
+                              '${item['name']}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            subtitle: Text(
+                              'Type: ${(item['type'] as String).capitalizeFirst} | Quantity: x${item['quantity']}',
+                              style: TextStyle(color: Colors.grey[600]),
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                Get.dialog(
+                                  AlertDialog(
+                                    title: const Text('Remove Item?'),
+                                    content: Text(
+                                      'Do you want to remove ${item['name']}?',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Get.back(),
+                                        child: const Text('Cancel'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          selectedProducts.removeAt(index);
+                                          Get.back();
+                                        },
+                                        child: const Text('Remove'),
+                                      ),
+                                    ],
                                   ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Get.back(),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        selectedProducts.removeAt(index);
-                                        Get.back();
-                                      },
-                                      child: const Text('Remove'),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        if (item['description'] != null &&
-                            item['description'].isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              72.0,
-                              0.0,
-                              16.0,
-                              8.0,
+                                );
+                              },
                             ),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'Keterangan: ${item['description']}',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey[600],
-                                  fontStyle: FontStyle.italic,
+                          ),
+                          if (item['description'] != null &&
+                              item['description'].isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                72.0,
+                                0.0,
+                                16.0,
+                                8.0,
+                              ),
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  'Keterangan: ${item['description']}',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey[600],
+                                    fontStyle: FontStyle.italic,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                      ],
-                    ),
-                  );
-                },
-              );
-            }),
-            const SizedBox(height: 16),
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: _addItemToNote,
-                icon: const Icon(Icons.add),
-                label: const Text('Add Item to Incoming Delivery Note'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  textStyle: const TextStyle(fontSize: 16),
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
-
-            // Save Button
-            Obx(() {
-              return incomingDeliveryNoteController.isLoading.value
-                  ? const Center(child: CircularProgressIndicator())
-                  : SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          if (selectedToBranch == null) {
-                            Get.snackbar(
-                              'Error',
-                              'Please select a To Branch.',
-                            );
-                            return;
-                          }
-                          if (selectedProducts.isEmpty) {
-                            Get.snackbar(
-                              'Error',
-                              'Please add at least one item to the incoming delivery note.',
-                            );
-                            return;
-                          }
-                          if (selectedToBranch!.id == null) {
-                            Get.snackbar('Error', 'To Branch ID is missing.');
-                            return;
-                          }
-
-                          if (widget.incomingDeliveryNote == null) {
-                            // Create new incoming delivery note
-                            incomingDeliveryNoteController.createIncomingDeliveryNote(
-                              fromVendorName: _fromVendorNameController.text,
-                              deliveryDate: selectedDeliveryDate,
-                              toBranchId: selectedToBranch!.id!,
-                              toBranchName: selectedToBranch!.name,
-                              items: selectedProducts.toList(),
-                              keterangan: keteranganController.text,
-                            );
-                          } else {
-                            // Update existing incoming delivery note
-                            incomingDeliveryNoteController.updateIncomingDeliveryNote(
-                              incomingDeliveryNoteId: incomingDeliveryNoteId!,
-                              fromVendorName: _fromVendorNameController.text,
-                              deliveryDate: selectedDeliveryDate,
-                              toBranchId: selectedToBranch!.id!,
-                              toBranchName: selectedToBranch!.name,
-                              newItems: selectedProducts.toList(),
-                              originalItems: (
-                                  widget.incomingDeliveryNote!.productItems ?? []
-                                ) + (
-                                  widget.incomingDeliveryNote!.consumableItems ?? []
-                                ),
-                              keterangan: keteranganController.text,
-                            );
-                          }
-                        },
-                        icon: Icon(
-                          widget.incomingDeliveryNote == null
-                              ? Icons.save
-                              : Icons.update,
-                        ),
-                        label: Text(
-                          widget.incomingDeliveryNote == null
-                              ? 'Save Incoming Delivery Note'
-                              : 'Update Incoming Delivery Note',
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          textStyle: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        ],
                       ),
                     );
-            }),
-          ],
-        ),
-      ),
-    );
+                  },
+                );
+              }),
+              const SizedBox(height: 16),
+              Center(
+                child: ElevatedButton.icon(
+                  onPressed: _addItemToNote,
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Item to Incoming Delivery Note'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    textStyle: const TextStyle(fontSize: 16),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // Save Button
+              Obx(() {
+                return incomingDeliveryNoteController.isLoading.value
+                    ? const Center(child: CircularProgressIndicator())
+                    : SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              if (selectedToBranch == null) {
+                                Get.snackbar(
+                                  'Error',
+                                  'Please select a To Branch.',
+                                );
+                                return;
+                              }
+                              if (selectedProducts.isEmpty) {
+                                Get.snackbar(
+                                  'Error',
+                                  'Please add at least one item to the incoming delivery note.',
+                                );
+                                return;
+                              }
+                              if (selectedToBranch!.id == null) {
+                                Get.snackbar('Error', 'To Branch ID is missing.');
+                                return;
+                              }
+
+                              if (widget.incomingDeliveryNote == null) {
+                                // Create new incoming delivery note
+                                incomingDeliveryNoteController.createIncomingDeliveryNote(
+                                  fromVendorName: _fromVendorNameController.text,
+                                  deliveryDate: selectedDeliveryDate,
+                                  toBranchId: selectedToBranch!.id!,
+                                  toBranchName: selectedToBranch!.name,
+                                  items: selectedProducts.toList(),
+                                  keterangan: keteranganController.text,
+                                );
+                              } else {
+                                // Update existing incoming delivery note
+                                incomingDeliveryNoteController.updateIncomingDeliveryNote(
+                                  incomingDeliveryNoteId: incomingDeliveryNoteId!,
+                                  fromVendorName: _fromVendorNameController.text,
+                                  deliveryDate: selectedDeliveryDate,
+                                  toBranchId: selectedToBranch!.id!,
+                                  toBranchName: selectedToBranch!.name,
+                                  newItems: selectedProducts.toList(),
+                                  originalItems: (
+                                      widget.incomingDeliveryNote!.productItems ?? []
+                                    ) + (
+                                      widget.incomingDeliveryNote!.consumableItems ?? []
+                                    ),
+                                  keterangan: keteranganController.text,
+                                );
+                              }
+                            }
+                          },
+                          icon: Icon(
+                            widget.incomingDeliveryNote == null
+                                ? Icons.save
+                                : Icons.update,
+                          ),
+                          label: Text(
+                            widget.incomingDeliveryNote == null
+                                ? 'Save Incoming Delivery Note'
+                                : 'Update Incoming Delivery Note',
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      );
+              }),
+            ],
+          ), // Closing parenthesis for Column
+        ), // Closing parenthesis for Form
+      ), // Closing parenthesis for SingleChildScrollView
+    ); // Closing parenthesis for Scaffold
   }
 }
