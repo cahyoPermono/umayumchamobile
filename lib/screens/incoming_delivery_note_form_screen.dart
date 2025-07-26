@@ -241,22 +241,28 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Autocomplete<String>(
-                optionsBuilder: (TextEditingValue textEditingValue) {
-                  if (textEditingValue.text == '') {
+                optionsBuilder: (TextEditingValue textEditingController) {
+                  if (textEditingController.text == '') {
                     return const Iterable<String>.empty();
                   }
-                  return incomingDeliveryNoteController.distinctVendorNames.where((String option) {
-                    return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                  return incomingDeliveryNoteController.distinctVendorNames
+                      .where((String option) {
+                    return option
+                        .toLowerCase()
+                        .contains(textEditingController.text.toLowerCase());
                   });
                 },
                 onSelected: (String selection) {
                   _fromVendorNameController.text = selection;
                 },
-                fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, void Function() onFieldSubmitted) {
-                  // Use the _fromVendorNameController directly
+                fieldViewBuilder: (BuildContext context,
+                    TextEditingController textEditingController,
+                    FocusNode focusNode,
+                    void Function() onFieldSubmitted) {
+                  textEditingController.text = _fromVendorNameController.text;
                   return TextFormField(
-                  controller: textEditingController..text = _fromVendorNameController.text,
-                  focusNode: focusNode,
+                    controller: textEditingController,
+                    focusNode: focusNode,
                     decoration: InputDecoration(
                       labelText: 'From (Vendor Name)',
                       hintText: 'e.g., Supplier A, Main Warehouse',
@@ -270,6 +276,9 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
                         return 'From (Vendor Name) cannot be empty';
                       }
                       return null;
+                    },
+                    onChanged: (value) {
+                      _fromVendorNameController.text = value;
                     },
                   );
                 },
@@ -480,6 +489,7 @@ class _IncomingDeliveryNoteFormScreenState extends State<IncomingDeliveryNoteFor
                         child: ElevatedButton.icon(
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
+                              _formKey.currentState!.save();
                               if (selectedToBranch == null) {
                                 Get.snackbar(
                                   'Error',
