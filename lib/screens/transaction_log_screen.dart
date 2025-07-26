@@ -14,7 +14,7 @@ class TransactionLogScreen extends StatelessWidget {
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Transaction Log')),
+      appBar: AppBar(title: const Text('Inventory Transaction Log')),
       body: Column(
         children: [
           Padding(
@@ -27,10 +27,12 @@ class TransactionLogScreen extends StatelessWidget {
                       child: Obx(
                         () => TextFormField(
                           controller: TextEditingController(
-                            text: controller.startDate.value == null
-                                ? ''
-                                : DateFormat('yyyy-MM-dd')
-                                    .format(controller.startDate.value!),
+                            text:
+                                controller.startDate.value == null
+                                    ? ''
+                                    : DateFormat(
+                                      'yyyy-MM-dd',
+                                    ).format(controller.startDate.value!),
                           ),
                           readOnly: true,
                           decoration: const InputDecoration(
@@ -57,10 +59,12 @@ class TransactionLogScreen extends StatelessWidget {
                       child: Obx(
                         () => TextFormField(
                           controller: TextEditingController(
-                            text: controller.endDate.value == null
-                                ? ''
-                                : DateFormat('yyyy-MM-dd')
-                                    .format(controller.endDate.value!),
+                            text:
+                                controller.endDate.value == null
+                                    ? ''
+                                    : DateFormat(
+                                      'yyyy-MM-dd',
+                                    ).format(controller.endDate.value!),
                           ),
                           readOnly: true,
                           decoration: const InputDecoration(

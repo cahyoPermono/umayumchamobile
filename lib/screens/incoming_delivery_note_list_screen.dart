@@ -20,7 +20,7 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Incoming Delivery Notes',
+          'Delivery Notes (In)',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Theme.of(context).primaryColor,

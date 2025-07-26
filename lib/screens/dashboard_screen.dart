@@ -460,7 +460,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   _buildDashboardCard(
                     context,
                     icon: Icons.local_shipping,
-                    title: 'Delivery Notes',
+                    title: 'Delivery Notes (Out)',
                     subtitle: 'Track shipments',
                     onTap: () => Get.to(() => const DeliveryNoteListScreen()),
                   ),

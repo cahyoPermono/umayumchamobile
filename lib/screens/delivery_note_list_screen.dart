@@ -18,7 +18,7 @@ class DeliveryNoteListScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Delivery Notes',
+          'Delivery Notes (Out)',
           style: TextStyle(
             color: Colors.white, // White text for consistency
             fontWeight: FontWeight.bold,
