@@ -14,9 +14,7 @@ class TransactionLogScreen extends StatelessWidget {
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Transaction Log'),
-      ),
+      appBar: AppBar(title: const Text('Transaction Log')),
       body: Column(
         children: [
           Padding(
@@ -29,10 +27,12 @@ class TransactionLogScreen extends StatelessWidget {
                       child: Obx(
                         () => TextFormField(
                           controller: TextEditingController(
-                            text: controller.startDate.value == null
-                                ? ''
-                                : DateFormat('yyyy-MM-dd')
-                                    .format(controller.startDate.value!),
+                            text:
+                                controller.startDate.value == null
+                                    ? ''
+                                    : DateFormat(
+                                      'yyyy-MM-dd',
+                                    ).format(controller.startDate.value!),
                           ),
                           readOnly: true,
                           decoration: const InputDecoration(
@@ -59,10 +59,12 @@ class TransactionLogScreen extends StatelessWidget {
                       child: Obx(
                         () => TextFormField(
                           controller: TextEditingController(
-                            text: controller.endDate.value == null
-                                ? ''
-                                : DateFormat('yyyy-MM-dd')
-                                    .format(controller.endDate.value!),
+                            text:
+                                controller.endDate.value == null
+                                    ? ''
+                                    : DateFormat(
+                                      'yyyy-MM-dd',
+                                    ).format(controller.endDate.value!),
                           ),
                           readOnly: true,
                           decoration: const InputDecoration(
@@ -86,6 +88,7 @@ class TransactionLogScreen extends StatelessWidget {
                     ),
                   ],
                 ),
+                const SizedBox(width: 16),
                 TextFormField(
                   decoration: const InputDecoration(
                     labelText: 'Search (Product, From Branch, To Branch)',
@@ -96,8 +99,6 @@ class TransactionLogScreen extends StatelessWidget {
                     controller.searchQuery.value = value;
                   },
                 ),
-                const SizedBox(height: 16),
-                
               ],
             ),
           ),
@@ -120,8 +121,10 @@ class TransactionLogScreen extends StatelessWidget {
                       controller.transactions[index];
                   final bool isIncoming = transaction.type == 'in';
                   return Card(
-                    margin:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     elevation: 2,
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
@@ -134,9 +137,7 @@ class TransactionLogScreen extends StatelessWidget {
                               Expanded(
                                 child: Text(
                                   transaction.productName ?? 'N/A',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
+                                  style: Theme.of(context).textTheme.titleMedium
                                       ?.copyWith(fontWeight: FontWeight.bold),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -153,12 +154,11 @@ class TransactionLogScreen extends StatelessWidget {
                           const SizedBox(height: 8),
                           Text(
                             'Quantity: ${transaction.quantityChange > 0 ? '+' : ''}${transaction.quantityChange}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyLarge
-                                ?.copyWith(
-                                  color: isIncoming ? Colors.green : Colors.red,
-                                ),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyLarge?.copyWith(
+                              color: isIncoming ? Colors.green : Colors.red,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           if (transaction.fromBranchName != null &&
@@ -215,9 +215,7 @@ class TransactionLogScreen extends StatelessWidget {
                             children: [
                               Text(
                                 'Date: ${DateFormat('yyyy-MM-dd HH:mm').format(transaction.createdAt.add(const Duration(hours: 7)))}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
+                                style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(color: Colors.grey[600]),
                               ),
                             ],

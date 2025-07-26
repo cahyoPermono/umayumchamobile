@@ -26,10 +26,12 @@ class ConsumableTransactionLogScreen extends StatelessWidget {
                       child: Obx(
                         () => TextFormField(
                           controller: TextEditingController(
-                            text: controller.fromDate.value == null
-                                ? ''
-                                : DateFormat('yyyy-MM-dd')
-                                    .format(controller.fromDate.value!),
+                            text:
+                                controller.fromDate.value == null
+                                    ? ''
+                                    : DateFormat(
+                                      'yyyy-MM-dd',
+                                    ).format(controller.fromDate.value!),
                           ),
                           readOnly: true,
                           decoration: const InputDecoration(
@@ -57,10 +59,12 @@ class ConsumableTransactionLogScreen extends StatelessWidget {
                       child: Obx(
                         () => TextFormField(
                           controller: TextEditingController(
-                            text: controller.toDate.value == null
-                                ? ''
-                                : DateFormat('yyyy-MM-dd')
-                                    .format(controller.toDate.value!),
+                            text:
+                                controller.toDate.value == null
+                                    ? ''
+                                    : DateFormat(
+                                      'yyyy-MM-dd',
+                                    ).format(controller.toDate.value!),
                           ),
                           readOnly: true,
                           decoration: const InputDecoration(
@@ -96,10 +100,6 @@ class ConsumableTransactionLogScreen extends StatelessWidget {
                     controller.searchQuery.value = value;
                   },
                 ),
-                const SizedBox(height: 16),
-                
-                const SizedBox(height: 16),
-                
               ],
             ),
           ),
@@ -110,15 +110,18 @@ class ConsumableTransactionLogScreen extends StatelessWidget {
               }
               if (controller.transactions.isEmpty) {
                 return const Center(
-                    child: Text('No consumable transactions found.'));
+                  child: Text('No consumable transactions found.'),
+                );
               }
               return ListView.builder(
                 itemCount: controller.transactions.length,
                 itemBuilder: (context, index) {
                   final transaction = controller.transactions[index];
                   return Card(
-                    margin:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     elevation: 2,
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
@@ -131,9 +134,7 @@ class ConsumableTransactionLogScreen extends StatelessWidget {
                               Expanded(
                                 child: Text(
                                   transaction.consumableName ?? 'N/A',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
+                                  style: Theme.of(context).textTheme.titleMedium
                                       ?.copyWith(fontWeight: FontWeight.bold),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -142,9 +143,10 @@ class ConsumableTransactionLogScreen extends StatelessWidget {
                                 transaction.type == 'in'
                                     ? Icons.arrow_circle_up
                                     : Icons.arrow_circle_down,
-                                color: transaction.type == 'in'
-                                    ? Colors.green
-                                    : Colors.red,
+                                color:
+                                    transaction.type == 'in'
+                                        ? Colors.green
+                                        : Colors.red,
                                 size: 28,
                               ),
                             ],
@@ -152,14 +154,14 @@ class ConsumableTransactionLogScreen extends StatelessWidget {
                           const SizedBox(height: 8),
                           Text(
                             'Quantity: ${transaction.quantityChange > 0 ? '+' : ''}${transaction.quantityChange}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyLarge
-                                ?.copyWith(
-                                  color: transaction.type == 'in'
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyLarge?.copyWith(
+                              color:
+                                  transaction.type == 'in'
                                       ? Colors.green
                                       : Colors.red,
-                                ),
+                            ),
                           ),
                           const SizedBox(height: 4),
                           if (transaction.branchSourceName != null &&
@@ -216,18 +218,14 @@ class ConsumableTransactionLogScreen extends StatelessWidget {
                             children: [
                               Text(
                                 'Date: ${DateFormat('yyyy-MM-dd HH:mm').format(transaction.createdAt.add(const Duration(hours: 7)))}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
+                                style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(color: Colors.grey[600]),
                               ),
                               if (transaction.userEmail != null &&
                                   transaction.userEmail!.isNotEmpty)
                                 Text(
                                   'By: ${transaction.userEmail}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
+                                  style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(color: Colors.grey[600]),
                                 ),
                             ],
@@ -240,7 +238,8 @@ class ConsumableTransactionLogScreen extends StatelessWidget {
               );
             }),
           ),
-        ],)
+        ],
+      ),
     );
   }
 }
