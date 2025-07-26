@@ -11,7 +11,9 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final IncomingDeliveryNoteController controller = Get.put(IncomingDeliveryNoteController());
+    final IncomingDeliveryNoteController controller = Get.put(
+      IncomingDeliveryNoteController(),
+    );
     final InventoryController inventoryController = Get.find();
     final ConsumableController consumableController = Get.find();
 
@@ -19,15 +21,10 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'Incoming Delivery Notes',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Theme.of(context).primaryColor,
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
+        iconTheme: const IconThemeData(color: Colors.white),
         elevation: 4,
       ),
       body: Column(
@@ -39,33 +36,29 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
               children: [
                 // To Branch Filter
                 Obx(() {
-                  return DropdownButtonFormField<String?>(
+                  return DropdownButtonFormField<String>(
                     decoration: const InputDecoration(
-                      labelText: 'Filter by To Branch',
+                      labelText: 'Filter by Vendor',
                       border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
+                      prefixIcon: Icon(Icons.business),
                     ),
-                    value: controller.selectedToBranchName.value,
-                    hint: const Text('All Branches'),
-                    onChanged: (newValue) {
-                      controller.selectedToBranchName.value = newValue;
-                      controller.fetchIncomingDeliveryNotes();
-                    },
+                    value: controller.selectedVendorName.value,
                     items: [
-                      const DropdownMenuItem<String?>(
+                      const DropdownMenuItem(
                         value: null,
-                        child: Text('All Branches'),
+                        child: Text('All Vendors'),
                       ),
-                      ...controller.distinctToBranchNames.map((branchName) {
-                        return DropdownMenuItem<String?>(
-                          value: branchName,
-                          child: Text(branchName),
+                      ...controller.distinctVendorNames.map((vendorName) {
+                        return DropdownMenuItem(
+                          value: vendorName,
+                          child: Text(vendorName),
                         );
                       }),
                     ],
+                    onChanged: (value) {
+                      controller.selectedVendorName.value = value;
+                      controller.fetchIncomingDeliveryNotes();
+                    },
                   );
                 }),
                 const SizedBox(height: 16),
@@ -174,10 +167,7 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
                       const SizedBox(height: 20),
                       Text(
                         'No incoming delivery notes found.',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                       ),
                       const SizedBox(height: 10),
                       Text(
@@ -266,9 +256,13 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
                                 confirmTextColor: Colors.white,
                                 buttonColor: Colors.red,
                                 onConfirm: () {
-                                  controller.deleteIncomingDeliveryNote(note.id);
-                                  inventoryController.fetchBranchProducts(); // Refresh relevant data
-                                  consumableController.fetchConsumables(); // Refresh relevant data
+                                  controller.deleteIncomingDeliveryNote(
+                                    note.id,
+                                  );
+                                  inventoryController
+                                      .fetchBranchProducts(); // Refresh relevant data
+                                  consumableController
+                                      .fetchConsumables(); // Refresh relevant data
                                   Get.back();
                                 },
                               );
@@ -277,10 +271,7 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
                         ],
                       ),
                       children: [
-                        const Divider(
-                          height: 1,
-                          color: Colors.grey,
-                        ),
+                        const Divider(height: 1, color: Colors.grey),
                         Padding(
                           padding: const EdgeInsets.all(20.0),
                           child: Column(
@@ -301,7 +292,8 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
                                   (item) => Padding(
                                     padding: const EdgeInsets.only(bottom: 5.0),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Row(
                                           children: [
@@ -322,9 +314,13 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
                                             ),
                                           ],
                                         ),
-                                        if (item['reason'] != null && item['reason'].isNotEmpty)
+                                        if (item['reason'] != null &&
+                                            item['reason'].isNotEmpty)
                                           Padding(
-                                            padding: const EdgeInsets.only(left: 26.0, top: 2.0),
+                                            padding: const EdgeInsets.only(
+                                              left: 26.0,
+                                              top: 2.0,
+                                            ),
                                             child: Text(
                                               'Keterangan: ${item['reason']}',
                                               style: TextStyle(
@@ -344,7 +340,8 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
                                   (item) => Padding(
                                     padding: const EdgeInsets.only(bottom: 5.0),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Row(
                                           children: [
@@ -365,9 +362,13 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
                                             ),
                                           ],
                                         ),
-                                        if (item['reason'] != null && item['reason'].isNotEmpty)
+                                        if (item['reason'] != null &&
+                                            item['reason'].isNotEmpty)
                                           Padding(
-                                            padding: const EdgeInsets.only(left: 26.0, top: 2.0),
+                                            padding: const EdgeInsets.only(
+                                              left: 26.0,
+                                              top: 2.0,
+                                            ),
                                             child: Text(
                                               'Keterangan: ${item['reason']}',
                                               style: TextStyle(

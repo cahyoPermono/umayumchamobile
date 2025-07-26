@@ -12,17 +12,15 @@ class IncomingDeliveryNoteController extends GetxController {
 
   var incomingDeliveryNotes = <IncomingDeliveryNote>[].obs;
   var isLoading = false.obs;
-  var distinctToBranchNames = <String>[].obs;
-  var distinctVendorNames = <String>[].obs; // New: For autocomplete
-  var selectedToBranchName = Rx<String?>(null);
+  var distinctVendorNames = <String>[].obs;
+  var selectedVendorName = Rx<String?>(null);
   var selectedFromDate = Rx<DateTime?>(null);
   var selectedToDate = Rx<DateTime?>(null);
 
   @override
   void onInit() {
     _initializeFiltersAndFetch();
-    fetchDistinctToBranchNames();
-    fetchDistinctVendorNames(); // New: Fetch distinct vendor names
+    fetchDistinctVendorNames();
     super.onInit();
   }
 
@@ -45,20 +43,6 @@ class IncomingDeliveryNoteController extends GetxController {
     fetchIncomingDeliveryNotes();
   }
 
-  Future<void> fetchDistinctToBranchNames() async {
-    try {
-      // This view might need to be created in Supabase if it doesn't exist
-      // For incoming notes, we are interested in 'to_branch_name'
-      final response = await supabase
-          .from('branches') // Assuming we fetch all branch names
-          .select('name');
-      distinctToBranchNames.value =
-          (response as List).map((e) => e['name'] as String).toList();
-    } catch (e) {
-      debugPrint('Error fetching distinct branch names: ${e.toString()}');
-    }
-  }
-
   Future<void> fetchIncomingDeliveryNotes() async {
     try {
       isLoading.value = true;
@@ -68,8 +52,8 @@ class IncomingDeliveryNoteController extends GetxController {
             '*, inventory_transactions(product_id, product_name, quantity_change, reason), consumable_transactions(consumable_id, consumable_name, quantity_change, reason)',
           );
 
-      if (selectedToBranchName.value != null) {
-        query = query.eq('to_branch_name', selectedToBranchName.value!);
+      if (selectedVendorName.value != null) {
+        query = query.eq('from_vendor_name', selectedVendorName.value!);
       }
       if (selectedFromDate.value != null) {
         query = query.gte(
