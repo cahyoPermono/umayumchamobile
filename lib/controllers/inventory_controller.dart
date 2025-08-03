@@ -17,6 +17,7 @@ class InventoryController extends GetxController {
   var searchQuery = ''.obs;
   String umayumchaHQBranchId =
       '2e109b1a-12c6-4572-87ab-6c96add8a603'; // To store UmayumchaHQ branch ID
+  var vendorNames = <String>[].obs;
 
   // Filtered list based on search query
   RxList<BranchProduct> get filteredBranchProducts =>
@@ -28,6 +29,23 @@ class InventoryController extends GetxController {
           })
           .toList()
           .obs;
+
+  Future<void> fetchVendorNames() async {
+    try {
+      final response = await supabase
+          .from('distinct_product_vendors')
+          .select('from');
+
+      final List<String> names = (response as List)
+          .map((item) => item['from'] as String)
+          .toList();
+      vendorNames.assignAll(names);
+      debugPrint('Vendor names fetched: ${vendorNames.length}');
+    } catch (e) {
+      debugPrint('Error fetching vendor names: ${e.toString()}');
+      Get.snackbar('Error', 'Failed to fetch vendor names: ${e.toString()}');
+    }
+  }
 
   Future<bool> updateProduct(Product product) async {
     isLoading.value = true;
@@ -85,7 +103,7 @@ class InventoryController extends GetxController {
   void onInit() {
     // Listen for changes in selectedBranch and refetch products
     ever(selectedBranch, (_) => fetchBranchProducts());
-
+    fetchVendorNames();
     fetchGlobalLowStockProducts(); // Fetch global low stock on init
     super.onInit();
   }

@@ -187,22 +187,50 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: fromController,
-                decoration: const InputDecoration(
-                  labelText: 'From (Vendor Name)',
-                  hintText: 'e.g., PT. ABC, Supplier XYZ',
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 12.0,
-                    horizontal: 15.0,
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter vendor name';
+              Autocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  if (textEditingValue.text == '') {
+                    return const Iterable<String>.empty();
                   }
-                  return null;
+                  return inventoryController.vendorNames.where((String option) {
+                    return option
+                        .toLowerCase()
+                        .contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+                onSelected: (String selection) {
+                  fromController.text = selection;
+                },
+                fieldViewBuilder: (BuildContext context,
+                    TextEditingController fieldTextEditingController,
+                    FocusNode fieldFocusNode,
+                    VoidCallback onFieldSubmitted) {
+                  // Set initial value
+                  if (fromController.text.isNotEmpty) {
+                    fieldTextEditingController.text = fromController.text;
+                  }
+                  return TextFormField(
+                    controller: fieldTextEditingController,
+                    focusNode: fieldFocusNode,
+                    decoration: const InputDecoration(
+                      labelText: 'From (Vendor Name)',
+                      hintText: 'e.g., PT. ABC, Supplier XYZ',
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 12.0,
+                        horizontal: 15.0,
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter vendor name';
+                      }
+                      return null;
+                    },
+                    onChanged: (text) {
+                      fromController.text = text;
+                    },
+                  );
                 },
               ),
               const SizedBox(height: 16),
