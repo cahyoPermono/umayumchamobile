@@ -179,7 +179,7 @@ class DeliveryNoteController extends GetxController {
             productId: itemId as String, // Cast to String for products
             type: 'out',
             quantityChange: quantity,
-            reason: 'Delivery Note: $customerName - ${item['description']}',
+            // reason: 'Delivery Note: $customerName - ${item['description']}',
             deliveryNoteId: deliveryNoteId,
             fromBranchId: fromBranchId,
             toBranchId: toBranchId,
@@ -192,7 +192,7 @@ class DeliveryNoteController extends GetxController {
             consumableId: int.parse(itemId), // Cast to int for consumables
             consumableName: itemName,
             quantityChange: quantity,
-            reason: 'Delivery Note: $customerName - ${item['description']}',
+            reason: '',
             deliveryNoteId: deliveryNoteId,
             fromBranchId: fromBranchId,
             toBranchId: toBranchId,
@@ -307,8 +307,8 @@ class DeliveryNoteController extends GetxController {
             productId: itemId as String, // Cast to String for products
             type: 'out',
             quantityChange: quantity,
-            reason:
-                'Delivery Note: ${customerName ?? 'Internal Transfer'} - ${item['description']}',
+            // reason:
+            //     'Delivery Note: ${customerName ?? 'Internal Transfer'} - ${item['description']}',
             deliveryNoteId: deliveryNoteId,
             fromBranchId: fromBranchId,
             toBranchId: toBranchId,
@@ -321,8 +321,7 @@ class DeliveryNoteController extends GetxController {
             consumableId: int.parse(itemId), // Cast to int for consumables
             consumableName: itemName,
             quantityChange: quantity,
-            reason:
-                'Delivery Note: ${customerName ?? 'Internal Transfer'} - ${item['description']}',
+            reason: '',
             deliveryNoteId: deliveryNoteId,
             fromBranchId: fromBranchId,
             toBranchId: toBranchId,

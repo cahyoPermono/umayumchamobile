@@ -287,43 +287,54 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
               icon: const Icon(Icons.print),
               onPressed: () async {
                 if (widget.deliveryNote != null && selectedToBranch != null) {
-                  final blue_printer.BlueThermalPrinter bluetooth = blue_printer.BlueThermalPrinter.instance;
+                  final blue_printer.BlueThermalPrinter bluetooth =
+                      blue_printer.BlueThermalPrinter.instance;
                   List<blue_printer.BluetoothDevice> devices = [];
 
                   try {
                     devices = await bluetooth.getBondedDevices();
                   } on PlatformException catch (e) {
-                    Get.snackbar('Error', 'Failed to get bonded Bluetooth devices: ${e.message}. Please ensure Bluetooth is on and try again.');
+                    Get.snackbar(
+                      'Error',
+                      'Failed to get bonded Bluetooth devices: ${e.message}. Please ensure Bluetooth is on and try again.',
+                    );
                     return;
                   }
 
                   if (devices.isEmpty) {
-                    Get.snackbar('Info', 'No bonded Bluetooth devices found. Please pair a printer first.');
+                    Get.snackbar(
+                      'Info',
+                      'No bonded Bluetooth devices found. Please pair a printer first.',
+                    );
                     return;
                   }
 
-                  blue_printer.BluetoothDevice? selectedDevice = await Get.dialog<blue_printer.BluetoothDevice>(
-                    AlertDialog(
-                      title: const Text('Select Bluetooth Printer'),
-                      content: SizedBox(
-                        width: double.maxFinite,
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: devices.length,
-                          itemBuilder: (context, index) {
-                            blue_printer.BluetoothDevice device = devices[index];
-                            return ListTile(
-                              title: Text(device.name ?? 'Unknown Device'),
-                              subtitle: Text(device.address ?? 'No Address'),
-                              onTap: () {
-                                Get.back(result: device);
+                  blue_printer.BluetoothDevice? selectedDevice =
+                      await Get.dialog<blue_printer.BluetoothDevice>(
+                        AlertDialog(
+                          title: const Text('Select Bluetooth Printer'),
+                          content: SizedBox(
+                            width: double.maxFinite,
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: devices.length,
+                              itemBuilder: (context, index) {
+                                blue_printer.BluetoothDevice device =
+                                    devices[index];
+                                return ListTile(
+                                  title: Text(device.name ?? 'Unknown Device'),
+                                  subtitle: Text(
+                                    device.address ?? 'No Address',
+                                  ),
+                                  onTap: () {
+                                    Get.back(result: device);
+                                  },
+                                );
                               },
-                            );
-                          },
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  );
+                      );
 
                   if (selectedDevice == null) {
                     Get.snackbar('Info', 'No printer selected.');
@@ -337,7 +348,10 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                     selectedDevice: selectedDevice,
                   );
                 } else {
-                  Get.snackbar('Error', 'Delivery note data is not complete for printing.');
+                  Get.snackbar(
+                    'Error',
+                    'Delivery note data is not complete for printing.',
+                  );
                 }
               },
             ),
