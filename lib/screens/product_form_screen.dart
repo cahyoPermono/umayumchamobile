@@ -534,6 +534,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                                             .name, // Set destination name
                                   );
                               if (transactionSuccess) {
+                                inventoryController.fetchVendorNames();
                                 Get.back();
                                 Get.snackbar(
                                   'Success',
@@ -552,6 +553,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                             final success = await inventoryController
                                 .updateProduct(product);
                             if (success) {
+                              inventoryController.fetchVendorNames();
                               Get.back();
                               Get.snackbar(
                                 'Success',
