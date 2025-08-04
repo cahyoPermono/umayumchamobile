@@ -364,7 +364,7 @@ class DeliveryNoteController extends GetxController {
 
       // Load logo
       final ByteData logoBytes = await rootBundle.load(
-        'assets/images/logo2.png',
+        'assets/images/logoprint.png',
       );
       final Uint8List logoUint8List = logoBytes.buffer.asUint8List();
 
@@ -471,7 +471,7 @@ class DeliveryNoteController extends GetxController {
 
       // Load logo
       final ByteData logoBytes = await rootBundle.load(
-        'assets/images/logo2.png',
+        'assets/images/logoprint.png',
       );
       final Uint8List logoUint8List = logoBytes.buffer.asUint8List();
       final pdf_lib.MemoryImage logoImage = pdf_lib.MemoryImage(logoUint8List);
@@ -501,14 +501,40 @@ class DeliveryNoteController extends GetxController {
                   ],
                 ),
                 pdf_lib.SizedBox(height: 20),
-                pdf_lib.Text(
-                  'No. Surat Jalan: ${deliveryNote.dnNumber ?? deliveryNote.id}',
+                pdf_lib.Table(
+                  columnWidths: {
+                    // 0: const pdf_lib.IntrinsicColumnWidth(),
+                    0: const pdf_lib.FixedColumnWidth(32),
+                    1: const pdf_lib.FixedColumnWidth(2),
+                  },
+                  children: [
+                    pdf_lib.TableRow(
+                      children: [
+                        pdf_lib.Text('No. Surat Jalan'),
+                        pdf_lib.Text(':'),
+                        pdf_lib.Text(
+                          ' ${deliveryNote.dnNumber ?? deliveryNote.id}',
+                        ),
+                      ],
+                    ),
+                    pdf_lib.TableRow(
+                      children: [
+                        pdf_lib.Text('Penerima'),
+                        pdf_lib.Text(':'),
+                        pdf_lib.Text(' Umayumcha $toBranchName'),
+                      ],
+                    ),
+                    pdf_lib.TableRow(
+                      children: [
+                        pdf_lib.Text('Tanggal'),
+                        pdf_lib.Text(':'),
+                        pdf_lib.Text(
+                          ' ${DateFormat('dd-MM-yyyy').format(deliveryNote.deliveryDate)}',
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                pdf_lib.Text('Penerima: Cabang $toBranchName'),
-                pdf_lib.Text(
-                  'Tanggal: ${DateFormat('dd-MM-yyyy').format(deliveryNote.deliveryDate)}',
-                ),
-
                 pdf_lib.SizedBox(height: 20),
                 pdf_lib.TableHelper.fromTextArray(
                   // Changed to TableHelper
@@ -655,7 +681,7 @@ class DeliveryNoteController extends GetxController {
 
       // 3. Format and print data
       final ByteData logoBytes = await rootBundle.load(
-        'assets/images/logo2.png',
+        'assets/images/logoprint.png',
       );
       final Uint8List logoUint8List = logoBytes.buffer.asUint8List();
       await bluetooth.printImageBytes(logoUint8List);
