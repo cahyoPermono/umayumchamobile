@@ -373,16 +373,13 @@ class DeliveryNoteController extends GetxController {
       picture.width = 150; // Set width of the image
       picture.height = 50; // Set height of the image
 
-      // Header
-      sheet.getRangeByName('A5').setText('Umayumcha Head Quarter Malang');
-      sheet.getRangeByName('A5').cellStyle.hAlign = xlsio.HAlignType.left;
-      sheet.getRangeByName('A5').cellStyle.bold = true;
+      // Header - Address to the right of the logo
+      sheet.getRangeByName('C2').setText('HEADQUARTER');
+      sheet.getRangeByName('C2').cellStyle.hAlign = xlsio.HAlignType.left;
+      sheet.getRangeByName('C2').cellStyle.bold = true;
 
-      sheet.getRangeByName('A6').setText('Jalan Dirgantara 4 no A5/11');
-      sheet.getRangeByName('A6').cellStyle.hAlign = xlsio.HAlignType.left;
-
-      sheet.getRangeByName('A7').setText('Sawojajar Malang');
-      sheet.getRangeByName('A7').cellStyle.hAlign = xlsio.HAlignType.left;
+      sheet.getRangeByName('C3').setText('MALANG');
+      sheet.getRangeByName('C3').cellStyle.hAlign = xlsio.HAlignType.left;
 
       sheet.getRangeByName('A9').setText('No. Surat Jalan:');
       sheet.getRangeByName('B9').setText(deliveryNote.dnNumber ?? deliveryNote.id.toString());
@@ -427,7 +424,8 @@ class DeliveryNoteController extends GetxController {
       // Signatures
       rowIndex += 3; // Add some space
       sheet.getRangeByName('A$rowIndex').setText('Pengirim');
-      sheet.getRangeByName('D$rowIndex').setText('Penerima');
+      sheet.getRangeByName('C$rowIndex').setText('Mengetahui');
+      sheet.getRangeByName('E$rowIndex').setText('Penerima');
 
       rowIndex += 4; // Space for signature
       sheet.getRangeByName('A$rowIndex').setText('(____________)');
@@ -472,14 +470,22 @@ class DeliveryNoteController extends GetxController {
             return pdf_lib.Column(
               crossAxisAlignment: pdf_lib.CrossAxisAlignment.start,
               children: [
-                pdf_lib.Image(logoImage, width: 150, height: 50),
-                pdf_lib.SizedBox(height: 20),
-                pdf_lib.Text(
-                  'Umayumcha Head Quarter Malang',
-                  style: pdf_lib.TextStyle(fontWeight: pdf_lib.FontWeight.bold),
+                pdf_lib.Row(
+                  mainAxisAlignment: pdf_lib.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pdf_lib.Image(logoImage, width: 150, height: 50),
+                    pdf_lib.Column(
+                      crossAxisAlignment: pdf_lib.CrossAxisAlignment.start,
+                      children: [
+                        pdf_lib.Text(
+                          'HEADQUARTER',
+                          style: pdf_lib.TextStyle(fontWeight: pdf_lib.FontWeight.bold),
+                        ),
+                        pdf_lib.Text('MALANG'),
+                      ],
+                    ),
+                  ],
                 ),
-                pdf_lib.Text('Jalan Dirgantara 4 no A5/11'),
-                pdf_lib.Text('Sawojajar Malang'),
                 pdf_lib.SizedBox(height: 20),
                 pdf_lib.Text(
                   'No. Surat Jalan: ${deliveryNote.dnNumber ?? deliveryNote.id}',
@@ -530,6 +536,13 @@ class DeliveryNoteController extends GetxController {
                     pdf_lib.Column(
                       children: [
                         pdf_lib.Text('Pengirim'),
+                        pdf_lib.SizedBox(height: 40),
+                        pdf_lib.Text('(____________)'),
+                      ],
+                    ),
+                    pdf_lib.Column(
+                      children: [
+                        pdf_lib.Text('Mengetahui'),
                         pdf_lib.SizedBox(height: 40),
                         pdf_lib.Text('(____________)'),
                       ],
