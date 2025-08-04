@@ -369,7 +369,11 @@ class DeliveryNoteController extends GetxController {
       final Uint8List logoUint8List = logoBytes.buffer.asUint8List();
 
       // Add the image to the worksheet at a specific cell (e.g., A1)
-      final xlsio.Picture picture = sheet.pictures.addStream(1, 1, logoUint8List); // Row 1, Column 1 (A1)
+      final xlsio.Picture picture = sheet.pictures.addStream(
+        1,
+        1,
+        logoUint8List,
+      ); // Row 1, Column 1 (A1)
       picture.width = 150; // Set width of the image
       picture.height = 50; // Set height of the image
 
@@ -382,13 +386,17 @@ class DeliveryNoteController extends GetxController {
       sheet.getRangeByName('C3').cellStyle.hAlign = xlsio.HAlignType.left;
 
       sheet.getRangeByName('A9').setText('No. Surat Jalan:');
-      sheet.getRangeByName('B9').setText(deliveryNote.dnNumber ?? deliveryNote.id.toString());
+      sheet
+          .getRangeByName('B9')
+          .setText(deliveryNote.dnNumber ?? deliveryNote.id.toString());
 
       sheet.getRangeByName('A10').setText('Penerima:');
       sheet.getRangeByName('B10').setText('Cabang $toBranchName');
 
       sheet.getRangeByName('A11').setText('Tanggal:');
-      sheet.getRangeByName('B11').setText(DateFormat('dd-MM-yyyy').format(deliveryNote.deliveryDate));
+      sheet
+          .getRangeByName('B11')
+          .setText(DateFormat('dd-MM-yyyy').format(deliveryNote.deliveryDate));
 
       // Keterangan
       sheet.getRangeByName('A12').setText('Catatan:');
@@ -415,9 +423,13 @@ class DeliveryNoteController extends GetxController {
       int rowIndex = 15;
       for (var item in items) {
         sheet.getRangeByName('A$rowIndex').setText(item['name']);
-        sheet.getRangeByName('B$rowIndex').setNumber(item['quantity'].abs().toDouble());
+        sheet
+            .getRangeByName('B$rowIndex')
+            .setNumber(item['quantity'].abs().toDouble());
         sheet.getRangeByName('C$rowIndex').setText('✓'); // Auto checklist
-        sheet.getRangeByName('D$rowIndex').setText(item['reason'] ?? ''); // Reason column
+        sheet
+            .getRangeByName('D$rowIndex')
+            .setText(item['reason'] ?? ''); // Reason column
         rowIndex++;
       }
 
@@ -479,7 +491,9 @@ class DeliveryNoteController extends GetxController {
                       children: [
                         pdf_lib.Text(
                           'HEADQUARTER',
-                          style: pdf_lib.TextStyle(fontWeight: pdf_lib.FontWeight.bold),
+                          style: pdf_lib.TextStyle(
+                            fontWeight: pdf_lib.FontWeight.bold,
+                          ),
                         ),
                         pdf_lib.Text('MALANG'),
                       ],
@@ -570,6 +584,26 @@ class DeliveryNoteController extends GetxController {
     }
   }
 
+  // Helper function to wrap text for thermal printer
+  List<String> _wrapText(String text, int maxCharsPerLine) {
+    List<String> lines = [];
+    String currentLine = '';
+    List<String> words = text.split(' ');
+
+    for (String word in words) {
+      if ((currentLine + word).length <= maxCharsPerLine) {
+        currentLine += (currentLine.isEmpty ? '' : ' ') + word;
+      } else {
+        lines.add(currentLine);
+        currentLine = word;
+      }
+    }
+    if (currentLine.isNotEmpty) {
+      lines.add(currentLine);
+    }
+    return lines;
+  }
+
   Future<void> printDeliveryNote({
     required DeliveryNote deliveryNote,
     required String toBranchName,
@@ -627,9 +661,8 @@ class DeliveryNoteController extends GetxController {
       await bluetooth.printImageBytes(logoUint8List);
 
       bluetooth.printNewLine();
-      bluetooth.printCustom('Umayumcha Head Quarter Malang', 1, 1);
-      bluetooth.printCustom('Jalan Dirgantara 4 no A5/11', 0, 1);
-      bluetooth.printCustom('Sawojajar Malang', 0, 1);
+      bluetooth.printCustom('HEADQUARTER', 1, 1);
+      bluetooth.printCustom('MALANG', 0, 1);
       bluetooth.printNewLine();
 
       bluetooth.printLeftRight(
@@ -648,12 +681,18 @@ class DeliveryNoteController extends GetxController {
       if (deliveryNote.keterangan != null &&
           deliveryNote.keterangan!.isNotEmpty) {
         bluetooth.printCustom('Catatan:', 0, 0);
-        bluetooth.printCustom(deliveryNote.keterangan!, 0, 0);
-        bluetooth.printNewLine();
+        List<String> wrappedKeterangan = _wrapText(
+          deliveryNote.keterangan!,
+          32,
+        ); // 32 chars per line for 54mm printer
+        for (String line in wrappedKeterangan) {
+          bluetooth.printCustom(line, 0, 0);
+        }
+        bluetooth.printNewLine(); // Add newline after notes
       }
 
       bluetooth.printCustom('--------------------------------', 0, 1);
-      bluetooth.printCustom('Nama Barang      Qty', 0, 0);
+      bluetooth.printCustom('Nama Barang  Qty  Keterangan', 0, 0);
       bluetooth.printCustom('--------------------------------', 0, 1);
 
       for (var item in items) {
@@ -661,18 +700,29 @@ class DeliveryNoteController extends GetxController {
         int quantity = item['quantity'].abs();
         String description = item['description'] ?? '';
 
-        bluetooth.printLeftRight(itemName, 'x$quantity', 0);
-        if (description.isNotEmpty) {
-          bluetooth.printCustom('  Keterangan: $description', 0, 0);
-        }
+        bluetooth.printCustom(' $itemName  $quantity  $description', 0, 0);
+        // bluetooth.printLeftRight(itemName, 'x$quantity', 0);
+        // if (description.isNotEmpty) {
+        //   bluetooth.printCustom('  Keterangan: $description', 0, 0);
+        // }
       }
       bluetooth.printCustom('--------------------------------', 0, 1);
       bluetooth.printNewLine();
 
-      bluetooth.printLeftRight('Pengirim', 'Penerima', 0);
+      bluetooth.printCustom('Pengirim', 0, 1);
       bluetooth.printNewLine();
       bluetooth.printNewLine();
-      bluetooth.printLeftRight('(____________)', '(____________)', 0);
+      bluetooth.printCustom('(____________)', 0, 1);
+      bluetooth.printNewLine();
+      bluetooth.printCustom('Mengetahui', 0, 1);
+      bluetooth.printNewLine();
+      bluetooth.printNewLine();
+      bluetooth.printCustom('(____________)', 0, 1);
+      bluetooth.printNewLine();
+      bluetooth.printCustom('Penerima', 0, 1);
+      bluetooth.printNewLine();
+      bluetooth.printNewLine();
+      bluetooth.printCustom('(____________)', 0, 1);
       bluetooth.printNewLine();
       bluetooth.printNewLine();
       bluetooth.printNewLine();
