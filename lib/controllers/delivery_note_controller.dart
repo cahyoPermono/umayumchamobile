@@ -5,7 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha_ims/controllers/consumable_controller.dart';
 import 'package:umayumcha_ims/controllers/inventory_controller.dart';
 import 'package:umayumcha_ims/models/delivery_note_model.dart';
-import 'package:excel/excel.dart';
+import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio;
 import 'package:pdf/pdf.dart' as pdf_colors; // New alias for PdfColors
 import 'package:pdf/widgets.dart' as pdf_lib; // Changed alias to pdf_lib
 
@@ -356,90 +356,94 @@ class DeliveryNoteController extends GetxController {
     required List<Map<String, dynamic>> items,
   }) async {
     try {
-      final excel = Excel.createExcel();
-      final sheet = excel['Delivery Note'];
+      // Create a new Excel document
+      final xlsio.Workbook workbook = xlsio.Workbook();
+      // Accessing worksheet via index
+      final xlsio.Worksheet sheet = workbook.worksheets[0];
+      sheet.name = 'Delivery Note';
+
+      // Load logo
+      final ByteData logoBytes = await rootBundle.load(
+        'assets/images/logo2.png',
+      );
+      final Uint8List logoUint8List = logoBytes.buffer.asUint8List();
+
+      // Add the image to the worksheet at a specific cell (e.g., A1)
+      final xlsio.Picture picture = sheet.pictures.addStream(1, 1, logoUint8List); // Row 1, Column 1 (A1)
+      picture.width = 150; // Set width of the image
+      picture.height = 50; // Set height of the image
 
       // Header
-      sheet.merge(CellIndex.indexByString('A5'), CellIndex.indexByString('F5'));
-      sheet.cell(CellIndex.indexByString('A5')).value =
-          'Umayumcha Head Quarter Malang';
-      sheet.cell(CellIndex.indexByString('A5')).cellStyle = CellStyle(
-        horizontalAlign: HorizontalAlign.Left,
-        bold: true,
-      );
+      sheet.getRangeByName('A5').setText('Umayumcha Head Quarter Malang');
+      sheet.getRangeByName('A5').cellStyle.hAlign = xlsio.HAlignType.left;
+      sheet.getRangeByName('A5').cellStyle.bold = true;
 
-      sheet.merge(CellIndex.indexByString('A6'), CellIndex.indexByString('F6'));
-      sheet.cell(CellIndex.indexByString('A6')).value =
-          'Jalan Dirgantara 4 no A5/11';
-      sheet.cell(CellIndex.indexByString('A6')).cellStyle = CellStyle(
-        horizontalAlign: HorizontalAlign.Left,
-      );
+      sheet.getRangeByName('A6').setText('Jalan Dirgantara 4 no A5/11');
+      sheet.getRangeByName('A6').cellStyle.hAlign = xlsio.HAlignType.left;
 
-      sheet.merge(CellIndex.indexByString('A7'), CellIndex.indexByString('F7'));
-      sheet.cell(CellIndex.indexByString('A7')).value = 'Sawojajar Malang';
-      sheet.cell(CellIndex.indexByString('A7')).cellStyle = CellStyle(
-        horizontalAlign: HorizontalAlign.Left,
-      );
+      sheet.getRangeByName('A7').setText('Sawojajar Malang');
+      sheet.getRangeByName('A7').cellStyle.hAlign = xlsio.HAlignType.left;
 
-      sheet.cell(CellIndex.indexByString('A9')).value = 'No. Surat Jalan:';
-      sheet.cell(CellIndex.indexByString('B9')).value =
-          deliveryNote.dnNumber ?? deliveryNote.id.toString();
+      sheet.getRangeByName('A9').setText('No. Surat Jalan:');
+      sheet.getRangeByName('B9').setText(deliveryNote.dnNumber ?? deliveryNote.id.toString());
 
-      sheet.cell(CellIndex.indexByString('A10')).value = 'Penerima:';
-      sheet.cell(CellIndex.indexByString('B10')).value = 'Cabang $toBranchName';
+      sheet.getRangeByName('A10').setText('Penerima:');
+      sheet.getRangeByName('B10').setText('Cabang $toBranchName');
 
-      sheet.cell(CellIndex.indexByString('A11')).value = 'Tanggal:';
-      sheet.cell(CellIndex.indexByString('B11')).value = DateFormat(
-        'dd-MM-yyyy',
-      ).format(deliveryNote.deliveryDate);
+      sheet.getRangeByName('A11').setText('Tanggal:');
+      sheet.getRangeByName('B11').setText(DateFormat('dd-MM-yyyy').format(deliveryNote.deliveryDate));
 
       // Keterangan
-      sheet.cell(CellIndex.indexByString('A12')).value = 'Catatan:';
-      sheet.cell(CellIndex.indexByString('B12')).value =
-          deliveryNote.keterangan ?? '';
+      sheet.getRangeByName('A12').setText('Catatan:');
+      sheet.getRangeByName('B12').setText(deliveryNote.keterangan ?? '');
 
       // Items Table Header
-      sheet.cell(CellIndex.indexByString('A14')).value = 'Nama Barang';
-      sheet.cell(CellIndex.indexByString('B14')).value = 'Quantity';
-      sheet.cell(CellIndex.indexByString('C14')).value = 'Check';
-      sheet.cell(CellIndex.indexByString('D14')).value = 'Keterangan';
+      sheet.getRangeByName('A14').setText('Nama Barang');
+      sheet.getRangeByName('B14').setText('Quantity');
+      sheet.getRangeByName('C14').setText('Check');
+      sheet.getRangeByName('D14').setText('Keterangan');
 
       // Apply bold style to table headers
-      final headerStyle = CellStyle(
-        bold: true,
-        horizontalAlign: HorizontalAlign.Center,
-        verticalAlign: VerticalAlign.Center,
-      );
-      sheet.cell(CellIndex.indexByString('A14')).cellStyle = headerStyle;
-      sheet.cell(CellIndex.indexByString('B14')).cellStyle = headerStyle;
-      sheet.cell(CellIndex.indexByString('C14')).cellStyle = headerStyle;
-      sheet.cell(CellIndex.indexByString('D14')).cellStyle = headerStyle;
+      final xlsio.Style headerStyle = workbook.styles.add('headerStyle');
+      headerStyle.bold = true;
+      headerStyle.hAlign = xlsio.HAlignType.center;
+      headerStyle.vAlign = xlsio.VAlignType.center;
+
+      sheet.getRangeByName('A14').cellStyle = headerStyle;
+      sheet.getRangeByName('B14').cellStyle = headerStyle;
+      sheet.getRangeByName('C14').cellStyle = headerStyle;
+      sheet.getRangeByName('D14').cellStyle = headerStyle;
 
       // Items Table Data
       int rowIndex = 15;
       for (var item in items) {
-        sheet.cell(CellIndex.indexByString('A$rowIndex')).value = item['name'];
-        sheet.cell(CellIndex.indexByString('B$rowIndex')).value =
-            item['quantity'].abs();
-        sheet.cell(CellIndex.indexByString('C$rowIndex')).value =
-            '✓'; // Auto checklist
-        sheet.cell(CellIndex.indexByString('D$rowIndex')).value =
-            item['reason'] ?? ''; // Reason column
+        sheet.getRangeByName('A$rowIndex').setText(item['name']);
+        sheet.getRangeByName('B$rowIndex').setNumber(item['quantity'].abs().toDouble());
+        sheet.getRangeByName('C$rowIndex').setText('✓'); // Auto checklist
+        sheet.getRangeByName('D$rowIndex').setText(item['reason'] ?? ''); // Reason column
         rowIndex++;
       }
 
       // Signatures
       rowIndex += 3; // Add some space
-      sheet.cell(CellIndex.indexByString('A$rowIndex')).value = 'Pengirim';
-      sheet.cell(CellIndex.indexByString('D$rowIndex')).value = 'Penerima';
+      sheet.getRangeByName('A$rowIndex').setText('Pengirim');
+      sheet.getRangeByName('D$rowIndex').setText('Penerima');
 
       rowIndex += 4; // Space for signature
-      sheet.cell(CellIndex.indexByString('A$rowIndex')).value =
-          '(____________)';
-      sheet.cell(CellIndex.indexByString('D$rowIndex')).value =
-          '(____________)';
+      sheet.getRangeByName('A$rowIndex').setText('(____________)');
+      sheet.getRangeByName('D$rowIndex').setText('(____________)');
 
-      return excel.save(); // Return bytes
+      // Auto-fit columns for better visibility
+      sheet.autoFitColumn(1);
+      sheet.autoFitColumn(2);
+      sheet.autoFitColumn(3);
+      sheet.autoFitColumn(4);
+
+      // Save the document
+      final List<int> bytes = workbook.saveAsStream();
+      workbook.dispose();
+
+      return bytes; // Return bytes
     } catch (e) {
       debugPrint('Error generating Excel: ${e.toString()}');
       Get.snackbar('Error', 'Failed to generate Excel: ${e.toString()}');
@@ -603,6 +607,12 @@ class DeliveryNoteController extends GetxController {
       }
 
       // 3. Format and print data
+      final ByteData logoBytes = await rootBundle.load(
+        'assets/images/logo2.png',
+      );
+      final Uint8List logoUint8List = logoBytes.buffer.asUint8List();
+      await bluetooth.printImageBytes(logoUint8List);
+
       bluetooth.printNewLine();
       bluetooth.printCustom('Umayumcha Head Quarter Malang', 1, 1);
       bluetooth.printCustom('Jalan Dirgantara 4 no A5/11', 0, 1);
