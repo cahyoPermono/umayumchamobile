@@ -12,7 +12,7 @@ import 'package:pdf/widgets.dart' as pdf_lib; // Changed alias to pdf_lib
 import 'package:intl/intl.dart';
 import 'package:blue_thermal_printer/blue_thermal_printer.dart'
     as blue_printer; // Alias to avoid conflict
-import 'package:permission_handler/permission_handler.dart';
+import 'package:image/image.dart' as img;
 
 class DeliveryNoteController extends GetxController {
   final SupabaseClient supabase = Supabase.instance.client;
