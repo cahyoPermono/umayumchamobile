@@ -212,6 +212,60 @@ class _IncomingDeliveryNoteFormScreenState
     }
   }
 
+  void _editItemInNote(int index, Map<String, dynamic> item) {
+    final TextEditingController quantityController = TextEditingController(
+      text: item['quantity'].toString(),
+    );
+    final TextEditingController descriptionController = TextEditingController(
+      text: item['description'],
+    );
+
+    Get.dialog(
+      AlertDialog(
+        title: Text('Edit Item: ${item['name']}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: quantityController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Quantity'),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(
+                labelText: 'Keterangan (Optional)',
+              ),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () {
+              final int? quantity = int.tryParse(quantityController.text);
+              if (quantity != null && quantity > 0) {
+                selectedProducts[index] = {
+                  'id': item['id'],
+                  'name': item['name'],
+                  'quantity': quantity,
+                  'type': item['type'],
+                  'description': descriptionController.text,
+                };
+                Get.back();
+              } else {
+                Get.snackbar('Error', 'Please enter a valid quantity.');
+              }
+            },
+            child: const Text('Update'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -407,31 +461,46 @@ class _IncomingDeliveryNoteFormScreenState
                               'Type: ${(item['type'] as String).capitalizeFirst} | Quantity: x${item['quantity']}',
                               style: TextStyle(color: Colors.grey[600]),
                             ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                Get.dialog(
-                                  AlertDialog(
-                                    title: const Text('Remove Item?'),
-                                    content: Text(
-                                      'Do you want to remove ${item['name']}?',
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Get.back(),
-                                        child: const Text('Cancel'),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          selectedProducts.removeAt(index);
-                                          Get.back();
-                                        },
-                                        child: const Text('Remove'),
-                                      ),
-                                    ],
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    color: Colors.grey,
                                   ),
-                                );
-                              },
+                                  onPressed: () => _editItemInNote(index, item),
+                                ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () {
+                                    Get.dialog(
+                                      AlertDialog(
+                                        title: const Text('Remove Item?'),
+                                        content: Text(
+                                          'Do you want to remove ${item['name']}?',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Get.back(),
+                                            child: const Text('Cancel'),
+                                          ),
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              selectedProducts.removeAt(index);
+                                              Get.back();
+                                            },
+                                            child: const Text('Remove'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                           ),
                           if (item['description'] != null &&
