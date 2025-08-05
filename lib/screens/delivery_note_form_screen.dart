@@ -263,6 +263,94 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
     }
   }
 
+  void _editProductInNote(int index) async {
+    final item = selectedProducts[index];
+    final TextEditingController quantityController = TextEditingController(
+      text: item['quantity'].abs().toString(),
+    );
+    final TextEditingController descriptionController = TextEditingController(
+      text: item['description'] ?? '',
+    );
+
+    // Fetch the latest stock quantity
+    int currentStock = 0;
+    if (item['type'] == 'product') {
+      final List<BranchProduct> availableProducts = await inventoryController
+          .fetchBranchProductsById(umayumchaHQBranch.value!.id!);
+      final product = availableProducts.firstWhereOrNull(
+        (p) => p.productId == item['id'],
+      );
+      if (product != null) {
+        currentStock = product.quantity;
+      }
+    } else if (item['type'] == 'consumable') {
+      final consumable = consumableController.consumables.firstWhereOrNull(
+        (c) => c.id.toString() == item['id'],
+      );
+      if (consumable != null) {
+        currentStock = consumable.quantity;
+      }
+    }
+
+    Get.dialog(
+      AlertDialog(
+        title: Text('Edit Item: ${item['name']}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: quantityController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Quantity (Max: $currentStock)',
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(
+                labelText: 'Keterangan (Optional)',
+              ),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final int? quantity = int.tryParse(quantityController.text);
+              if (quantity != null &&
+                  quantity > 0 &&
+                  quantity <= currentStock) {
+                final updatedItem = {
+                  'id': item['id'],
+                  'name': item['name'],
+                  'quantity': quantity,
+                  'type': item['type'],
+                  'description': descriptionController.text,
+                };
+                selectedProducts[index] = updatedItem;
+                Get.back();
+              } else {
+                Get.snackbar(
+                  'Error',
+                  'Please enter a valid quantity within available stock.',
+                );
+              }
+            },
+            child: const Text('Update'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -541,31 +629,48 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                             'Type: ${(item['type'] as String).capitalizeFirst} | Quantity: x${item['quantity']}',
                             style: TextStyle(color: Colors.grey[600]),
                           ),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {
-                              Get.dialog(
-                                AlertDialog(
-                                  title: const Text('Remove Item?'),
-                                  content: Text(
-                                    'Do you want to remove ${item['name']}?',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Get.back(),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        selectedProducts.removeAt(index);
-                                        Get.back();
-                                      },
-                                      child: const Text('Remove'),
-                                    ),
-                                  ],
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.edit,
+                                  color: Colors.grey,
                                 ),
-                              );
-                            },
+                                onPressed: () {
+                                  _editProductInNote(index);
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                ),
+                                onPressed: () {
+                                  Get.dialog(
+                                    AlertDialog(
+                                      title: const Text('Remove Item?'),
+                                      content: Text(
+                                        'Do you want to remove ${item['name']}?',
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Get.back(),
+                                          child: const Text('Cancel'),
+                                        ),
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            selectedProducts.removeAt(index);
+                                            Get.back();
+                                          },
+                                          child: const Text('Remove'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
                           ),
                         ),
                         if (item['description'] != null &&

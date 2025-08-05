@@ -174,13 +174,14 @@ class DeliveryNoteController extends GetxController {
             item['id']; // Use dynamic to handle both int and String
         final String itemName = item['name'];
         final int quantity = item['quantity'];
+        final String reason = item['description'] ?? ''; // Get description
 
         if (itemType == 'product') {
           await inventoryController.addTransaction(
             productId: itemId as String, // Cast to String for products
             type: 'out',
             quantityChange: quantity,
-            // reason: 'Delivery Note: $customerName - ${item['description']}',
+            reason: reason, // Pass the description as the reason
             deliveryNoteId: deliveryNoteId,
             fromBranchId: fromBranchId,
             toBranchId: toBranchId,
@@ -193,7 +194,7 @@ class DeliveryNoteController extends GetxController {
             consumableId: int.parse(itemId), // Cast to int for consumables
             consumableName: itemName,
             quantityChange: quantity,
-            reason: '',
+            reason: reason, // Pass the description as the reason
             deliveryNoteId: deliveryNoteId,
             fromBranchId: fromBranchId,
             toBranchId: toBranchId,
@@ -259,8 +260,8 @@ class DeliveryNoteController extends GetxController {
         );
       }
       // await supabase
-      //     .from('consumable_transactions')
       //     .delete()
+      //     .eq('consumable_transactions')
       //     .eq('delivery_note_id', deliveryNoteId);
 
       debugPrint('Original transactions reversed and deleted.');
@@ -302,14 +303,15 @@ class DeliveryNoteController extends GetxController {
             item['id']; // Use dynamic to handle both int and String
         final String itemName = item['name'];
         final int quantity = item['quantity'].abs();
+        final String reason = item['description'] ?? ''; // Get description
 
         if (itemType == 'product') {
           await inventoryController.addTransaction(
             productId: itemId as String, // Cast to String for products
             type: 'out',
             quantityChange: quantity,
-            // reason:
-            //     'Delivery Note: ${customerName ?? 'Internal Transfer'} - ${item['description']}',
+            reason:
+                reason, // Pass the description as the reason
             deliveryNoteId: deliveryNoteId,
             fromBranchId: fromBranchId,
             toBranchId: toBranchId,
@@ -322,7 +324,7 @@ class DeliveryNoteController extends GetxController {
             consumableId: int.parse(itemId), // Cast to int for consumables
             consumableName: itemName,
             quantityChange: quantity,
-            reason: '',
+            reason: reason, // Pass the description as the reason
             deliveryNoteId: deliveryNoteId,
             fromBranchId: fromBranchId,
             toBranchId: toBranchId,
