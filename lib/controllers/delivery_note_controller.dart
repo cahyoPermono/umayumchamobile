@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart'; // For debugPrint
 import 'package:flutter/services.dart'; // For rootBundle
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha_ims/controllers/consumable_controller.dart';
 import 'package:umayumcha_ims/controllers/inventory_controller.dart';
@@ -681,10 +682,31 @@ class DeliveryNoteController extends GetxController {
 
       // 3. Format and print data
       final ByteData logoBytes = await rootBundle.load(
-        'assets/images/logoprint.png',
+        'assets/images/logoprintblack.png', // Corrected path
       );
       final Uint8List logoUint8List = logoBytes.buffer.asUint8List();
-      await bluetooth.printImageBytes(logoUint8List);
+
+      // --- Resize the image ---
+      final img.Image? originalImage = img.decodeImage(logoUint8List);
+      if (originalImage == null) {
+        Get.snackbar('Error', 'Failed to decode logo image.');
+        return;
+      }
+      final img.Image resizedImage = img.copyResize(
+        originalImage,
+        width: 360, // A reasonable width for a 58mm thermal printer
+      );
+      final Uint8List resizedLogoBytes = Uint8List.fromList(
+        img.encodePng(resizedImage),
+      );
+      // --- End of resize ---
+
+      await bluetooth.printImageBytes(
+        resizedLogoBytes,
+      ); // Print the resized image
+
+      // Add a small delay to allow the printer to process the image
+      await Future.delayed(const Duration(milliseconds: 500));
 
       bluetooth.printNewLine();
       bluetooth.printCustom('HEADQUARTER', 1, 1);
