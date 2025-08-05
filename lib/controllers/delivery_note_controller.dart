@@ -368,15 +368,27 @@ class DeliveryNoteController extends GetxController {
         'assets/images/logoprint.png',
       );
       final Uint8List logoUint8List = logoBytes.buffer.asUint8List();
+      final img.Image? logoImage = img.decodeImage(logoUint8List);
 
-      // Add the image to the worksheet at a specific cell (e.g., A1)
+      if (logoImage == null) {
+        Get.snackbar('Error', 'Failed to decode logo for Excel export.');
+        return null;
+      }
+
+      // Calculate aspect ratio
+      final double aspectRatio = logoImage.width / logoImage.height;
+
+      // Add the image to the worksheet
       final xlsio.Picture picture = sheet.pictures.addStream(
-        1,
-        1,
+        1, // Row 1
+        1, // Column 1 (A1)
         logoUint8List,
-      ); // Row 1, Column 1 (A1)
-      picture.width = 150; // Set width of the image
-      picture.height = 50; // Set height of the image
+      );
+
+      // Set width and calculate height to maintain aspect ratio
+      picture.width = 150;
+      // picture.height = (150 / aspectRatio).round();
+      picture.height = 150;
 
       // Header - Address to the right of the logo
       sheet.getRangeByName('C2').setText('HEADQUARTER');
@@ -442,7 +454,8 @@ class DeliveryNoteController extends GetxController {
 
       rowIndex += 4; // Space for signature
       sheet.getRangeByName('A$rowIndex').setText('(____________)');
-      sheet.getRangeByName('D$rowIndex').setText('(____________)');
+      sheet.getRangeByName('C$rowIndex').setText('(____________)');
+      sheet.getRangeByName('E$rowIndex').setText('(____________)');
 
       // Auto-fit columns for better visibility
       sheet.autoFitColumn(1);
