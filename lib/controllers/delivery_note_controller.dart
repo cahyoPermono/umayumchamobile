@@ -375,9 +375,6 @@ class DeliveryNoteController extends GetxController {
         return null;
       }
 
-      // Calculate aspect ratio
-      final double aspectRatio = logoImage.width / logoImage.height;
-
       // Add the image to the worksheet
       final xlsio.Picture picture = sheet.pictures.addStream(
         1, // Row 1
@@ -497,9 +494,10 @@ class DeliveryNoteController extends GetxController {
               crossAxisAlignment: pdf_lib.CrossAxisAlignment.start,
               children: [
                 pdf_lib.Row(
-                  mainAxisAlignment: pdf_lib.MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: pdf_lib.MainAxisAlignment.start,
                   children: [
                     pdf_lib.Image(logoImage, width: 150, height: 50),
+                    pdf_lib.SizedBox(width: 20),
                     pdf_lib.Column(
                       crossAxisAlignment: pdf_lib.CrossAxisAlignment.start,
                       children: [
