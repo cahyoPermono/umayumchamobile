@@ -310,8 +310,7 @@ class DeliveryNoteController extends GetxController {
             productId: itemId as String, // Cast to String for products
             type: 'out',
             quantityChange: quantity,
-            reason:
-                reason, // Pass the description as the reason
+            reason: reason, // Pass the description as the reason
             deliveryNoteId: deliveryNoteId,
             fromBranchId: fromBranchId,
             toBranchId: toBranchId,
@@ -385,7 +384,7 @@ class DeliveryNoteController extends GetxController {
       );
 
       // Set width and calculate height to maintain aspect ratio
-      picture.width = 150;
+      picture.width = 200;
       // picture.height = (150 / aspectRatio).round();
       picture.height = 150;
 
@@ -403,7 +402,7 @@ class DeliveryNoteController extends GetxController {
           .setText(deliveryNote.dnNumber ?? deliveryNote.id.toString());
 
       sheet.getRangeByName('A10').setText('Penerima:');
-      sheet.getRangeByName('B10').setText('Cabang $toBranchName');
+      sheet.getRangeByName('B10').setText('Umayumcha $toBranchName');
 
       sheet.getRangeByName('A11').setText('Tanggal:');
       sheet
