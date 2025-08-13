@@ -49,7 +49,7 @@ class IncomingDeliveryNoteController extends GetxController {
       var query = supabase
           .from('incoming_delivery_notes')
           .select(
-            '*, inventory_transactions(product_id, product_name, quantity_change, reason), consumable_transactions(consumable_id, consumable_name, quantity_change, reason)',
+            '*, inventory_transactions(*, product:products(price)), consumable_transactions(*, consumable:consumables(price))',
           );
 
       if (selectedVendorName.value != null) {

@@ -4,7 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:umayumcha_ims/controllers/consumable_controller.dart';
 import 'package:umayumcha_ims/controllers/delivery_note_controller.dart';
 import 'package:umayumcha_ims/controllers/inventory_controller.dart';
-import 'package:umayumcha_ims/screens/delivery_note_form_screen.dart';
+// Import the new dialog
+import 'package:umayumcha_ims/screens/delivery_note_form_screen.dart'; // ADDED
 
 class DeliveryNoteListScreen extends StatelessWidget {
   const DeliveryNoteListScreen({super.key});
@@ -248,6 +249,16 @@ class DeliveryNoteListScreen extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.grey[600],
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Total Price: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(note.totalPrice)}',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
                         ],

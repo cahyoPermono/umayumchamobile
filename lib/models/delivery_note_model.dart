@@ -15,6 +15,7 @@ class DeliveryNote {
   productItems; // For displaying product items in the note
   final List<Map<String, dynamic>>?
   consumableItems; // For displaying consumable items in the note
+  double totalPrice = 0.0; // ADDED for calculated total price
 
   DeliveryNote({
     required this.id,
@@ -31,9 +32,54 @@ class DeliveryNote {
     this.keterangan, // New field
     this.productItems,
     this.consumableItems,
+    this.totalPrice = 0.0, // Initialize totalPrice in constructor
   });
 
   factory DeliveryNote.fromJson(Map<String, dynamic> json) {
+    double calculatedTotalPrice = 0.0;
+
+    final List<Map<String, dynamic>>? productItems = (json['inventory_transactions'] as List?)
+        ?.map(
+          (e) => {
+            'product_id': e['product_id'],
+            'quantity_change': e['quantity_change'],
+            'product_name': e['product_name'],
+            'reason': e['reason'],
+            'type': 'product',
+            'price': (e['product']?['price'] as num?)?.toDouble(), // Get price from nested product
+          },
+        )
+        .toList();
+
+    if (productItems != null) {
+      for (var item in productItems) {
+        final double price = item['price'] ?? 0.0;
+        final int quantity = (item['quantity_change'] as int).abs();
+        calculatedTotalPrice += price * quantity;
+      }
+    }
+
+    final List<Map<String, dynamic>>? consumableItems = (json['consumable_transactions'] as List?)
+        ?.map(
+          (e) => {
+            'consumable_id': e['consumable_id'],
+            'quantity_change': e['quantity_change'],
+            'consumable_name': e['consumable_name'],
+            'reason': e['reason'],
+            'type': 'consumable',
+            'price': (e['consumable']?['price'] as num?)?.toDouble(), // Get price from nested consumable
+          },
+        )
+        .toList();
+
+    if (consumableItems != null) {
+      for (var item in consumableItems) {
+        final double price = item['price'] ?? 0.0;
+        final int quantity = (item['quantity_change'] as int).abs();
+        calculatedTotalPrice += price * quantity;
+      }
+    }
+
     return DeliveryNote(
       id: json['id'] as String,
       dnNumber: json['dn_number'] as String?,
@@ -45,34 +91,13 @@ class DeliveryNote {
       fromBranchId: json['from_branch_id'] as String?,
       toBranchId: json['to_branch_id'] as String?,
       fromBranchName:
-          json['from_branch_name'] as String?, // Read directly from top-level
+          json['from_branch_name'] as String?,
       toBranchName:
-          json['to_branch_name'] as String?, // Read directly from top-level
-      keterangan: json['keterangan'] as String?, // New field
-      productItems:
-          (json['inventory_transactions'] as List?)
-              ?.map(
-                (e) => {
-                  'product_id': e['product_id'],
-                  'quantity_change': e['quantity_change'],
-                  'product_name': e['product_name'], // Directly from transaction
-                  'reason': e['reason'], // New: Add reason
-                  'type': 'product',
-                },
-              )
-              .toList(),
-      consumableItems:
-          (json['consumable_transactions'] as List?)
-              ?.map(
-                (e) => {
-                  'consumable_id': e['consumable_id'],
-                  'quantity_change': e['quantity_change'],
-                  'consumable_name': e['consumable_name'],
-                  'reason': e['reason'], // New: Add reason
-                  'type': 'consumable',
-                },
-              )
-              .toList(),
+          json['to_branch_name'] as String?,
+      keterangan: json['keterangan'] as String?,
+      productItems: productItems,
+      consumableItems: consumableItems,
+      totalPrice: calculatedTotalPrice, // Assign calculated total price
     );
   }
 

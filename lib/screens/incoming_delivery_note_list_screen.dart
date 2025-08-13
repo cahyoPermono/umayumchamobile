@@ -229,6 +229,16 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
                               color: Colors.grey[600],
                             ),
                           ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Total Price: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(note.totalPrice)}',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
                         ],
                       ),
                       trailing: Row(

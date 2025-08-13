@@ -61,7 +61,7 @@ class DeliveryNoteController extends GetxController {
       var query = supabase
           .from('delivery_notes')
           .select(
-            '*, inventory_transactions(product_id, product_name, quantity_change, reason), consumable_transactions(consumable_id, consumable_name, quantity_change, reason), keterangan',
+            '*, inventory_transactions(*, product:products(price)), consumable_transactions(*, consumable:consumables(price)), keterangan',
           );
 
       // Apply filters
