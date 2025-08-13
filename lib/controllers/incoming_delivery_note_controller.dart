@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:umayumcha_ims/controllers/auth_controller.dart';
 import 'package:umayumcha_ims/models/incoming_delivery_note_model.dart';
 import 'package:umayumcha_ims/controllers/inventory_controller.dart';
 import 'package:umayumcha_ims/controllers/consumable_controller.dart';
@@ -9,6 +10,7 @@ class IncomingDeliveryNoteController extends GetxController {
   final SupabaseClient supabase = Supabase.instance.client;
   final InventoryController inventoryController = Get.find();
   final ConsumableController consumableController = Get.find();
+  final AuthController authController = Get.find();
 
   var incomingDeliveryNotes = <IncomingDeliveryNote>[].obs;
   var isLoading = false.obs;
@@ -128,6 +130,10 @@ class IncomingDeliveryNoteController extends GetxController {
   }
 
   Future<void> deleteIncomingDeliveryNote(String incomingDeliveryNoteId) async {
+    if (authController.userRole.value == 'finance') {
+      Get.snackbar('Permission Denied', 'Finance role cannot delete incoming delivery notes.');
+      return;
+    }
     try {
       isLoading(true);
       await supabase.rpc(
@@ -155,6 +161,10 @@ class IncomingDeliveryNoteController extends GetxController {
     required List<Map<String, dynamic>> originalItems,
     String? keterangan,
   }) async {
+    if (authController.userRole.value == 'finance') {
+      Get.snackbar('Permission Denied', 'Finance role cannot update incoming delivery notes.');
+      return;
+    }
     try {
       isLoading.value = true;
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:umayumcha_ims/controllers/auth_controller.dart';
 import 'package:umayumcha_ims/controllers/incoming_delivery_note_controller.dart';
 import 'package:umayumcha_ims/controllers/inventory_controller.dart';
 import 'package:umayumcha_ims/controllers/branch_controller.dart';
@@ -30,6 +31,7 @@ class _IncomingDeliveryNoteFormScreenState
   final InventoryController inventoryController = Get.find();
   final BranchController branchController = Get.find();
   final ConsumableController consumableController = Get.find();
+  final AuthController authController = Get.find();
 
   final TextEditingController _fromVendorNameController =
       TextEditingController();
@@ -283,13 +285,16 @@ class _IncomingDeliveryNoteFormScreenState
         iconTheme: const IconThemeData(color: Colors.white),
         elevation: 4,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      body: Obx(
+        () => AbsorbPointer(
+          absorbing: authController.userRole.value == 'finance',
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
               Autocomplete<String>(
                 optionsBuilder: (TextEditingValue textEditingController) {
                   if (textEditingController.text == '') {
@@ -461,46 +466,53 @@ class _IncomingDeliveryNoteFormScreenState
                               'Type: ${(item['type'] as String).capitalizeFirst} | Quantity: x${item['quantity']}',
                               style: TextStyle(color: Colors.grey[600]),
                             ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.edit,
-                                    color: Colors.grey,
-                                  ),
-                                  onPressed: () => _editItemInNote(index, item),
-                                ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
-                                  ),
-                                  onPressed: () {
-                                    Get.dialog(
-                                      AlertDialog(
-                                        title: const Text('Remove Item?'),
-                                        content: Text(
-                                          'Do you want to remove ${item['name']}?',
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () => Get.back(),
-                                            child: const Text('Cancel'),
+                            trailing: Obx(
+                              () => authController.userRole.value != 'finance'
+                                  ? SizedBox( // Add SizedBox here
+                                      width: 100.0, // Fixed width for the trailing row
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.edit,
+                                              color: Colors.grey,
+                                            ),
+                                            onPressed: () => _editItemInNote(index, item),
                                           ),
-                                          ElevatedButton(
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.delete,
+                                              color: Colors.red,
+                                            ),
                                             onPressed: () {
-                                              selectedProducts.removeAt(index);
-                                              Get.back();
+                                              Get.dialog(
+                                                AlertDialog(
+                                                  title: const Text('Remove Item?'),
+                                                  content: Text(
+                                                    'Do you want to remove ${item['name']}?',
+                                                  ),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () => Get.back(),
+                                                      child: const Text('Cancel'),
+                                                    ),
+                                                    ElevatedButton(
+                                                      onPressed: () {
+                                                        selectedProducts.removeAt(index);
+                                                        Get.back();
+                                                      },
+                                                      child: const Text('Remove'),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
                                             },
-                                            child: const Text('Remove'),
                                           ),
                                         ],
                                       ),
-                                    );
-                                  },
-                                ),
-                              ],
+                                    )
+                                  : const SizedBox.shrink(),
                             ),
                           ),
                           if (item['description'] != null &&
@@ -533,7 +545,7 @@ class _IncomingDeliveryNoteFormScreenState
               const SizedBox(height: 16),
               Center(
                 child: ElevatedButton.icon(
-                  onPressed: _addItemToNote,
+                  onPressed: authController.userRole.value != 'finance' ? _addItemToNote : null,
                   icon: const Icon(Icons.add),
                   label: const Text('Add Item to Incoming Delivery Note'),
                   style: ElevatedButton.styleFrom(
@@ -552,6 +564,9 @@ class _IncomingDeliveryNoteFormScreenState
 
               // Save Button
               Obx(() {
+                if (authController.userRole.value == 'finance') {
+                  return const SizedBox.shrink(); // Hide button for finance role
+                }
                 return incomingDeliveryNoteController.isLoading.value
                     ? const Center(child: CircularProgressIndicator())
                     : SizedBox(
@@ -644,6 +659,8 @@ class _IncomingDeliveryNoteFormScreenState
           ), // Closing parenthesis for Column
         ), // Closing parenthesis for Form
       ), // Closing parenthesis for SingleChildScrollView
+    ), // Closing AbsorbPointer
+  ), // Closing Obx
     ); // Closing parenthesis for Scaffold
   }
 }

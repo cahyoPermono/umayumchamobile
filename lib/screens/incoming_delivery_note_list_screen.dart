@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:umayumcha_ims/controllers/auth_controller.dart';
 import 'package:umayumcha_ims/controllers/incoming_delivery_note_controller.dart';
 import 'package:umayumcha_ims/controllers/inventory_controller.dart';
 import 'package:umayumcha_ims/controllers/consumable_controller.dart';
@@ -16,6 +17,7 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
     );
     final InventoryController inventoryController = Get.find();
     final ConsumableController consumableController = Get.find();
+    final AuthController authController = Get.find();
 
     return Scaffold(
       appBar: AppBar(
@@ -241,44 +243,62 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.grey),
-                            onPressed: () {
-                              Get.to(
-                                () => IncomingDeliveryNoteFormScreen(
-                                  incomingDeliveryNote: note,
-                                ),
-                              );
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {
-                              Get.defaultDialog(
-                                title: "Delete Incoming Delivery Note",
-                                middleText:
-                                    "Are you sure you want to delete this incoming delivery note? This action cannot be undone and will reverse product quantities.",
-                                textConfirm: "Delete",
-                                textCancel: "Cancel",
-                                confirmTextColor: Colors.white,
-                                buttonColor: Colors.red,
-                                onConfirm: () {
-                                  controller.deleteIncomingDeliveryNote(
-                                    note.id,
-                                  );
-                                  inventoryController
-                                      .fetchBranchProducts(); // Refresh relevant data
-                                  consumableController
-                                      .fetchConsumables(); // Refresh relevant data
-                                  Get.back();
-                                },
-                              );
-                            },
-                          ),
-                        ],
+                      trailing: Obx(
+                        () =>
+                            authController.userRole.value != 'finance'
+                                ? SizedBox(
+                                  width:
+                                      100.0, // Fixed width for the trailing row
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.edit,
+                                          color: Colors.grey,
+                                        ),
+                                        onPressed: () {
+                                          Get.to(
+                                            () =>
+                                                IncomingDeliveryNoteFormScreen(
+                                                  incomingDeliveryNote: note,
+                                                ),
+                                          );
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.delete,
+                                          color: Colors.red,
+                                        ),
+                                        onPressed: () {
+                                          Get.defaultDialog(
+                                            title:
+                                                "Delete Incoming Delivery Note",
+                                            middleText:
+                                                "Are you sure you want to delete this incoming delivery note? This action cannot be undone and will reverse product quantities.",
+                                            textConfirm: "Delete",
+                                            textCancel: "Cancel",
+                                            confirmTextColor: Colors.white,
+                                            buttonColor: Colors.red,
+                                            onConfirm: () {
+                                              controller
+                                                  .deleteIncomingDeliveryNote(
+                                                    note.id,
+                                                  );
+                                              inventoryController
+                                                  .fetchBranchProducts(); // Refresh relevant data
+                                              consumableController
+                                                  .fetchConsumables(); // Refresh relevant data
+                                              Get.back();
+                                            },
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                )
+                                : const SizedBox.shrink(),
                       ),
                       children: [
                         const Divider(height: 1, color: Colors.grey),
@@ -416,11 +436,16 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.to(() => const IncomingDeliveryNoteFormScreen());
-        },
-        child: const Icon(Icons.add),
+      floatingActionButton: Obx(
+        () =>
+            authController.userRole.value != 'finance'
+                ? FloatingActionButton(
+                  onPressed: () {
+                    Get.to(() => const IncomingDeliveryNoteFormScreen());
+                  },
+                  child: const Icon(Icons.add),
+                )
+                : const SizedBox.shrink(),
       ),
     );
   }
