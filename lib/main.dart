@@ -14,10 +14,21 @@ import 'package:umayumcha_ims/controllers/user_controller.dart';
 
 import 'package:umayumcha_ims/screens/auth_wrapper.dart';
 
+import 'package:umayumcha_ims/screens/create_new_password_screen.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
+
+  // Listen for auth state changes to handle deep links
+  Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+    final AuthChangeEvent event = data.event;
+    if (event == AuthChangeEvent.passwordRecovery) {
+      // Navigate to the password creation screen when the user clicks the deep link
+      Get.to(() => const CreateNewPasswordScreen());
+    }
+  });
 
   // Initialize AuthController, InventoryController, dan ConsumableController secara global
   Get.put(AuthController());

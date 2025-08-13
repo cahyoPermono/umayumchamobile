@@ -122,4 +122,42 @@ class AuthController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<void> updatePassword(String newPassword) async {
+    try {
+      isLoading.value = true;
+      await supabase.auth.updateUser(UserAttributes(password: newPassword));
+      Get.snackbar(
+        'Success',
+        'Password updated successfully.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } on AuthException catch (e) {
+      Get.snackbar('Error', e.message, snackPosition: SnackPosition.BOTTOM);
+    } catch (e) {
+      Get.snackbar('Error', 'An unexpected error occurred.',
+          snackPosition: SnackPosition.BOTTOM);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      isLoading.value = true;
+      await supabase.auth.resetPasswordForEmail(email);
+      Get.snackbar(
+        'Success',
+        'Password reset link sent to your email.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } on AuthException catch (e) {
+      Get.snackbar('Error', e.message, snackPosition: SnackPosition.BOTTOM);
+    } catch (e) {
+      Get.snackbar('Error', 'An unexpected error occurred.',
+          snackPosition: SnackPosition.BOTTOM);
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

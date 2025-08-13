@@ -30,6 +30,42 @@ class _SignInScreenState extends State<SignInScreen> {
     });
   }
 
+  void _showPasswordResetDialog(BuildContext context) {
+    final TextEditingController resetEmailController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Reset Password'),
+          content: TextField(
+            controller: resetEmailController,
+            decoration: const InputDecoration(
+              labelText: 'Enter your email',
+              prefixIcon: Icon(Icons.email),
+            ),
+            keyboardType: TextInputType.emailAddress,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (resetEmailController.text.isNotEmpty) {
+                  authController
+                      .sendPasswordResetEmail(resetEmailController.text.trim());
+                  Navigator.of(context).pop(); // Close the dialog
+                }
+              },
+              child: const Text('Send Reset Link'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -112,6 +148,13 @@ class _SignInScreenState extends State<SignInScreen> {
                               ),
                             );
                       }),
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: () {
+                          _showPasswordResetDialog(context);
+                        },
+                        child: const Text('Forgot Password?'),
+                      ),
                     ],
                   ),
                 ),
