@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:umayumcha_ims/controllers/auth_controller.dart';
-import 'package:umayumcha_ims/screens/dashboard_screen.dart';
+import 'package:umayumcha_ims/screens/sign_in_screen.dart';
 
 class CreateNewPasswordScreen extends StatefulWidget {
   const CreateNewPasswordScreen({super.key});
@@ -77,20 +77,31 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                   return authController.isLoading.value
                       ? const CircularProgressIndicator()
                       : SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              if (formKey.currentState!.validate()) {
-                                await authController.updatePassword(
-                                  newPasswordController.text,
-                                );
-                                // On success, navigate to dashboard
-                                Get.offAll(() => const DashboardScreen());
-                              }
-                            },
-                            child: const Text('Save New Password'),
-                          ),
-                        );
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            if (formKey.currentState!.validate()) {
+                              // Update the password first
+                              await authController.updatePassword(
+                                newPasswordController.text,
+                              );
+
+                              // Sign the user out to clear the session
+                              await authController.signOut();
+
+                              // Explicitly navigate to SignInScreen and clear navigation stack
+                              Get.offAll(() => const SignInScreen());
+
+                              Get.snackbar(
+                                'Success',
+                                'Password reset successfully. Please sign in again.',
+                                snackPosition: SnackPosition.BOTTOM,
+                              );
+                            }
+                          },
+                          child: const Text('Save New Password'),
+                        ),
+                      );
                 }),
               ],
             ),
