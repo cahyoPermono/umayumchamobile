@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter/foundation.dart'; // Untuk kIsWeb
 import 'package:android_path_provider/android_path_provider.dart'; // New import
 import 'package:get/get.dart'; // Import Get for Get.snackbar
+import 'package:open_filex/open_filex.dart'; // Import OpenFilex
 
 /// Meminta izin penyimpanan dan mengembalikan jalur direktori yang sesuai.
 /// Mengarahkan pengguna ke pengaturan aplikasi jika izin ditolak secara permanen.
@@ -69,44 +70,26 @@ Future<String?> getStorageDirectoryPath() async {
   return null; // Mengembalikan null jika izin tidak diberikan atau direktori tidak ditemukan
 }
 
-/// Fungsi untuk mengekspor data PDF dan Excel.
-/// Menerima bytes dari file PDF dan Excel, serta nama file yang diinginkan.
-Future<void> exportPdfAndExcel({
-  required List<int> pdfBytes,
-  required String pdfFileName,
-  required List<int> excelBytes,
-  required String excelFileName,
+/// Fungsi untuk menyimpan file ke direktori penyimpanan yang sesuai.
+/// Menerima bytes dari file dan nama file yang diinginkan.
+Future<void> saveFile({
+  required List<int> fileBytes,
+  required String fileName,
 }) async {
-  debugPrint('Attempting to export PDF and Excel...');
+  debugPrint('Attempting to save file: $fileName');
   final directoryPath = await getStorageDirectoryPath();
 
   if (directoryPath != null) {
     try {
-      // Simpan file PDF
-      if (pdfBytes.isNotEmpty && pdfFileName.isNotEmpty) {
-        final pdfFile = File('$directoryPath/$pdfFileName');
-        await pdfFile.writeAsBytes(pdfBytes);
-        debugPrint('PDF berhasil disimpan di: ${pdfFile.path}');
-        Get.snackbar(
-          'Sukses',
-          'PDF berhasil disimpan di: ${pdfFile.path.split('/').last}',
-        );
-      } else {
-        debugPrint('PDF bytes or filename is empty, skipping PDF export.');
-      }
-
-      // Simpan file Excel
-      if (excelBytes.isNotEmpty && excelFileName.isNotEmpty) {
-        final excelFile = File('$directoryPath/$excelFileName');
-        await excelFile.writeAsBytes(excelBytes);
-        debugPrint('Excel berhasil disimpan di: ${excelFile.path}');
-        Get.snackbar(
-          'Sukses',
-          'Excel berhasil disimpan di: ${excelFile.path.split('/').last}',
-        );
-      } else {
-        debugPrint('Excel bytes or filename is empty, skipping Excel export.');
-      }
+      final file = File('$directoryPath/$fileName');
+      await file.writeAsBytes(fileBytes);
+      debugPrint('File berhasil disimpan di: ${file.path}');
+      Get.snackbar(
+        'Sukses',
+        'File berhasil disimpan di: ${file.path.split('/').last}',
+      );
+      // Open the file after saving
+      OpenFilex.open(file.path);
     } catch (e) {
       debugPrint('Gagal menyimpan file: $e');
       Get.snackbar('Error', 'Gagal menyimpan file: $e');
@@ -115,6 +98,5 @@ Future<void> exportPdfAndExcel({
     debugPrint(
       'Tidak dapat menyimpan file karena izin tidak diberikan atau direktori tidak ditemukan.',
     );
-    // Snackbar sudah ditangani di getStorageDirectoryPath()
   }
 }

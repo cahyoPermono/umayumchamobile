@@ -845,13 +845,9 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                                                     selectedProducts.toList(),
                                               );
                                       if (excelBytes != null) {
-                                        await exportPdfAndExcel(
-                                          pdfBytes:
-                                              [], // No PDF bytes for Excel export
-                                          pdfFileName: '', // No PDF file name
-                                          excelBytes: excelBytes,
-                                          excelFileName:
-                                              'DeliveryNote_${(widget.deliveryNote!.dnNumber ?? widget.deliveryNote!.id).replaceAll('/', '_')}.xlsx',
+                                        await saveFile(
+                                          fileBytes: excelBytes,
+                                          fileName: 'DeliveryNote_${(widget.deliveryNote!.dnNumber ?? widget.deliveryNote!.id).replaceAll('/', '_')}.xlsx',
                                         );
                                       }
                                     },
@@ -892,14 +888,9 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                                                     selectedProducts.toList(),
                                               );
                                       if (pdfBytes != null) {
-                                        await exportPdfAndExcel(
-                                          pdfBytes: pdfBytes,
-                                          pdfFileName:
-                                              'DeliveryNote_${(widget.deliveryNote!.dnNumber ?? widget.deliveryNote!.id).replaceAll('/', '_')}.pdf',
-                                          excelBytes:
-                                              [], // No Excel bytes for PDF export
-                                          excelFileName:
-                                              '', // No Excel file name
+                                        await saveFile(
+                                          fileBytes: pdfBytes,
+                                          fileName: 'DeliveryNote_${(widget.deliveryNote!.dnNumber ?? widget.deliveryNote!.id).replaceAll('/', '_')}.pdf',
                                         );
                                       }
                                     },

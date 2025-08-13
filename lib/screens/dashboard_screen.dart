@@ -8,6 +8,7 @@ import 'package:umayumcha_ims/controllers/inventory_controller.dart'; // Import 
 import 'package:umayumcha_ims/controllers/consumable_controller.dart';
 import 'package:umayumcha_ims/screens/delivery_note_list_screen.dart';
 import 'package:umayumcha_ims/screens/incoming_delivery_note_list_screen.dart'; // New: Import IncomingDeliveryNoteListScreen
+import 'package:umayumcha_ims/screens/delivery_note_report_screen.dart'; // New: Import DeliveryNoteReportScreen
 
 import 'package:umayumcha_ims/screens/transaction_log_screen.dart';
 import 'package:umayumcha_ims/screens/consumable_transaction_log_screen.dart';
@@ -145,6 +146,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Get.back(); // Close the drawer
                 Get.to(() => const DeliveryNoteListScreen());
               },
+            ),
+            Obx(
+              () => authController.userRole.value == 'finance'
+                  ? ListTile(
+                      leading: const Icon(Icons.bar_chart), // Or another suitable icon
+                      title: const Text('Delivery Notes Report (Out)'),
+                      onTap: () {
+                        Get.back(); // Close the drawer
+                        Get.to(() => const DeliveryNoteReportScreen());
+                      },
+                    )
+                  : const SizedBox.shrink(),
             ),
             ListTile(
               leading: const Icon(Icons.store),
