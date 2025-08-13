@@ -3,6 +3,7 @@ import 'package:flutter/services.dart'; // For rootBundle
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:umayumcha_ims/controllers/auth_controller.dart';
 import 'package:umayumcha_ims/controllers/consumable_controller.dart';
 import 'package:umayumcha_ims/controllers/inventory_controller.dart';
 import 'package:umayumcha_ims/models/delivery_note_model.dart';
@@ -20,6 +21,7 @@ class DeliveryNoteController extends GetxController {
   final InventoryController inventoryController = Get.find();
   final ConsumableController consumableController =
       Get.find(); // New: Get ConsumableController
+  final AuthController authController = Get.find();
 
   var deliveryNotes = <DeliveryNote>[].obs;
   var isLoading = false.obs;
@@ -102,6 +104,10 @@ class DeliveryNoteController extends GetxController {
   }
 
   Future<void> deleteDeliveryNote(String deliveryNoteId) async {
+    if (authController.userRole.value == 'finance') {
+      Get.snackbar('Permission Denied', 'Finance role cannot delete delivery notes.');
+      return;
+    }
     try {
       isLoading(true);
       await supabase.rpc(
@@ -126,6 +132,10 @@ class DeliveryNoteController extends GetxController {
     required List<Map<String, dynamic>> items, // {id, name, quantity, type}
     String? keterangan,
   }) async {
+    if (authController.userRole.value == 'finance') {
+      Get.snackbar('Permission Denied', 'Finance role cannot create delivery notes.');
+      return;
+    }
     try {
       isLoading.value = true;
 
@@ -227,6 +237,10 @@ class DeliveryNoteController extends GetxController {
     required List<Map<String, dynamic>> originalItems,
     String? keterangan,
   }) async {
+    if (authController.userRole.value == 'finance') {
+      Get.snackbar('Permission Denied', 'Finance role cannot update delivery notes.');
+      return;
+    }
     try {
       isLoading.value = true;
 

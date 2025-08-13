@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:umayumcha_ims/controllers/auth_controller.dart';
 import 'package:umayumcha_ims/controllers/consumable_controller.dart';
 import 'package:umayumcha_ims/controllers/delivery_note_controller.dart';
 import 'package:umayumcha_ims/controllers/inventory_controller.dart';
@@ -15,6 +16,7 @@ class DeliveryNoteListScreen extends StatelessWidget {
     final DeliveryNoteController controller = Get.put(DeliveryNoteController());
     final InventoryController inventoryController = Get.find();
     final ConsumableController consumableController = Get.find();
+    final AuthController authController = Get.find();
 
     return Scaffold(
       appBar: AppBar(
@@ -263,39 +265,45 @@ class DeliveryNoteListScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.grey),
-                            onPressed: () {
-                              Get.to(
-                                () =>
-                                    DeliveryNoteFormScreen(deliveryNote: note),
-                              );
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {
-                              Get.defaultDialog(
-                                title: "Delete Delivery Note",
-                                middleText:
-                                    "Are you sure you want to delete this delivery note? This action cannot be undone and will restore product quantities.",
-                                textConfirm: "Delete",
-                                textCancel: "Cancel",
-                                confirmTextColor: Colors.white,
-                                buttonColor: Colors.red,
-                                onConfirm: () {
-                                  controller.deleteDeliveryNote(note.id);
-                                  inventoryController.fetchBranchProducts();
-                                  consumableController.fetchConsumables();
-                                  Get.back(); // Close the dialog
-                                },
-                              );
-                            },
-                          ),
-                        ],
+                      trailing: Obx(
+                        () => authController.userRole.value != 'finance'
+                            ? SizedBox( // Add SizedBox here
+                                width: 100.0, // Fixed width for the trailing row
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.edit, color: Colors.grey),
+                                      onPressed: () {
+                                        Get.to(
+                                          () => DeliveryNoteFormScreen(deliveryNote: note),
+                                        );
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete, color: Colors.red),
+                                      onPressed: () {
+                                        Get.defaultDialog(
+                                          title: "Delete Delivery Note",
+                                          middleText:
+                                              "Are you sure you want to delete this delivery note? This action cannot be undone and will restore product quantities.",
+                                          textConfirm: "Delete",
+                                          textCancel: "Cancel",
+                                          confirmTextColor: Colors.white,
+                                          buttonColor: Colors.red,
+                                          onConfirm: () {
+                                            controller.deleteDeliveryNote(note.id);
+                                            inventoryController.fetchBranchProducts();
+                                            consumableController.fetchConsumables();
+                                            Get.back(); // Close the dialog
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : const SizedBox.shrink(),
                       ),
                       children: [
                         const Divider(
@@ -436,11 +444,15 @@ class DeliveryNoteListScreen extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.to(() => const DeliveryNoteFormScreen());
-        },
-        child: const Icon(Icons.add),
+      floatingActionButton: Obx(
+        () => authController.userRole.value != 'finance'
+            ? FloatingActionButton(
+                onPressed: () {
+                  Get.to(() => const DeliveryNoteFormScreen());
+                },
+                child: const Icon(Icons.add),
+              )
+            : const SizedBox.shrink(),
       ),
     );
   }

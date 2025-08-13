@@ -31,6 +31,7 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
       Get.find(); // Import BranchController
   final ConsumableController consumableController =
       Get.find(); // New: Get ConsumableController
+  final AuthController authController = Get.find(); // New: Get AuthController
 
   final TextEditingController customerNameController = TextEditingController();
   final TextEditingController destinationAddressController =
@@ -629,48 +630,52 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
                             'Type: ${(item['type'] as String).capitalizeFirst} | Quantity: x${item['quantity']}',
                             style: TextStyle(color: Colors.grey[600]),
                           ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.edit,
-                                  color: Colors.grey,
-                                ),
-                                onPressed: () {
-                                  _editProductInNote(index);
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
-                                ),
-                                onPressed: () {
-                                  Get.dialog(
-                                    AlertDialog(
-                                      title: const Text('Remove Item?'),
-                                      content: Text(
-                                        'Do you want to remove ${item['name']}?',
+                          trailing: Obx(
+                            () => authController.userRole.value != 'finance'
+                                ? Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.edit,
+                                          color: Colors.grey,
+                                        ),
+                                        onPressed: () {
+                                          _editProductInNote(index);
+                                        },
                                       ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Get.back(),
-                                          child: const Text('Cancel'),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.delete,
+                                          color: Colors.red,
                                         ),
-                                        ElevatedButton(
-                                          onPressed: () {
-                                            selectedProducts.removeAt(index);
-                                            Get.back();
-                                          },
-                                          child: const Text('Remove'),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
+                                        onPressed: () {
+                                          Get.dialog(
+                                            AlertDialog(
+                                              title: const Text('Remove Item?'),
+                                              content: Text(
+                                                'Do you want to remove ${item['name']}?',
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () => Get.back(),
+                                                  child: const Text('Cancel'),
+                                                ),
+                                                ElevatedButton(
+                                                  onPressed: () {
+                                                    selectedProducts.removeAt(index);
+                                                    Get.back();
+                                                  },
+                                                  child: const Text('Remove'),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  )
+                                : const SizedBox.shrink(),
                           ),
                         ),
                         if (item['description'] != null &&
@@ -703,7 +708,7 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
             const SizedBox(height: 16),
             Center(
               child: ElevatedButton.icon(
-                onPressed: _addProductToNote,
+                onPressed: authController.userRole.value != 'finance' ? _addProductToNote : null,
                 icon: const Icon(Icons.add),
                 label: const Text('Add Item to Delivery Note'),
                 style: ElevatedButton.styleFrom(
@@ -722,6 +727,9 @@ class _DeliveryNoteFormScreenState extends State<DeliveryNoteFormScreen> {
 
             // Save Button
             Obx(() {
+              if (authController.userRole.value == 'finance') {
+                return const SizedBox.shrink(); // Hide button for finance role
+              }
               return deliveryNoteController.isLoading.value
                   ? const Center(child: CircularProgressIndicator())
                   : Column(
