@@ -694,7 +694,7 @@ class DeliveryNoteController extends GetxController {
 
       // 3. Format and print data
       final ByteData logoBytes = await rootBundle.load(
-        'assets/images/logoprintblack.png', // Corrected path
+        'assets/images/logoprintthermal.png', // Corrected path
       );
       final Uint8List logoUint8List = logoBytes.buffer.asUint8List();
 
@@ -706,7 +706,8 @@ class DeliveryNoteController extends GetxController {
       }
       final img.Image resizedImage = img.copyResize(
         originalImage,
-        width: 360, // A reasonable width for a 58mm thermal printer
+        width: 200,
+        height: 150,
       );
       final Uint8List resizedLogoBytes = Uint8List.fromList(
         img.encodePng(resizedImage),
