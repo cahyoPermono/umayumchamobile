@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umayumcha_ims/controllers/consumable_controller.dart';
 import 'package:umayumcha_ims/models/consumable_model.dart';
+import 'package:umayumcha_ims/controllers/auth_controller.dart';
 
 class ConsumableFormScreen extends StatefulWidget {
   final Consumable? consumable;
@@ -16,6 +17,7 @@ class ConsumableFormScreen extends StatefulWidget {
 
 class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
   final ConsumableController controller = Get.find();
+  final AuthController authController = Get.find(); // ADDED
   final _formKey = GlobalKey<FormState>();
   final SupabaseClient supabase = Supabase.instance.client;
 
@@ -23,16 +25,33 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
   late TextEditingController _nameController;
   late TextEditingController _quantityController;
   late TextEditingController _descriptionController;
+  late TextEditingController _priceController; // ADDED
   late TextEditingController _lowStockController; // New: Low Stock Controller
   late TextEditingController _fromController; // New: From Controller
   final TextEditingController _locationController = TextEditingController();
   DateTime? _expiredDate;
-  bool _isSubmitting = false; // New: State variable for submission status
+  bool _isSubmitting = false;
+  bool isFinanceUser = false;
   String umayumchaHQBranchId = '2e109b1a-12c6-4572-87ab-6c96add8a603';
 
   @override
   void initState() {
     super.initState();
+    isFinanceUser = authController.userRole.value == 'finance';
+
+    // ADDED: Prevent finance user from accessing the 'add new' form
+    if (isFinanceUser && widget.consumable == null) {
+      // Use addPostFrameCallback to safely navigate back after the build cycle.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.back();
+        Get.snackbar(
+          'Access Denied',
+          'You do not have permission to create a new consumable.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      });
+    }
+
     _codeController = TextEditingController(
       text: widget.consumable?.code ?? '',
     );
@@ -45,12 +64,15 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
     _descriptionController = TextEditingController(
       text: widget.consumable?.description ?? '',
     );
+    _priceController = TextEditingController(
+      text: widget.consumable?.price?.toString() ?? '',
+    );
     _lowStockController = TextEditingController(
       text: widget.consumable?.lowStock.toString() ?? '50',
-    ); // Initialize with existing or default 50
+    );
     _fromController = TextEditingController(
       text: widget.consumable?.from ?? '',
-    ); // Initialize fromController
+    );
     _expiredDate = widget.consumable?.expiredDate;
     fetchBranch();
   }
@@ -117,6 +139,7 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
                 CrossAxisAlignment.stretch, // Stretch fields horizontally
             children: [
               TextFormField(
+                readOnly: isFinanceUser,
                 controller: _codeController,
                 decoration: const InputDecoration(
                   labelText: 'Code',
@@ -136,6 +159,7 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
               ),
               const SizedBox(height: 16),
               TextFormField(
+                readOnly: isFinanceUser,
                 controller: _nameController,
                 decoration: const InputDecoration(
                   labelText: 'Name',
@@ -155,6 +179,7 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
               ),
               const SizedBox(height: 16),
               TextFormField(
+                readOnly: isFinanceUser,
                 controller: _fromController,
                 decoration: const InputDecoration(
                   labelText: 'From (Vendor Name)',
@@ -198,6 +223,7 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
               ),
               const SizedBox(height: 16),
               TextFormField(
+                readOnly: isFinanceUser,
                 controller: _descriptionController,
                 decoration: const InputDecoration(
                   labelText: 'Description (Optional)',
@@ -212,6 +238,21 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
               ),
               const SizedBox(height: 16),
               TextFormField(
+                controller: _priceController,
+                decoration: const InputDecoration(
+                  labelText: 'Price (Optional)',
+                  hintText: 'e.g., 25000',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 12.0,
+                    horizontal: 15.0,
+                  ),
+                ),
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                readOnly: isFinanceUser,
                 controller: _lowStockController,
                 decoration: const InputDecoration(
                   labelText: 'Low Stock Threshold',
@@ -249,7 +290,7 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
               ),
               const SizedBox(height: 16),
               InkWell(
-                onTap: () => _selectDate(context),
+                onTap: isFinanceUser ? null : () => _selectDate(context), // Make read-only for finance user
                 child: InputDecorator(
                   decoration: InputDecoration(
                     labelText: 'Expiration Date (Optional)',
@@ -296,15 +337,23 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
                                     int.parse(_quantityController.text),
                                 description: _descriptionController.text,
                                 expiredDate: _expiredDate,
+                                price: double.tryParse(_priceController.text),
                                 lowStock: int.parse(_lowStockController.text),
                                 from: _fromController.text, // Save 'from' field
                               );
                               if (widget.consumable == null) {
                                 await controller.addConsumable(newConsumable);
                               } else {
-                                await controller.updateConsumable(
-                                  newConsumable,
-                                );
+                                if (isFinanceUser) {
+                                  await controller.updateConsumablePrice(
+                                    consumableId: widget.consumable!.id!,
+                                    price: double.parse(_priceController.text),
+                                  );
+                                } else {
+                                  await controller.updateConsumable(
+                                    newConsumable,
+                                  );
+                                }
                               }
                             } finally {
                               setState(() {

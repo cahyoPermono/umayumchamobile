@@ -168,6 +168,32 @@ class ConsumableController extends GetxController {
     }
   }
 
+  Future<void> updateConsumablePrice({
+    required int consumableId,
+    required double price,
+  }) async {
+    try {
+      isLoading.value = true;
+      final authController = Get.find<AuthController>();
+      final String? currentUserId = authController.currentUser.value?.id;
+
+      await _supabase.from('consumables').update({
+        'price': price,
+        'updated_at': DateTime.now().toIso8601String(),
+        'updated_by': currentUserId,
+      }).eq('id', consumableId);
+
+      fetchConsumables(); // Refresh the list
+      Get.back();
+      Get.snackbar('Success', 'Consumable price updated successfully!');
+    } catch (e) {
+      log('Error updating consumable price: $e');
+      Get.snackbar('Error', 'Failed to update price: ${e.toString()}');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> updateConsumable(Consumable consumable) async {
     try {
       isLoading.value = true;

@@ -5,6 +5,7 @@ import 'package:umayumcha_ims/controllers/consumable_controller.dart';
 import 'package:umayumcha_ims/models/consumable_model.dart';
 import 'package:umayumcha_ims/screens/consumable_form_screen.dart';
 import 'package:umayumcha_ims/widgets/delete_confirmation_dialog.dart';
+import 'package:umayumcha_ims/controllers/auth_controller.dart';
 
 void _showConsumableTransactionDialog(
   BuildContext context,
@@ -125,6 +126,7 @@ class ConsumableListScreen extends StatefulWidget {
 
 class _ConsumableListScreenState extends State<ConsumableListScreen> {
   final ConsumableController controller = Get.put(ConsumableController());
+  final AuthController authController = Get.find(); // ADDED
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
 
@@ -210,10 +212,15 @@ class _ConsumableListScreenState extends State<ConsumableListScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.to(() => const ConsumableFormScreen()),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: Obx(() {
+        if (authController.userRole.value == 'finance') {
+          return const SizedBox.shrink(); // Hide FAB for finance role
+        }
+        return FloatingActionButton(
+          onPressed: () => Get.to(() => const ConsumableFormScreen()),
+          child: const Icon(Icons.add),
+        );
+      }),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
@@ -298,6 +305,43 @@ class _ConsumableListScreenState extends State<ConsumableListScreen> {
                             'Expired: ${DateFormat.yMd().format(consumable.expiredDate!)}',
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
+                        Obx(() {
+                          if (authController.userRole.value == 'finance') {
+                            final price = consumable.price ?? 0.0;
+                            final totalPrice = price * consumable.quantity;
+                            final currencyFormatter = NumberFormat.currency(
+                              locale: 'id_ID',
+                              symbol: 'Rp ',
+                              decimalDigits: 0,
+                            );
+
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Divider(),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Price: ${currencyFormatter.format(price)}',
+                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Total Price: ${currencyFormatter.format(totalPrice)}',
+                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          } else {
+                            return const SizedBox.shrink();
+                          }
+                        }),
                         const SizedBox(height: 16),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
@@ -314,22 +358,27 @@ class _ConsumableListScreenState extends State<ConsumableListScreen> {
                                     ),
                                   ),
                             ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.delete,
-                                color: Colors.redAccent,
-                              ),
-                              onPressed: () {
-                                showDeleteConfirmationDialog(
-                                  title: "Delete Consumable",
-                                  content:
-                                      "Are you sure you want to delete ${consumable.name}? This action cannot be undone.",
-                                  onConfirm: () {
-                                    controller.deleteConsumable(consumable.id!);
-                                  },
-                                );
-                              },
-                            ),
+                            Obx(() {
+                              if (authController.userRole.value == 'finance') {
+                                return const SizedBox.shrink(); // Hide delete button for finance
+                              }
+                              return IconButton(
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.redAccent,
+                                ),
+                                onPressed: () {
+                                  showDeleteConfirmationDialog(
+                                    title: "Delete Consumable",
+                                    content:
+                                        "Are you sure you want to delete ${consumable.name}? This action cannot be undone.",
+                                    onConfirm: () {
+                                      controller.deleteConsumable(consumable.id!);
+                                    },
+                                  );
+                                },
+                              );
+                            }),
                             const SizedBox(width: 8),
                             ElevatedButton.icon(
                               onPressed:
