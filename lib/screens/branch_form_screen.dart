@@ -25,7 +25,21 @@ class _BranchFormScreenState extends State<BranchFormScreen> {
   @override
   void initState() {
     super.initState();
-    _isReadOnly = authController.userRole.value != 'admin';
+    // Users with the 'finance' role have read-only access.
+    _isReadOnly = authController.userRole.value == 'finance';
+
+    // If a finance user tries to open the form for a new branch, deny access.
+    if (_isReadOnly && widget.branch == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.back();
+        Get.snackbar(
+          'Access Denied',
+          'You do not have permission to create a new branch.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      });
+    }
+
     _nameController = TextEditingController(text: widget.branch?.name ?? '');
     _addressController = TextEditingController(
       text: widget.branch?.address ?? '',
@@ -36,11 +50,13 @@ class _BranchFormScreenState extends State<BranchFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.branch == null
-            ? 'Add Branch'
-            : _isReadOnly
-                ? 'Branch Details'
-                : 'Edit Branch'),
+        title: Text(
+          widget.branch == null
+              ? 'Add Branch'
+              : _isReadOnly
+              ? 'Branch Details'
+              : 'Edit Branch',
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -50,7 +66,9 @@ class _BranchFormScreenState extends State<BranchFormScreen> {
             children: [
               TextFormField(
                 controller: _nameController,
-                readOnly: _isReadOnly || widget.branch?.id == '2e109b1a-12c6-4572-87ab-6c96add8a603',
+                readOnly:
+                    _isReadOnly ||
+                    widget.branch?.id == '2e109b1a-12c6-4572-87ab-6c96add8a603',
                 decoration: const InputDecoration(labelText: 'Branch Name'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {

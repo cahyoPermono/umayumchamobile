@@ -22,9 +22,9 @@ class BranchListScreen extends StatelessWidget {
       floatingActionButton: Obx(() {
         return authController.userRole.value == 'admin'
             ? FloatingActionButton(
-                onPressed: () => Get.to(() => const BranchFormScreen()),
-                child: const Icon(Icons.add),
-              )
+              onPressed: () => Get.to(() => const BranchFormScreen()),
+              child: const Icon(Icons.add),
+            )
             : const SizedBox.shrink();
       }),
       body: Obx(() {
@@ -38,8 +38,14 @@ class BranchListScreen extends StatelessWidget {
               children: [
                 Icon(Icons.store_mall_directory, size: 80, color: Colors.grey),
                 SizedBox(height: 16),
-                Text('Belum ada cabang', style: TextStyle(fontSize: 18, color: Colors.grey)),
-                Text('Silakan tambahkan cabang baru', style: TextStyle(color: Colors.grey)),
+                Text(
+                  'Belum ada cabang',
+                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                ),
+                Text(
+                  'Silakan tambahkan cabang baru',
+                  style: TextStyle(color: Colors.grey),
+                ),
               ],
             ),
           );
@@ -56,13 +62,20 @@ class BranchListScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(15),
               ),
               child: InkWell(
-                onTap: () => Get.to(() => BranchFormScreen(branch: branch)),
+                onTap:
+                    authController.userRole.value != 'finance'
+                        ? () => Get.to(() => BranchFormScreen(branch: branch))
+                        : null,
                 borderRadius: BorderRadius.circular(15),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
                     children: [
-                      Icon(Icons.store, color: Theme.of(context).colorScheme.primary, size: 40),
+                      Icon(
+                        Icons.store,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 40,
+                      ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Column(
@@ -85,27 +98,38 @@ class BranchListScreen extends StatelessWidget {
                       ),
                       Obx(() {
                         return authController.userRole.value == 'admin'
-                            ? (branch.id == '2e109b1a-12c6-4572-87ab-6c96add8a603'
+                            ? (branch.id ==
+                                    '2e109b1a-12c6-4572-87ab-6c96add8a603'
                                 ? IconButton(
-                                    icon: Icon(Icons.delete, color: Colors.grey[400]), // Grey out icon
-                                    onPressed: null, // Disable button
-                                  )
+                                  icon: Icon(
+                                    Icons.delete,
+                                    color: Colors.grey[400],
+                                  ), // Grey out icon
+                                  onPressed: null, // Disable button
+                                )
                                 : IconButton(
-                                    icon: Icon(Icons.delete, color: Colors.red[400]),
-                                    onPressed: () {
-                                      if (branch.id != null) {
-                                        showDeleteConfirmationDialog(
-                                          title: "Hapus Cabang",
-                                          content: "Apakah Anda yakin ingin menghapus cabang '${branch.name}'?",
-                                          onConfirm: () {
-                                            controller.deleteBranch(branch.id!); 
-                                          },
-                                        );
-                                      } else {
-                                        Get.snackbar('Error', 'ID Cabang tidak ditemukan.');
-                                      }
-                                    },
-                                  ))
+                                  icon: Icon(
+                                    Icons.delete,
+                                    color: Colors.red[400],
+                                  ),
+                                  onPressed: () {
+                                    if (branch.id != null) {
+                                      showDeleteConfirmationDialog(
+                                        title: "Hapus Cabang",
+                                        content:
+                                            "Apakah Anda yakin ingin menghapus cabang '${branch.name}'?",
+                                        onConfirm: () {
+                                          controller.deleteBranch(branch.id!);
+                                        },
+                                      );
+                                    } else {
+                                      Get.snackbar(
+                                        'Error',
+                                        'ID Cabang tidak ditemukan.',
+                                      );
+                                    }
+                                  },
+                                ))
                             : const SizedBox.shrink();
                       }),
                     ],

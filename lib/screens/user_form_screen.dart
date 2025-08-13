@@ -111,6 +111,10 @@ class _UserFormScreenState extends State<UserFormScreen> {
                       child: Text('Super User (Admin)'),
                     ),
                     DropdownMenuItem(
+                      value: 'finance',
+                      child: Text('Finance'),
+                    ),
+                    DropdownMenuItem(
                       value: 'authenticated',
                       child: Text('User (Authenticated)'),
                     ),

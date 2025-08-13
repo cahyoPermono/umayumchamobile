@@ -90,21 +90,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ],
               ),
             ),
-            ListTile(
-              leading: const Icon(Icons.history),
-              title: const Text('Inventory Transaction Log'),
-              onTap: () {
-                Get.back(); // Close the drawer
-                Get.to(() => const TransactionLogScreen());
-              },
+            Obx(
+              () => authController.userRole.value != 'finance'
+                  ? ListTile(
+                      leading: const Icon(Icons.history),
+                      title: const Text('Inventory Transaction Log'),
+                      onTap: () {
+                        Get.back(); // Close the drawer
+                        Get.to(() => const TransactionLogScreen());
+                      },
+                    )
+                  : const SizedBox.shrink(),
             ),
-            ListTile(
-              leading: const Icon(Icons.receipt_long),
-              title: const Text('Consumable Transaction Log'),
-              onTap: () {
-                Get.back(); // Close the drawer
-                Get.to(() => ConsumableTransactionLogScreen());
-              },
+            Obx(
+              () => authController.userRole.value != 'finance'
+                  ? ListTile(
+                      leading: const Icon(Icons.receipt_long),
+                      title: const Text('Consumable Transaction Log'),
+                      onTap: () {
+                        Get.back(); // Close the drawer
+                        Get.to(() => ConsumableTransactionLogScreen());
+                      },
+                    )
+                  : const SizedBox.shrink(),
             ),
             ListTile(
               leading: const Icon(Icons.inventory),
