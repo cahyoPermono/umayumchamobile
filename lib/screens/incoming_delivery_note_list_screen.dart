@@ -232,15 +232,21 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 4),
-                          Text(
-                            'Total Price: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(note.totalPrice)}',
-                            style: Theme.of(
-                              context,
-                            ).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
+                          Obx(() {
+                            if (authController.userRole.value == 'finance') {
+                              return Text(
+                                'Total Price: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(note.totalPrice)}',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              );
+                            } else {
+                              return const SizedBox.shrink();
+                            }
+                          }),
                         ],
                       ),
                       trailing: Obx(
@@ -318,8 +324,11 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
                               const SizedBox(height: 10),
                               if (note.productItems != null &&
                                   note.productItems!.isNotEmpty)
-                                ...note.productItems!.map(
-                                  (item) => Padding(
+                                ...note.productItems!.map((item) {
+                                  final price = item['price'] ?? 0;
+                                  final quantity = item['quantity_change'] ?? 0;
+                                  final totalPrice = price * quantity;
+                                  return Padding(
                                     padding: const EdgeInsets.only(bottom: 5.0),
                                     child: Column(
                                       crossAxisAlignment:
@@ -344,6 +353,41 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
                                             ),
                                           ],
                                         ),
+                                        Obx(() {
+                                          if (authController.userRole.value ==
+                                              'finance') {
+                                            return Padding(
+                                              padding: const EdgeInsets.only(
+                                                left: 26.0,
+                                                top: 4.0,
+                                              ),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Price: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(price)}',
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      color: Colors.grey[600],
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    'Total: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(totalPrice)}',
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      color: Colors.grey[600],
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          } else {
+                                            return const SizedBox.shrink();
+                                          }
+                                        }),
                                         if (item['reason'] != null &&
                                             item['reason'].isNotEmpty)
                                           Padding(
@@ -362,12 +406,15 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
                                           ),
                                       ],
                                     ),
-                                  ),
-                                ),
+                                  );
+                                }),
                               if (note.consumableItems != null &&
                                   note.consumableItems!.isNotEmpty)
-                                ...note.consumableItems!.map(
-                                  (item) => Padding(
+                                ...note.consumableItems!.map((item) {
+                                  final price = item['price'] ?? 0;
+                                  final quantity = item['quantity_change'] ?? 0;
+                                  final totalPrice = price * quantity;
+                                  return Padding(
                                     padding: const EdgeInsets.only(bottom: 5.0),
                                     child: Column(
                                       crossAxisAlignment:
@@ -392,6 +439,41 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
                                             ),
                                           ],
                                         ),
+                                        Obx(() {
+                                          if (authController.userRole.value ==
+                                              'finance') {
+                                            return Padding(
+                                              padding: const EdgeInsets.only(
+                                                left: 26.0,
+                                                top: 4.0,
+                                              ),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Price: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(price)}',
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      color: Colors.grey[600],
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    'Total: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(totalPrice)}',
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      color: Colors.grey[600],
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          } else {
+                                            return const SizedBox.shrink();
+                                          }
+                                        }),
                                         if (item['reason'] != null &&
                                             item['reason'].isNotEmpty)
                                           Padding(
@@ -410,8 +492,8 @@ class IncomingDeliveryNoteListScreen extends StatelessWidget {
                                           ),
                                       ],
                                     ),
-                                  ),
-                                ),
+                                  );
+                                }),
                               if ((note.productItems == null ||
                                       note.productItems!.isEmpty) &&
                                   (note.consumableItems == null ||

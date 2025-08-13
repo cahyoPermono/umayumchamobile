@@ -254,15 +254,21 @@ class DeliveryNoteListScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 4),
-                          Text(
-                            'Total Price: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(note.totalPrice)}',
-                            style: Theme.of(
-                              context,
-                            ).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
+                          Obx(() {
+                            if (authController.userRole.value == 'finance') {
+                              return Text(
+                                'Total Price: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(note.totalPrice)}',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              );
+                            } else {
+                              return const SizedBox.shrink();
+                            }
+                          }),
                         ],
                       ),
                       trailing: Obx(
@@ -327,98 +333,152 @@ class DeliveryNoteListScreen extends StatelessWidget {
                               if (note.productItems != null &&
                                   note.productItems!.isNotEmpty)
                                 ...note.productItems!.map(
-                                  (item) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 5.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.inventory_2_outlined,
-                                              size: 18,
-                                              color: Colors.blueGrey,
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Expanded(
+                                  (item) {
+                                    final price = item['price'] ?? 0;
+                                    final quantity = item['quantity_change'] ?? 0;
+                                    final totalPrice = price * quantity;
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: 5.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.inventory_2_outlined,
+                                                size: 18,
+                                                color: Colors.blueGrey,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: Text(
+                                                  '${item['product_name']} (x${item['quantity_change']})',
+                                                  style: TextStyle(
+                                                    fontSize: 15,
+                                                    color: Colors.grey[800],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Obx(() {
+                                            if (authController.userRole.value == 'finance') {
+                                              return Padding(
+                                                padding: const EdgeInsets.only(left: 26.0, top: 4.0),
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      'Price: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(price)}',
+                                                      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                                                    ),
+                                                    Text(
+                                                      'Total: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(totalPrice)}',
+                                                      style: TextStyle(fontSize: 13, color: Colors.grey[600], fontWeight: FontWeight.bold),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            } else {
+                                              return const SizedBox.shrink();
+                                            }
+                                          }),
+                                          if (item['reason'] != null &&
+                                              item['reason'].isNotEmpty)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                left: 26.0,
+                                                top: 2.0,
+                                              ),
                                               child: Text(
-                                                '${item['product_name']} (x${item['quantity_change']})',
+                                                'Keterangan: ${item['reason']}',
                                                 style: TextStyle(
-                                                  fontSize: 15,
-                                                  color: Colors.grey[800],
+                                                  fontSize: 13,
+                                                  color: Colors.grey[600],
+                                                  fontStyle: FontStyle.italic,
                                                 ),
                                               ),
                                             ),
-                                          ],
-                                        ),
-                                        if (item['reason'] != null &&
-                                            item['reason'].isNotEmpty)
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              left: 26.0,
-                                              top: 2.0,
-                                            ),
-                                            child: Text(
-                                              'Keterangan: ${item['reason']}',
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                color: Colors.grey[600],
-                                                fontStyle: FontStyle.italic,
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
+                                        ],
+                                      ),
+                                    );
+                                  },
                                 ),
                               if (note.consumableItems != null &&
                                   note.consumableItems!.isNotEmpty)
                                 ...note.consumableItems!.map(
-                                  (item) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 5.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.category_outlined,
-                                              size: 18,
-                                              color: Colors.teal,
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Expanded(
+                                  (item) {
+                                    final price = item['price'] ?? 0;
+                                    final quantity = item['quantity_change'] ?? 0;
+                                    final totalPrice = price * quantity;
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: 5.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.category_outlined,
+                                                size: 18,
+                                                color: Colors.teal,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: Text(
+                                                  '${item['consumable_name']} (x${item['quantity_change']})',
+                                                  style: TextStyle(
+                                                    fontSize: 15,
+                                                    color: Colors.grey[800],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Obx(() {
+                                            if (authController.userRole.value == 'finance') {
+                                              return Padding(
+                                                padding: const EdgeInsets.only(left: 26.0, top: 4.0),
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      'Price: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(price)}',
+                                                      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                                                    ),
+                                                    Text(
+                                                      'Total: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(totalPrice)}',
+                                                      style: TextStyle(fontSize: 13, color: Colors.grey[600], fontWeight: FontWeight.bold),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            } else {
+                                              return const SizedBox.shrink();
+                                            }
+                                          }),
+                                          if (item['reason'] != null &&
+                                              item['reason'].isNotEmpty)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                left: 26.0,
+                                                top: 2.0,
+                                              ),
                                               child: Text(
-                                                '${item['consumable_name']} (x${item['quantity_change']})',
+                                                'Keterangan: ${item['reason']}',
                                                 style: TextStyle(
-                                                  fontSize: 15,
-                                                  color: Colors.grey[800],
+                                                  fontSize: 13,
+                                                  color: Colors.grey[600],
+                                                  fontStyle: FontStyle.italic,
                                                 ),
                                               ),
                                             ),
-                                          ],
-                                        ),
-                                        if (item['reason'] != null &&
-                                            item['reason'].isNotEmpty)
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              left: 26.0,
-                                              top: 2.0,
-                                            ),
-                                            child: Text(
-                                              'Keterangan: ${item['reason']}',
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                color: Colors.grey[600],
-                                                fontStyle: FontStyle.italic,
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
+                                        ],
+                                      ),
+                                    );
+                                  },
                                 ),
                               if ((note.productItems == null ||
                                       note.productItems!.isEmpty) &&
