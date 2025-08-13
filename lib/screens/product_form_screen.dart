@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:umayumcha_ims/controllers/auth_controller.dart';
 import 'package:umayumcha_ims/controllers/inventory_controller.dart';
 import 'package:umayumcha_ims/controllers/branch_controller.dart'; // Import BranchController
 import 'package:umayumcha_ims/models/product_model.dart';
@@ -17,8 +18,12 @@ class ProductFormScreen extends StatefulWidget {
 class _ProductFormScreenState extends State<ProductFormScreen> {
   final InventoryController inventoryController = Get.find();
   final BranchController branchController = Get.find();
+  final AuthController authController = Get.find(); // Add AuthController
 
   final _formKey = GlobalKey<FormState>();
+
+  // Add a flag for finance user
+  bool isFinanceUser = false;
 
   TextEditingController nameController = TextEditingController();
   TextEditingController codeController =
@@ -33,7 +38,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   TextEditingController priceController = TextEditingController();
   TextEditingController lowStockController =
       TextEditingController(); // New: Low Stock Controller
-  TextEditingController fromController = TextEditingController(); // New: From Controller
+  TextEditingController fromController =
+      TextEditingController(); // New: From Controller
   TextEditingController initialQuantityController = TextEditingController();
 
   bool _showOptionalFields = false; // New state variable
@@ -45,6 +51,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   @override
   void initState() {
     super.initState();
+    isFinanceUser = authController.userRole.value == 'finance';
+
     nameController = TextEditingController(text: widget.product?.name ?? '');
     codeController = TextEditingController(text: widget.product?.code ?? '');
     descriptionController = TextEditingController(
@@ -69,7 +77,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     lowStockController = TextEditingController(
       text: widget.product?.lowStock.toString() ?? '50',
     ); // Initialize with existing or default 50
-    fromController = TextEditingController(text: widget.product?.from ?? ''); // Initialize fromController
+    fromController = TextEditingController(
+      text: widget.product?.from ?? '',
+    ); // Initialize fromController
 
     if (widget.product == null) {
       initialQuantityController.text = '1';
@@ -150,6 +160,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 CrossAxisAlignment.stretch, // Stretch fields horizontally
             children: [
               TextFormField(
+                readOnly: isFinanceUser,
                 controller: nameController,
                 decoration: const InputDecoration(
                   labelText: 'Product Name',
@@ -169,6 +180,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               ),
               const SizedBox(height: 16),
               TextFormField(
+                readOnly: isFinanceUser,
                 controller: codeController,
                 decoration: const InputDecoration(
                   labelText: 'Code (Required)',
@@ -193,23 +205,26 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     return const Iterable<String>.empty();
                   }
                   return inventoryController.vendorNames.where((String option) {
-                    return option
-                        .toLowerCase()
-                        .contains(textEditingValue.text.toLowerCase());
+                    return option.toLowerCase().contains(
+                      textEditingValue.text.toLowerCase(),
+                    );
                   });
                 },
                 onSelected: (String selection) {
                   fromController.text = selection;
                 },
-                fieldViewBuilder: (BuildContext context,
-                    TextEditingController fieldTextEditingController,
-                    FocusNode fieldFocusNode,
-                    VoidCallback onFieldSubmitted) {
+                fieldViewBuilder: (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
                   // Set initial value
                   if (fromController.text.isNotEmpty) {
                     fieldTextEditingController.text = fromController.text;
                   }
                   return TextFormField(
+                    readOnly: isFinanceUser,
                     controller: fieldTextEditingController,
                     focusNode: fieldFocusNode,
                     decoration: const InputDecoration(
@@ -235,6 +250,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               ),
               const SizedBox(height: 16),
               TextFormField(
+                readOnly: isFinanceUser,
                 controller: kondisiController,
                 decoration: const InputDecoration(
                   labelText: 'Kondisi (Required)',
@@ -269,6 +285,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               ],
               const SizedBox(height: 16),
               TextFormField(
+                readOnly: isFinanceUser,
                 controller: lowStockController,
                 decoration: const InputDecoration(
                   labelText: 'Low Stock Threshold',
@@ -304,6 +321,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               ),
               if (_showOptionalFields) ...[
                 TextFormField(
+                  readOnly: isFinanceUser,
                   controller: merkController,
                   decoration: const InputDecoration(
                     labelText: 'Merk (Optional)',
@@ -317,6 +335,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
+                  readOnly: isFinanceUser,
                   controller: descriptionController,
                   decoration: const InputDecoration(
                     labelText: 'Description (Optional)',
@@ -331,6 +350,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
+                  readOnly: isFinanceUser,
                   controller: tahunPerolehanController,
                   decoration: const InputDecoration(
                     labelText: 'Tahun Perolehan (Optional)',
@@ -345,6 +365,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
+                  readOnly: isFinanceUser,
                   controller: nilaiResiduController,
                   decoration: const InputDecoration(
                     labelText: 'Nilai Residu (Optional)',
@@ -359,6 +380,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
+                  readOnly: isFinanceUser,
                   controller: penggunaController,
                   decoration: const InputDecoration(
                     labelText: 'Pengguna (Optional)',
@@ -464,7 +486,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                         );
                         debugPrint('Pengguna: ${penggunaController.text}');
                         debugPrint('Price: ${priceController.text}');
-                        debugPrint('From: ${fromController.text}'); // New debug print
+                        debugPrint(
+                          'From: ${fromController.text}',
+                        ); // New debug print
 
                         if (isValid) {
                           final product = Product(
@@ -495,10 +519,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                                     ? null
                                     : penggunaController.text.trim(),
                             price: double.tryParse(priceController.text.trim()),
-                            lowStock: int.parse(
-                              lowStockController.text.trim(),
-                            ),
-                            from: fromController.text.trim(), // Save 'from' field
+                            lowStock: int.parse(lowStockController.text.trim()),
+                            from:
+                                fromController.text.trim(), // Save 'from' field
                             createdAt:
                                 widget.product?.createdAt ?? DateTime.now(),
                           );
@@ -550,23 +573,34 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                               Get.snackbar('Error', 'Failed to add product.');
                             }
                           } else {
-                            final success = await inventoryController
-                                .updateProduct(product);
-                            if (success) {
-                              inventoryController.fetchVendorNames();
-                              Get.back();
-                              Get.snackbar(
-                                'Success',
-                                'Product updated successfully!',
-                              );
+                            if (isFinanceUser) {
+                              // Finance user can only update the price.
+                              final success = await inventoryController
+                                  .updateProductPrice(
+                                    productId: widget.product!.id!,
+                                    price: double.parse(
+                                      priceController.text.trim(),
+                                    ),
+                                  );
+                              if (success) {
+                                Get.back();
+                                Get.snackbar(
+                                  'Success',
+                                  'Product price updated successfully!',
+                                );
+                              }
                             } else {
-                              Get.snackbar(
-                                'Error',
-                                'Failed to update product.',
-                                margin: EdgeInsets.all(10),
-                                backgroundColor: Colors.red,
-                                colorText: Colors.white,
-                              );
+                              // Other users can update the whole product.
+                              final success = await inventoryController
+                                  .updateProduct(product);
+                              if (success) {
+                                inventoryController.fetchVendorNames();
+                                Get.back();
+                                Get.snackbar(
+                                  'Success',
+                                  'Product updated successfully!',
+                                );
+                              }
                             }
                           }
                         }

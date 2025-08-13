@@ -83,6 +83,32 @@ class InventoryController extends GetxController {
     }
   }
 
+  Future<bool> updateProductPrice({
+    required String productId,
+    required double price,
+  }) async {
+    isLoading.value = true;
+    try {
+      final authController = Get.find<AuthController>();
+      final String? currentUserId = authController.currentUser.value?.id;
+
+      await supabase.from('products').update({
+        'price': price,
+        'updated_at': DateTime.now().toIso8601String(),
+        'updated_by': currentUserId,
+      }).eq('id', productId);
+
+      fetchBranchProducts(); // Refresh the list
+      return true; // Return true on success
+    } catch (e) {
+      debugPrint('Error updating product price: $e');
+      Get.snackbar('Error', 'Failed to update product price: ${e.toString()}');
+      return false; // Return false on failure
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> deleteProduct(String productId) async {
     isLoading.value = true;
     try {

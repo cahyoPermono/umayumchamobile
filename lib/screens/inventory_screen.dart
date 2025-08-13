@@ -6,6 +6,7 @@ import 'package:umayumcha_ims/controllers/branch_controller.dart';
 import 'package:umayumcha_ims/models/branch_product_model.dart';
 import 'package:umayumcha_ims/screens/product_form_screen.dart';
 import 'package:umayumcha_ims/widgets/delete_confirmation_dialog.dart';
+import 'package:intl/intl.dart';
 
 void _showTransactionDialog(
   BuildContext context,
@@ -325,6 +326,43 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                 'Description: ${product?.description ?? 'No Description'}',
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
+                              Obx(() {
+                                if (authController.userRole.value == 'finance') {
+                                  final price = product?.price ?? 0.0;
+                                  final totalPrice = price * branchProduct.quantity;
+                                  final currencyFormatter = NumberFormat.currency(
+                                    locale: 'id_ID',
+                                    symbol: 'Rp ',
+                                    decimalDigits: 0,
+                                  );
+
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 12.0),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Divider(),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'Price: ${currencyFormatter.format(price)}',
+                                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Total Price: ${currencyFormatter.format(totalPrice)}',
+                                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                } else {
+                                  return const SizedBox.shrink();
+                                }
+                              }),
                               const SizedBox(height: 16),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
@@ -347,28 +385,33 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                       );
                                     },
                                   ),
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.delete,
-                                      color: Colors.redAccent,
-                                    ),
-                                    onPressed: () {
-                                      showDeleteConfirmationDialog(
-                                        title: 'Delete Product',
-                                        content:
-                                            'Are you sure you want to delete ${product?.name ?? 'this product'}?',
-                                        onConfirm: () {
-                                          if (product != null &&
-                                              product.id != null) {
-                                            final productId = product.id!;
-                                            inventoryController.deleteProduct(
-                                              productId,
-                                            );
-                                          }
-                                        },
-                                      );
-                                    },
-                                  ),
+                                  Obx(() {
+                                    if (authController.userRole.value == 'finance') {
+                                      return const SizedBox.shrink(); // Hide delete button for finance role
+                                    }
+                                    return IconButton(
+                                      icon: const Icon(
+                                        Icons.delete,
+                                        color: Colors.redAccent,
+                                      ),
+                                      onPressed: () {
+                                        showDeleteConfirmationDialog(
+                                          title: 'Delete Product',
+                                          content:
+                                              'Are you sure you want to delete ${product?.name ?? 'this product'}?',
+                                          onConfirm: () {
+                                            if (product != null &&
+                                                product.id != null) {
+                                              final productId = product.id!;
+                                              inventoryController.deleteProduct(
+                                                productId,
+                                              );
+                                            }
+                                          },
+                                        );
+                                      },
+                                    );
+                                  }),
                                   ElevatedButton.icon(
                                     onPressed:
                                         () => _showTransactionDialog(
