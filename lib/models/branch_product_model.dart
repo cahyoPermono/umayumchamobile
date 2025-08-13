@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:umayumcha_ims/models/product_model.dart';
 
 class BranchProduct {
@@ -21,11 +20,6 @@ class BranchProduct {
   });
 
   factory BranchProduct.fromJson(Map<String, dynamic> json) {
-    if (json['products'] == null) {
-      debugPrint(
-        'BranchProduct.fromJson: json[\'products\'] is null for branch_product ID: ${json['id']}',
-      );
-    }
     return BranchProduct(
       id: json['id'] as String,
       branchId: json['branch_id'] as String,
