@@ -1,7 +1,7 @@
 -- Step 1: Drop the old function
 DROP FUNCTION IF EXISTS get_combined_report(text,text,text);
 
--- Step 2: Create the new function with the 'keterangan' column
+-- Step 2: Create the function with the new filtering logic
 CREATE OR REPLACE FUNCTION get_combined_report(
     start_date TEXT,
     end_date TEXT,
@@ -32,7 +32,7 @@ BEGIN
         inventory_transactions it
     JOIN products p ON it.product_id = p.id
     WHERE
-        it.delivery_note_id IS NOT NULL
+        it.delivery_note_id IS NOT NULL -- This condition is already correct
         AND it.type = 'out'
         AND it.created_at >= start_date::TIMESTAMPTZ
         AND it.created_at <= end_date::TIMESTAMPTZ
@@ -53,7 +53,7 @@ BEGIN
         consumable_transactions ct
     JOIN consumables c ON ct.consumable_id = c.id
     WHERE
-        ct.delivery_note_id IS NOT NULL
+        ct.delivery_note_id IS NOT NULL -- This condition is already correct
         AND ct.type = 'out'
         AND ct.created_at >= start_date::TIMESTAMPTZ
         AND ct.created_at <= end_date::TIMESTAMPTZ
@@ -75,7 +75,8 @@ BEGIN
     JOIN products p ON it.product_id = p.id
     LEFT JOIN incoming_delivery_notes idn ON it.incoming_delivery_note_id = idn.id
     WHERE
-        it.type = 'in'
+        it.incoming_delivery_note_id IS NOT NULL -- Added this filter
+        AND it.type = 'in'
         AND it.created_at >= start_date::TIMESTAMPTZ
         AND it.created_at <= end_date::TIMESTAMPTZ
         AND (item_name_filter IS NULL OR p.name ILIKE '%' || item_name_filter || '%')
@@ -96,7 +97,8 @@ BEGIN
     JOIN consumables c ON ct.consumable_id = c.id
     LEFT JOIN incoming_delivery_notes idn ON ct.incoming_delivery_note_id = idn.id
     WHERE
-        ct.type = 'in'
+        ct.incoming_delivery_note_id IS NOT NULL -- Added this filter
+        AND ct.type = 'in'
         AND ct.created_at >= start_date::TIMESTAMPTZ
         AND ct.created_at <= end_date::TIMESTAMPTZ
         AND (item_name_filter IS NULL OR c.name ILIKE '%' || item_name_filter || '%');
