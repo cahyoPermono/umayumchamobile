@@ -214,7 +214,7 @@ class IncomingDeliveryNoteReportScreen extends StatelessWidget {
                       onPressed:
                           canExport
                               ? () {
-                                PdfReportExporter.generateAndOpenPdf(
+                                PdfReportExporter.generateAndOpenPdfIncoming(
                                   reportItems: controller.reportItems,
                                   totalOverallCost:
                                       controller.totalOverallCost.value,
