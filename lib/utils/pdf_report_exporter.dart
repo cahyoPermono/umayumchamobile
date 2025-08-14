@@ -10,6 +10,7 @@ class PdfReportExporter {
     required List<Map<String, dynamic>> reportItems,
     required double totalOverallCost,
     required double totalOverallQuantity,
+    required String userRole, // Added userRole parameter
   }) async {
     final pdf = pw.Document();
 
@@ -52,18 +53,27 @@ class PdfReportExporter {
         build:
             (pw.Context context) => [
               pw.TableHelper.fromTextArray(
-                headers: [
-                  'Nama Barang',
-                  'To (Cabang)',
-                  'Delivery Date',
-                  'Quantity',
-                  'Keterangan',
-                  'Harga',
-                  'Total',
-                ],
+                headers:
+                    userRole == 'admin'
+                        ? [
+                          'Nama Barang',
+                          'To (Cabang)',
+                          'Delivery Date',
+                          'Quantity',
+                          'Keterangan',
+                        ]
+                        : [
+                          'Nama Barang',
+                          'To (Cabang)',
+                          'Delivery Date',
+                          'Quantity',
+                          'Keterangan',
+                          'Harga',
+                          'Total',
+                        ],
                 data:
                     reportItems.map((item) {
-                      return [
+                      final List<String> rowData = [
                         item['item_name'],
                         item['to_branch_name'],
                         DateFormat(
@@ -71,42 +81,50 @@ class PdfReportExporter {
                         ).format(item['delivery_date']),
                         item['quantity'].toString(),
                         item['keterangan'],
-                        NumberFormat.currency(
-                          locale: 'id_ID',
-                          symbol: 'Rp ',
-                          decimalDigits: 0,
-                        ).format(item['price_per_unit']),
-                        NumberFormat.currency(
-                          locale: 'id_ID',
-                          symbol: 'Rp ',
-                          decimalDigits: 0,
-                        ).format(item['total_price']),
                       ];
+                      if (userRole != 'admin') {
+                        rowData.add(
+                          NumberFormat.currency(
+                            locale: 'id_ID',
+                            symbol: 'Rp ',
+                            decimalDigits: 0,
+                          ).format(item['price_per_unit']),
+                        );
+                        rowData.add(
+                          NumberFormat.currency(
+                            locale: 'id_ID',
+                            symbol: 'Rp ',
+                            decimalDigits: 0,
+                          ).format(item['total_price']),
+                        );
+                      }
+                      return rowData;
                     }).toList(),
               ),
               pw.SizedBox(height: 20),
-              pw.Align(
-                alignment: pw.Alignment.bottomRight,
-                child: pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.end,
-                  children: [
-                    pw.Text(
-                      'Total Keseluruhan: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(totalOverallCost)}',
-                      style: pw.TextStyle(
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 14,
+              if (userRole != 'admin') // Hide totals for admin
+                pw.Align(
+                  alignment: pw.Alignment.bottomRight,
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.Text(
+                        'Total Keseluruhan: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(totalOverallCost)}',
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
-                    pw.Text(
-                      'Total Quantity: ${totalOverallQuantity.toInt()}',
-                      style: pw.TextStyle(
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 14,
+                      pw.Text(
+                        'Total Quantity: ${totalOverallQuantity.toInt()}',
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
             ],
         footer: (pw.Context context) {
           return pw.Container(
@@ -128,6 +146,7 @@ class PdfReportExporter {
     required List<Map<String, dynamic>> reportItems,
     required double totalOverallCost,
     required double totalOverallQuantity,
+    required String userRole, // Added userRole parameter
   }) async {
     final pdf = pw.Document();
 
@@ -170,61 +189,78 @@ class PdfReportExporter {
         build:
             (pw.Context context) => [
               pw.TableHelper.fromTextArray(
-                headers: [
-                  'Nama Barang',
-                  'From (Vendor)',
-                  'Delivery Date',
-                  'Quantity',
-                  'Harga',
-                  'Total',
-                  'Keterangan',
-                ],
+                headers:
+                    userRole == 'admin'
+                        ? [
+                          'Nama Barang',
+                          'From (Vendor)',
+                          'Delivery Date',
+                          'Quantity',
+                          'Keterangan',
+                        ]
+                        : [
+                          'Nama Barang',
+                          'From (Vendor)',
+                          'Delivery Date',
+                          'Quantity',
+                          'Keterangan',
+                          'Harga',
+                          'Total',
+                        ],
                 data:
                     reportItems.map((item) {
-                      return [
+                      final List<String> rowData = [
                         item['item_name'],
                         item['from_branch_name'],
                         DateFormat(
                           'dd-MM-yyyy HH:mm',
                         ).format(item['delivery_date']),
                         item['quantity'].toString(),
-                        NumberFormat.currency(
-                          locale: 'id_ID',
-                          symbol: 'Rp ',
-                          decimalDigits: 0,
-                        ).format(item['price_per_unit']),
-                        NumberFormat.currency(
-                          locale: 'id_ID',
-                          symbol: 'Rp ',
-                          decimalDigits: 0,
-                        ).format(item['total_price']),
                         item['keterangan'],
                       ];
+                      if (userRole != 'admin') {
+                        rowData.add(
+                          NumberFormat.currency(
+                            locale: 'id_ID',
+                            symbol: 'Rp ',
+                            decimalDigits: 0,
+                          ).format(item['price_per_unit']),
+                        );
+                        rowData.add(
+                          NumberFormat.currency(
+                            locale: 'id_ID',
+                            symbol: 'Rp ',
+                            decimalDigits: 0,
+                          ).format(item['total_price']),
+                        );
+                      }
+                      return rowData;
                     }).toList(),
               ),
               pw.SizedBox(height: 20),
-              pw.Align(
-                alignment: pw.Alignment.bottomRight,
-                child: pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.end,
-                  children: [
-                    pw.Text(
-                      'Total Keseluruhan: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(totalOverallCost)}',
-                      style: pw.TextStyle(
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 14,
+              if (userRole != 'admin') // Hide totals for admin
+                pw.Align(
+                  alignment: pw.Alignment.bottomRight,
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.Text(
+                        'Total Keseluruhan: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(totalOverallCost)}',
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
-                    pw.Text(
-                      'Total Quantity: ${totalOverallQuantity.toInt()}',
-                      style: pw.TextStyle(
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 14,
+                      pw.Text(
+                        'Total Quantity: ${totalOverallQuantity.toInt()}',
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
             ],
         footer: (pw.Context context) {
           return pw.Container(
@@ -239,6 +275,9 @@ class PdfReportExporter {
     );
 
     final pdfBytes = await pdf.save();
-    await saveFile(fileBytes: pdfBytes, fileName: 'delivery_note_report.pdf');
+    await saveFile(
+      fileBytes: pdfBytes,
+      fileName: 'incoming_delivery_note_report.pdf',
+    );
   }
 }

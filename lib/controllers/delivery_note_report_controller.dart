@@ -75,7 +75,7 @@ class DeliveryNoteReportController extends GetxController {
   }
 
   Future<void> fetchReportData() async {
-    if (authController.userRole.value != 'finance') {
+    if (authController.userRole.value != 'finance' && authController.userRole.value != 'admin') {
       reportItems.clear();
       Get.snackbar(
         'Permission Denied',

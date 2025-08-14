@@ -16,7 +16,7 @@ class IncomingDeliveryNoteReportScreen extends StatelessWidget {
     ); // Updated controller
     final AuthController authController = Get.find();
 
-    if (authController.userRole.value != 'finance') {
+    if (authController.userRole.value != 'finance' && authController.userRole.value != 'admin') {
       return Scaffold(
         appBar: AppBar(title: const Text('Access Denied')),
         body: const Center(
@@ -220,6 +220,7 @@ class IncomingDeliveryNoteReportScreen extends StatelessWidget {
                                       controller.totalOverallCost.value,
                                   totalOverallQuantity:
                                       controller.totalOverallQuantity.value,
+                                  userRole: authController.userRole.value,
                                 );
                               }
                               : null,
@@ -243,6 +244,7 @@ class IncomingDeliveryNoteReportScreen extends StatelessWidget {
                                       controller.totalOverallCost.value,
                                   totalOverallQuantity:
                                       controller.totalOverallQuantity.value,
+                                  userRole: authController.userRole.value,
                                 );
                               }
                               : null,
@@ -312,16 +314,19 @@ class IncomingDeliveryNoteReportScreen extends StatelessWidget {
                             'Delivery Date: ${DateFormat('dd-MMM-yyyy HH:mm').format(item['delivery_date'])}',
                           ),
                           Text('Quantity: ${item['quantity']}'),
-                          Text(
-                            'Price per Unit: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(item['price_per_unit'])}',
-                          ),
-                          Text(
-                            'Total Price: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(item['total_price'])}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
+                          // Hide price information for admin
+                          if (authController.userRole.value != 'admin') ...[
+                            Text(
+                              'Price per Unit: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(item['price_per_unit'])}',
                             ),
-                          ),
+                            Text(
+                              'Total Price: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(item['total_price'])}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green,
+                              ),
+                            ),
+                          ],
                           if (item['keterangan'] != null &&
                               item['keterangan'].isNotEmpty)
                             Text('Description: ${item['keterangan']}'),
@@ -335,6 +340,10 @@ class IncomingDeliveryNoteReportScreen extends StatelessWidget {
           ),
           // Summary Section
           Obx(() {
+            // Hide summary section for admin
+            if (authController.userRole.value == 'admin') {
+              return const SizedBox.shrink();
+            }
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(

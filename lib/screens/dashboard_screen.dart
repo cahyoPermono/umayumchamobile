@@ -93,28 +93,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             Obx(
-              () => authController.userRole.value != 'finance'
-                  ? ListTile(
-                      leading: const Icon(Icons.history),
-                      title: const Text('Inventory Transaction Log'),
-                      onTap: () {
-                        Get.back(); // Close the drawer
-                        Get.to(() => const TransactionLogScreen());
-                      },
-                    )
-                  : const SizedBox.shrink(),
+              () =>
+                  authController.userRole.value != 'finance'
+                      ? ListTile(
+                        leading: const Icon(Icons.history),
+                        title: const Text('Inventory Transaction Log'),
+                        onTap: () {
+                          Get.back(); // Close the drawer
+                          Get.to(() => const TransactionLogScreen());
+                        },
+                      )
+                      : const SizedBox.shrink(),
             ),
             Obx(
-              () => authController.userRole.value != 'finance'
-                  ? ListTile(
-                      leading: const Icon(Icons.receipt_long),
-                      title: const Text('Consumable Transaction Log'),
-                      onTap: () {
-                        Get.back(); // Close the drawer
-                        Get.to(() => ConsumableTransactionLogScreen());
-                      },
-                    )
-                  : const SizedBox.shrink(),
+              () =>
+                  authController.userRole.value != 'finance'
+                      ? ListTile(
+                        leading: const Icon(Icons.receipt_long),
+                        title: const Text('Consumable Transaction Log'),
+                        onTap: () {
+                          Get.back(); // Close the drawer
+                          Get.to(() => ConsumableTransactionLogScreen());
+                        },
+                      )
+                      : const SizedBox.shrink(),
             ),
             ListTile(
               leading: const Icon(Icons.inventory),
@@ -149,28 +151,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
             Obx(
-              () => authController.userRole.value == 'finance'
-                  ? ListTile(
-                      leading: const Icon(Icons.bar_chart), // Or another suitable icon
-                      title: const Text('Delivery Notes Report (Out)'),
-                      onTap: () {
-                        Get.back(); // Close the drawer
-                        Get.to(() => const DeliveryNoteReportScreen());
-                      },
-                    )
-                  : const SizedBox.shrink(),
+              () =>
+                  authController.userRole.value == 'finance' ||
+                          authController.userRole.value == 'admin'
+                      ? ListTile(
+                        leading: const Icon(
+                          Icons.bar_chart,
+                        ), // Or another suitable icon
+                        title: const Text('Delivery Notes Report (Out)'),
+                        onTap: () {
+                          Get.back(); // Close the drawer
+                          Get.to(() => const DeliveryNoteReportScreen());
+                        },
+                      )
+                      : const SizedBox.shrink(),
             ),
             Obx(
-              () => authController.userRole.value == 'finance'
-                  ? ListTile(
-                      leading: const Icon(Icons.bar_chart), // Using the same icon for now
-                      title: const Text('Incoming Delivery Notes Report'),
-                      onTap: () {
-                        Get.back(); // Close the drawer
-                        Get.to(() => const IncomingDeliveryNoteReportScreen());
-                      },
-                    )
-                  : const SizedBox.shrink(),
+              () =>
+                  authController.userRole.value == 'admin'
+                      ? ListTile(
+                        leading: const Icon(
+                          Icons.bar_chart,
+                        ), // Using the same icon for now
+                        title: const Text('Incoming Delivery Notes Report'),
+                        onTap: () {
+                          Get.back(); // Close the drawer
+                          Get.to(
+                            () => const IncomingDeliveryNoteReportScreen(),
+                          );
+                        },
+                      )
+                      : const SizedBox.shrink(),
             ),
             ListTile(
               leading: const Icon(Icons.store),
