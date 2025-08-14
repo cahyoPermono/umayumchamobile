@@ -24,6 +24,16 @@ class CombinedReportExporter {
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4.landscape,
+        footer: (context) => pw.Container(
+          alignment: pw.Alignment.centerLeft,
+          margin: const pw.EdgeInsets.only(top: 1.0 * PdfPageFormat.cm),
+          child: pw.Text(
+            'Page ${context.pageNumber} of ${context.pagesCount}',
+            style: pw.Theme.of(context)
+                .defaultTextStyle
+                .copyWith(color: PdfColors.grey),
+          ),
+        ),
         build: (context) => [
           pw.Row(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
