@@ -94,6 +94,7 @@ class DeliveryNoteReportController extends GetxController {
           .select(
             '*, delivery_note:delivery_notes(*, from_branch:branches!delivery_notes_from_branch_id_fkey(name), to_branch:branches!delivery_notes_to_branch_id_fkey(name)), product:products(price)',
           )
+          .not('delivery_note_id', 'is', null)
           .eq('type', 'out');
 
       if (selectedToBranchName.value != null) {
@@ -151,6 +152,7 @@ class DeliveryNoteReportController extends GetxController {
           .select(
             '*, delivery_note:delivery_notes(*, from_branch:branches!delivery_notes_from_branch_id_fkey(name), to_branch:branches!delivery_notes_to_branch_id_fkey(name)), consumable:consumables(price)',
           )
+          .not('delivery_note_id', 'is', null)
           .eq('type', 'out');
 
       if (selectedToBranchName.value != null) {
