@@ -10,6 +10,8 @@ import 'package:umayumcha_ims/screens/delivery_note_list_screen.dart';
 import 'package:umayumcha_ims/screens/incoming_delivery_note_list_screen.dart'; // New: Import IncomingDeliveryNoteListScreen
 import 'package:umayumcha_ims/screens/delivery_note_report_screen.dart'; // New: Import DeliveryNoteReportScreen
 import 'package:umayumcha_ims/screens/incoming_delivery_note_report_screen.dart'; // New: Import IncomingDeliveryNoteReportScreen
+import 'package:umayumcha_ims/screens/combined_delivery_note_report_screen.dart';
+
 
 import 'package:umayumcha_ims/screens/transaction_log_screen.dart';
 import 'package:umayumcha_ims/screens/consumable_transaction_log_screen.dart';
@@ -178,6 +180,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           Get.back(); // Close the drawer
                           Get.to(
                             () => const IncomingDeliveryNoteReportScreen(),
+                          );
+                        },
+                      )
+                      : const SizedBox.shrink(),
+            ),
+            Obx(
+              () =>
+                  authController.userRole.value == 'admin'
+                      ? ListTile(
+                        leading: const Icon(
+                          Icons.summarize,
+                        ), // Using the same icon for now
+                        title: const Text('Report Delivery Note (In & Out)'),
+                        onTap: () {
+                          Get.back(); // Close the drawer
+                          Get.to(
+                            () => CombinedDeliveryNoteReportScreen(),
                           );
                         },
                       )
