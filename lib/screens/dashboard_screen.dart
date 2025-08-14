@@ -173,7 +173,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         leading: const Icon(
                           Icons.bar_chart,
                         ), // Using the same icon for now
-                        title: const Text('Incoming Delivery Notes Report'),
+                        title: const Text('Delivery Notes Report (In)'),
                         onTap: () {
                           Get.back(); // Close the drawer
                           Get.to(
