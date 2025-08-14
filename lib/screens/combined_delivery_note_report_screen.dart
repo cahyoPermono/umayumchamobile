@@ -31,7 +31,7 @@ class CombinedDeliveryNoteReportScreen extends StatelessWidget {
               if (controller.reportData.isEmpty) {
                 return const Center(child: Text('No data available for the selected filters.'));
               }
-              return _buildDataTable();
+              return _buildDataList(context);
             }),
           ),
         ],
@@ -156,7 +156,9 @@ class CombinedDeliveryNoteReportScreen extends StatelessWidget {
             const SizedBox(width: 16),
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: null, // Excel export not implemented yet
+                onPressed: canExport
+                    ? () => CombinedReportExporter.exportToExcel(controller.reportData)
+                    : null,
                 icon: const Icon(Icons.table_chart),
                 label: const Text('Export Excel'),
                 style: ElevatedButton.styleFrom(
@@ -171,30 +173,96 @@ class CombinedDeliveryNoteReportScreen extends StatelessWidget {
     });
   }
 
-  Widget _buildDataTable() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: DataTable(
-        columns: const [
-          DataColumn(label: Text('Date')),
-          DataColumn(label: Text('Item Name')),
-          DataColumn(label: Text('Quantity')),
-          DataColumn(label: Text('From Vendor')),
-          DataColumn(label: Text('To Branch')),
-          DataColumn(label: Text('Type')),
+  Widget _buildDataList(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16.0),
+      itemCount: controller.reportData.length,
+      itemBuilder: (context, index) {
+        final item = controller.reportData[index];
+        final isOut = item.type == 'Out';
+        return Card(
+          margin: const EdgeInsets.only(bottom: 16),
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      isOut ? Icons.arrow_circle_up_outlined : Icons.arrow_circle_down_outlined,
+                      color: isOut ? Colors.redAccent : Colors.green,
+                      size: 28,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        item.itemName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const Divider(height: 20, thickness: 1),
+                _buildInfoRow(
+                  'Date',
+                  DateFormat('dd-MMM-yyyy HH:mm').format(item.date),
+                  Icons.calendar_today,
+                ),
+                _buildInfoRow(
+                  'Quantity',
+                  item.quantity.toString(),
+                  Icons.numbers,
+                  valueColor: isOut ? Colors.red : Colors.green,
+                  isBold: true,
+                ),
+                if (isOut && item.toBranch != null && item.toBranch!.isNotEmpty)
+                  _buildInfoRow('To Branch', item.toBranch!, Icons.location_on),
+                if (!isOut && item.fromVendor != null && item.fromVendor!.isNotEmpty)
+                  _buildInfoRow('From Vendor', item.fromVendor!, Icons.store),
+                _buildInfoRow('Type', item.type, isOut ? Icons.file_upload : Icons.file_download),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value, IconData icon, {Color? valueColor, bool isBold = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 20, color: Colors.grey[600]),
+          const SizedBox(width: 12),
+          Text(
+            '$label: ',
+            style: const TextStyle(
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+                color: valueColor ?? Colors.black54,
+              ),
+            ),
+          ),
         ],
-        rows: controller.reportData.map((item) {
-          return DataRow(
-            cells: [
-              DataCell(Text(DateFormat('yyyy-MM-dd').format(item.date))),
-              DataCell(Text(item.itemName)),
-              DataCell(Text(item.quantity.toString())),
-              DataCell(Text(item.fromVendor ?? '')),
-              DataCell(Text(item.toBranch ?? '')),
-              DataCell(Text(item.type)),
-            ],
-          );
-        }).toList(),
       ),
     );
   }

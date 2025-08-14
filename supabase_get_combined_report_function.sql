@@ -1,7 +1,7 @@
 -- Step 1: Drop the old function
 DROP FUNCTION IF EXISTS get_combined_report(text,text,text);
 
--- Step 2: Create the corrected function with matching data types
+-- Step 2: Create the new function with the 'keterangan' column
 CREATE OR REPLACE FUNCTION get_combined_report(
     start_date TEXT,
     end_date TEXT,
@@ -13,7 +13,8 @@ RETURNS TABLE (
     quantity INTEGER,
     "fromVendor" TEXT,
     "toBranch" TEXT,
-    note_type TEXT
+    note_type TEXT,
+    keterangan TEXT
 )
 AS $$
 BEGIN
@@ -25,7 +26,8 @@ BEGIN
         -it.quantity_change AS quantity,
         NULL AS "fromVendor",
         it.to_branch_name AS "toBranch",
-        'Out' AS note_type
+        'Out' AS note_type,
+        it.reason AS keterangan
     FROM
         inventory_transactions it
     JOIN products p ON it.product_id = p.id
@@ -45,7 +47,8 @@ BEGIN
         -ct.quantity_change AS quantity,
         NULL AS "fromVendor",
         ct.branch_destination_name AS "toBranch",
-        'Out' AS note_type
+        'Out' AS note_type,
+        ct.reason AS keterangan
     FROM
         consumable_transactions ct
     JOIN consumables c ON ct.consumable_id = c.id
@@ -65,7 +68,8 @@ BEGIN
         it.quantity_change AS quantity,
         idn.from_vendor_name AS "fromVendor",
         NULL AS "toBranch",
-        'In' AS note_type
+        'In' AS note_type,
+        COALESCE(it.reason, idn.keterangan) AS keterangan
     FROM
         inventory_transactions it
     JOIN products p ON it.product_id = p.id
@@ -85,7 +89,8 @@ BEGIN
         ct.quantity_change AS quantity,
         idn.from_vendor_name AS "fromVendor",
         NULL AS "toBranch",
-        'In' AS note_type
+        'In' AS note_type,
+        COALESCE(ct.reason, idn.keterangan) AS keterangan
     FROM
         consumable_transactions ct
     JOIN consumables c ON ct.consumable_id = c.id

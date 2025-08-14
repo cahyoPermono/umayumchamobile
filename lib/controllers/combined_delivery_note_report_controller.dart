@@ -62,6 +62,7 @@ class CombinedDeliveryNoteReportController extends GetxController {
           fromVendor: item['fromVendor'],
           toBranch: item['toBranch'],
           type: item['note_type'] ?? 'N/A',
+          keterangan: item['keterangan'],
         );
       }).toList();
 

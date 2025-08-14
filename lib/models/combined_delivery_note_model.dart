@@ -6,6 +6,7 @@ class CombinedDeliveryNote {
   final String? fromVendor;
   final String? toBranch;
   final String type;
+  final String? keterangan;
 
   CombinedDeliveryNote({
     required this.date,
@@ -14,5 +15,6 @@ class CombinedDeliveryNote {
     this.fromVendor,
     this.toBranch,
     required this.type,
+    this.keterangan,
   });
 }
