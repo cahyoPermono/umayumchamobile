@@ -46,38 +46,40 @@ class PdfReportExporter {
                 ],
               ),
               pw.SizedBox(height: 30),
-              pw.TableHelper.fromTextArray(
-                headers: [
-                  'Nama Barang',
-                  'To (Cabang)',
-                  'Delivery Date',
-                  'Quantity',
-                  'Keterangan',
-                  'Harga',
-                  'Total',
-                ],
-                data:
-                    reportItems.map((item) {
-                      return [
-                        item['item_name'],
-                        item['to_branch_name'],
-                        DateFormat(
-                          'dd-MM-yyyy HH:mm',
-                        ).format(item['delivery_date']),
-                        item['quantity'].toString(),
-                        item['keterangan'],
-                        NumberFormat.currency(
-                          locale: 'id_ID',
-                          symbol: 'Rp ',
-                          decimalDigits: 0,
-                        ).format(item['price_per_unit']),
-                        NumberFormat.currency(
-                          locale: 'id_ID',
-                          symbol: 'Rp ',
-                          decimalDigits: 0,
-                        ).format(item['total_price']),
-                      ];
-                    }).toList(),
+              pw.Expanded(
+                child: pw.TableHelper.fromTextArray(
+                  headers: [
+                    'Nama Barang',
+                    'To (Cabang)',
+                    'Delivery Date',
+                    'Quantity',
+                    'Keterangan',
+                    'Harga',
+                    'Total',
+                  ],
+                  data:
+                      reportItems.map((item) {
+                        return [
+                          item['item_name'],
+                          item['to_branch_name'],
+                          DateFormat(
+                            'dd-MM-yyyy HH:mm',
+                          ).format(item['delivery_date']),
+                          item['quantity'].toString(),
+                          item['keterangan'],
+                          NumberFormat.currency(
+                            locale: 'id_ID',
+                            symbol: 'Rp ',
+                            decimalDigits: 0,
+                          ).format(item['price_per_unit']),
+                          NumberFormat.currency(
+                            locale: 'id_ID',
+                            symbol: 'Rp ',
+                            decimalDigits: 0,
+                          ).format(item['total_price']),
+                        ];
+                      }).toList(),
+                ),
               ),
               pw.SizedBox(height: 20),
               pw.Align(
