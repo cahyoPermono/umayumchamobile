@@ -11,14 +11,15 @@ class DeliveryNoteReportScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final DeliveryNoteReportController controller = Get.put(DeliveryNoteReportController());
+    final DeliveryNoteReportController controller = Get.put(
+      DeliveryNoteReportController(),
+    );
     final AuthController authController = Get.find();
 
-    if (authController.userRole.value != 'finance' && authController.userRole.value != 'admin') {
+    if (authController.userRole.value != 'finance' &&
+        authController.userRole.value != 'admin') {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Access Denied'),
-        ),
+        appBar: AppBar(title: const Text('Access Denied')),
         body: const Center(
           child: Text('You do not have permission to view this report.'),
         ),
@@ -97,7 +98,9 @@ class DeliveryNoteReportScreen extends StatelessWidget {
                         value: null,
                         child: Text('All Items'),
                       ),
-                      ...controller.distinctProductConsumableNames.map((itemName) {
+                      ...controller.distinctProductConsumableNames.map((
+                        itemName,
+                      ) {
                         return DropdownMenuItem<String?>(
                           value: itemName,
                           child: Text(itemName),
@@ -196,24 +199,35 @@ class DeliveryNoteReportScreen extends StatelessWidget {
           ),
           // Export Buttons
           Obx(() {
-            final bool canExport = !controller.isLoading.value && controller.reportItems.isNotEmpty;
+            final bool canExport =
+                !controller.isLoading.value &&
+                controller.reportItems.isNotEmpty;
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: canExport
-                          ? () {
-                              PdfReportExporter.generateAndOpenPdf(
-                                reportItems: controller.reportItems,
-                                totalOverallCost: controller.totalOverallCost.value,
-                                totalOverallQuantity: controller.totalOverallQuantity.value,
-                                userRole: authController.userRole.value, // Pass userRole
-                              );
-                            }
-                          : null,
+                      onPressed:
+                          canExport
+                              ? () {
+                                PdfReportExporter.generateAndOpenPdf(
+                                  reportItems: controller.reportItems,
+                                  totalOverallCost:
+                                      controller.totalOverallCost.value,
+                                  totalOverallQuantity:
+                                      controller.totalOverallQuantity.value,
+                                  userRole:
+                                      authController
+                                          .userRole
+                                          .value, // Pass userRole
+                                );
+                              }
+                              : null,
                       icon: const Icon(Icons.picture_as_pdf),
                       label: const Text('Export PDF'),
                       style: ElevatedButton.styleFrom(
@@ -225,16 +239,22 @@ class DeliveryNoteReportScreen extends StatelessWidget {
                   const SizedBox(width: 16),
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: canExport
-                          ? () {
-                              ExcelReportExporter.generateAndOpenExcel(
-                                reportItems: controller.reportItems,
-                                totalOverallCost: controller.totalOverallCost.value,
-                                totalOverallQuantity: controller.totalOverallQuantity.value,
-                                userRole: authController.userRole.value, // Pass userRole
-                              );
-                            }
-                          : null,
+                      onPressed:
+                          canExport
+                              ? () {
+                                ExcelReportExporter.generateAndOpenExcel(
+                                  reportItems: controller.reportItems,
+                                  totalOverallCost:
+                                      controller.totalOverallCost.value,
+                                  totalOverallQuantity:
+                                      controller.totalOverallQuantity.value,
+                                  userRole:
+                                      authController
+                                          .userRole
+                                          .value, // Pass userRole
+                                );
+                              }
+                              : null,
                       icon: const Icon(Icons.table_chart),
                       label: const Text('Export Excel'),
                       style: ElevatedButton.styleFrom(
@@ -280,7 +300,9 @@ class DeliveryNoteReportScreen extends StatelessWidget {
                   return Card(
                     margin: const EdgeInsets.only(bottom: 16),
                     elevation: 2,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
@@ -288,21 +310,32 @@ class DeliveryNoteReportScreen extends StatelessWidget {
                         children: [
                           Text(
                             '${item['item_name']} (${item['type'] == 'product' ? 'Product' : 'Consumable'})',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           Text('To Branch: ${item['to_branch_name']}'),
-                          Text('Delivery Date: ${DateFormat('dd-MMM-yyyy HH:mm').format(item['delivery_date'])}'),
+                          Text(
+                            'Delivery Date: ${DateFormat('dd-MMM-yyyy HH:mm').format(item['delivery_date'])}',
+                          ),
                           Text('Quantity: ${item['quantity']}'),
                           // Hide price information for admin
                           if (authController.userRole.value != 'admin') ...[
-                            Text('Price per Unit: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(item['price_per_unit'])}'),
+                            Text(
+                              'Price per Unit: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(item['price_per_unit'])}',
+                            ),
                             Text(
                               'Total Price: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(item['total_price'])}',
-                              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green,
+                              ),
                             ),
                           ],
-                          if (item['keterangan'] != null && item['keterangan'].isNotEmpty)
+                          if (item['keterangan'] != null &&
+                              item['keterangan'].isNotEmpty)
                             Text('Description: ${item['keterangan']}'),
                         ],
                       ),
@@ -316,7 +349,23 @@ class DeliveryNoteReportScreen extends StatelessWidget {
           Obx(() {
             // Hide summary section for admin
             if (authController.userRole.value == 'admin') {
-              return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Divider(),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Total Overall Quantity: ${controller.totalOverallQuantity.value}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              );
             }
             return Padding(
               padding: const EdgeInsets.all(16.0),
@@ -327,12 +376,19 @@ class DeliveryNoteReportScreen extends StatelessWidget {
                   const SizedBox(height: 10),
                   Text(
                     'Total Overall Quantity: ${controller.totalOverallQuantity.value}',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
                   const SizedBox(height: 5),
                   Text(
                     'Total Overall Cost: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(controller.totalOverallCost.value)}',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.blue),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.blue,
+                    ),
                   ),
                 ],
               ),

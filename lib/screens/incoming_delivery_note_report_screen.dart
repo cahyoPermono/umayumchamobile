@@ -16,7 +16,8 @@ class IncomingDeliveryNoteReportScreen extends StatelessWidget {
     ); // Updated controller
     final AuthController authController = Get.find();
 
-    if (authController.userRole.value != 'finance' && authController.userRole.value != 'admin') {
+    if (authController.userRole.value != 'finance' &&
+        authController.userRole.value != 'admin') {
       return Scaffold(
         appBar: AppBar(title: const Text('Access Denied')),
         body: const Center(
@@ -342,7 +343,23 @@ class IncomingDeliveryNoteReportScreen extends StatelessWidget {
           Obx(() {
             // Hide summary section for admin
             if (authController.userRole.value == 'admin') {
-              return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Divider(),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Total Overall Quantity: ${controller.totalOverallQuantity.value}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              );
             }
             return Padding(
               padding: const EdgeInsets.all(16.0),
