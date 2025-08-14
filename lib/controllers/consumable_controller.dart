@@ -10,6 +10,7 @@ class ConsumableController extends GetxController {
   var expiringConsumables = <Consumable>[].obs;
   var globalLowStockConsumables =
       <Consumable>[].obs; // New: Global low stock consumables
+  var consumablesWithoutPrice = <Consumable>[].obs; // New: Consumables without price
   var isLoading = false.obs;
   var searchQuery = ''.obs; // New: Search query observable
   String umayumchaHQBranchId =
@@ -109,6 +110,7 @@ class ConsumableController extends GetxController {
     super.onInit();
     fetchConsumables();
     fetchGlobalLowStockConsumables(); // Fetch global low stock consumables on init
+    fetchConsumablesWithoutPrice(); // New: Fetch consumables without price on init
   }
 
   Future<void> fetchConsumables() async {
@@ -129,10 +131,28 @@ class ConsumableController extends GetxController {
             final difference = c.expiredDate!.difference(now).inDays;
             return difference >= 0 && difference <= 60;
           }).toList();
+      fetchConsumablesWithoutPrice(); // New: Refresh consumables without price after fetching all consumables
     } catch (e) {
       Get.snackbar('Error', 'Failed to fetch consumables: ${e.toString()}');
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchConsumablesWithoutPrice() async {
+    try {
+      final response = await _supabase
+          .from('consumables')
+          .select('*')
+          .filter('price', 'is', null); // Query for consumables where price is null
+
+      consumablesWithoutPrice.value =
+          (response as List).map((item) => Consumable.fromJson(item)).toList();
+      log(
+        'Consumables without price fetched: ${consumablesWithoutPrice.length}',
+      );
+    } catch (e) {
+      log('Error fetching consumables without price: ${e.toString()}');
     }
   }
 
@@ -155,6 +175,7 @@ class ConsumableController extends GetxController {
       isLoading.value = true;
       await _supabase.from('consumables').insert([consumable.toJson()]);
       fetchConsumables(); // Refresh the list
+      fetchConsumablesWithoutPrice(); // New: Refresh consumables without price
       Get.back(); // Close the form screen
       Get.snackbar(
         'Success',
@@ -184,6 +205,7 @@ class ConsumableController extends GetxController {
       }).eq('id', consumableId);
 
       fetchConsumables(); // Refresh the list
+      fetchConsumablesWithoutPrice(); // New: Refresh consumables without price
       Get.back();
       Get.snackbar('Success', 'Consumable price updated successfully!');
     } catch (e) {
@@ -214,6 +236,7 @@ class ConsumableController extends GetxController {
           .update(consumableMap)
           .eq('id', consumable.id!);
       fetchConsumables(); // Refresh the list
+      fetchConsumablesWithoutPrice(); // New: Refresh consumables without price
       Get.back(); // Close the form screen
       Get.snackbar(
         'Success',
@@ -232,6 +255,7 @@ class ConsumableController extends GetxController {
       isLoading.value = true;
       await _supabase.from('consumables').delete().eq('id', id);
       fetchConsumables(); // Refresh the list
+      fetchConsumablesWithoutPrice(); // New: Refresh consumables without price
       Get.snackbar(
         'Success',
         'Consumable deleted successfully!',

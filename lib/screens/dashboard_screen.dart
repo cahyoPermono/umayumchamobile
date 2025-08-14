@@ -233,6 +233,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: <Widget>[
               // Combined Low Stock Warning Section
               Obx(() {
+                if (authController.userRole.value == 'finance') {
+                  return Container(); // Hide for finance role
+                }
+
                 final lowStockProducts =
                     inventoryController.globalLowStockProducts;
                 final lowStockConsumables =
@@ -357,6 +361,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               // Expiring Consumables Warning Section
               Obx(() {
+                if (authController.userRole.value == 'finance') {
+                  return Container(); // Hide for finance role
+                }
+
                 if (consumableController.isLoading.value) {
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -460,6 +468,116 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 .colorScheme
                                 .onTertiaryContainer
                                 .withValues(alpha: 0.8),
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+              const SizedBox(height: 24),
+
+              // Products/Consumables Without Price Alert Section (for Finance Role)
+              Obx(() {
+                if (authController.userRole.value != 'finance') {
+                  return Container(); // Only show for finance role
+                }
+
+                final productsWithoutPrice =
+                    inventoryController.productsWithoutPrice;
+                final consumablesWithoutPrice =
+                    consumableController.consumablesWithoutPrice;
+
+                if (productsWithoutPrice.isEmpty &&
+                    consumablesWithoutPrice.isEmpty) {
+                  debugPrint('No products or consumables without price.');
+                  return Container();
+                }
+
+                final allItemsWithoutPrice = <String>[];
+                for (var p in productsWithoutPrice) {
+                  allItemsWithoutPrice.add('${p.name} (Product)');
+                }
+                for (var c in consumablesWithoutPrice) {
+                  allItemsWithoutPrice.add('${c.name} (Consumable)');
+                }
+
+                debugPrint(
+                  'Items without price: ${allItemsWithoutPrice.length}',
+                );
+
+                return Card(
+                  color: Colors.orange.shade100, // Warning background color
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.attach_money_rounded,
+                              color: Colors.orange.shade900, // Warning icon color
+                              size: 28,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Items Without Price!',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange.shade900, // Warning text color
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        const Divider(height: 1, thickness: 1),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 120, // Dynamic height up to 120
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            physics: const ClampingScrollPhysics(),
+                            itemCount: allItemsWithoutPrice.length,
+                            itemBuilder: (context, index) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4.0,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.circle,
+                                      size: 10,
+                                      color: Colors.orange.shade700, // Warning circle color
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        allItemsWithoutPrice[index],
+                                        style: TextStyle(
+                                          color: Colors.orange.shade900, // Warning text color
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Please input prices for these items.',
+                          style: TextStyle(
+                            color: Colors.orange.shade800, // Warning text color
                             fontStyle: FontStyle.italic,
                           ),
                         ),

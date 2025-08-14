@@ -14,6 +14,7 @@ class InventoryController extends GetxController {
   var isLoading = false.obs;
   var selectedBranch = Rx<Branch?>(null);
   var globalLowStockProducts = <BranchProduct>[].obs; // Renamed and now global
+  var productsWithoutPrice = <Product>[].obs; // New: Products without price
   var searchQuery = ''.obs;
   String umayumchaHQBranchId =
       '2e109b1a-12c6-4572-87ab-6c96add8a603'; // To store UmayumchaHQ branch ID
@@ -73,6 +74,7 @@ class InventoryController extends GetxController {
       await supabase.from('products').update(updateData).eq('id', product.id!);
 
       fetchBranchProducts(); // Refresh the list
+      fetchProductsWithoutPrice(); // New: Refresh products without price
       return true; // Return true on success
     } catch (e) {
       debugPrint('Error updating product: $e');
@@ -99,6 +101,7 @@ class InventoryController extends GetxController {
       }).eq('id', productId);
 
       fetchBranchProducts(); // Refresh the list
+      fetchProductsWithoutPrice(); // New: Refresh products without price
       return true; // Return true on success
     } catch (e) {
       debugPrint('Error updating product price: $e');
@@ -117,6 +120,7 @@ class InventoryController extends GetxController {
       // If no exception is thrown, the deletion is successful.
       Get.snackbar('Success', 'Product deleted successfully');
       fetchBranchProducts(); // Refresh the list
+      fetchProductsWithoutPrice(); // New: Refresh products without price
     } catch (e) {
       debugPrint('Error deleting product: $e'); // Log the actual error
       Get.snackbar('Error', 'Failed to delete product: ${e.toString()}');
@@ -131,6 +135,7 @@ class InventoryController extends GetxController {
     ever(selectedBranch, (_) => fetchBranchProducts());
     fetchVendorNames();
     fetchGlobalLowStockProducts(); // Fetch global low stock on init
+    fetchProductsWithoutPrice(); // New: Fetch products without price on init
     super.onInit();
   }
 
@@ -192,8 +197,26 @@ class InventoryController extends GetxController {
     }
   }
 
+  Future<void> fetchProductsWithoutPrice() async {
+    try {
+      final response = await supabase
+          .from('products')
+          .select('*')
+          .filter('price', 'is', null); // Query for products where price is null
+
+      productsWithoutPrice.value =
+          (response as List).map((item) => Product.fromJson(item)).toList();
+      debugPrint(
+        'Products without price fetched: ${productsWithoutPrice.length}',
+      );
+    } catch (e) {
+      debugPrint('Error fetching products without price: ${e.toString()}');
+    }
+  }
+
   Future<void> refreshDashboardData() async {
     await fetchGlobalLowStockProducts();
+    await fetchProductsWithoutPrice(); // New: Refresh products without price
     final consumableController = Get.find<ConsumableController>();
     await consumableController.fetchGlobalLowStockConsumables();
     await consumableController.fetchConsumables();
@@ -408,6 +431,7 @@ class InventoryController extends GetxController {
       );
       fetchBranchProducts();
       fetchGlobalLowStockProducts();
+      fetchProductsWithoutPrice(); // New: Refresh products without price after transaction
       return true; // Return true on success
     } catch (e) {
       debugPrint('Error adding transaction: ${e.toString()}');
