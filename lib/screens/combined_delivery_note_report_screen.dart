@@ -34,6 +34,7 @@ class CombinedDeliveryNoteReportScreen extends StatelessWidget {
               return _buildDataList(context);
             }),
           ),
+          _buildSummaryCard(),
         ],
       ),
     );
@@ -258,6 +259,87 @@ class CombinedDeliveryNoteReportScreen extends StatelessWidget {
               textAlign: TextAlign.end,
               style: TextStyle(
                 fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+                color: valueColor ?? Colors.black54,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard() {
+    return Obx(() {
+        if (controller.reportData.isEmpty) return const SizedBox.shrink();
+        return Card(
+          margin: const EdgeInsets.all(16.0),
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Summary',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: Colors.black87,
+                  ),
+                ),
+                const Divider(height: 20, thickness: 1),
+                _buildSummaryRow(
+                  'Total Quantity In',
+                  controller.totalIn.value.toString(),
+                  Icons.arrow_downward,
+                  valueColor: Colors.green,
+                ),
+                _buildSummaryRow(
+                  'Total Quantity Out',
+                  controller.totalOut.value.toString(),
+                  Icons.arrow_upward,
+                  valueColor: Colors.red,
+                ),
+                const Divider(height: 20, thickness: 1),
+                 _buildSummaryRow(
+                  'Net Total (In - Out)',
+                  controller.netTotal.value.toString(),
+                  Icons.functions,
+                  isBold: true,
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    );
+  }
+
+  Widget _buildSummaryRow(String label, String value, IconData icon, {Color? valueColor, bool isBold = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        children: [
+          Icon(icon, size: 24, color: Colors.grey[700]),
+          const SizedBox(width: 12),
+          Text(
+            '$label: ',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Colors.black87,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+                fontSize: 16,
                 color: valueColor ?? Colors.black54,
               ),
             ),

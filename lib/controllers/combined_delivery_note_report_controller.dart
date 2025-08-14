@@ -10,6 +10,10 @@ class CombinedDeliveryNoteReportController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxList<String> itemNames = <String>[].obs;
 
+  final RxNum totalIn = RxNum(0);
+  final RxNum totalOut = RxNum(0);
+  final RxNum netTotal = RxNum(0);
+
   var selectedItemName = Rx<String?>(null);
   var selectedFromDate = Rx<DateTime?>(null);
   var selectedToDate = Rx<DateTime?>(null);
@@ -22,7 +26,7 @@ class CombinedDeliveryNoteReportController extends GetxController {
   }
 
   void _initializeFiltersAndFetch() {
-    selectedFromDate.value = DateTime.now().subtract(const Duration(days: 30));
+    selectedFromDate.value = DateTime.now().subtract(const Duration(days: 7));
     selectedToDate.value = DateTime.now();
     fetchReportData();
   }
@@ -67,6 +71,20 @@ class CombinedDeliveryNoteReportController extends GetxController {
       }).toList();
 
       reportData.assignAll(notes);
+
+      // Calculate totals
+      num calculatedIn = 0;
+      num calculatedOut = 0;
+      for (var note in notes) {
+        if (note.type == 'In') {
+          calculatedIn += note.quantity;
+        } else {
+          calculatedOut += note.quantity.abs(); // Use absolute for summation
+        }
+      }
+      totalIn.value = calculatedIn;
+      totalOut.value = calculatedOut;
+      netTotal.value = calculatedIn - calculatedOut;
 
     } catch (e) {
       debugPrint('Error fetching report data via RPC: $e');
