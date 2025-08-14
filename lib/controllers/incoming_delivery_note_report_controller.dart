@@ -23,7 +23,8 @@ class IncomingDeliveryNoteReportController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    if (authController.userRole.value == 'finance') {
+    if (authController.userRole.value == 'finance' ||
+        authController.userRole.value == 'admin') {
       _initializeFiltersAndFetch();
       fetchDistinctFromBranchNames();
       fetchDistinctProductConsumableNames();
@@ -78,7 +79,8 @@ class IncomingDeliveryNoteReportController extends GetxController {
   }
 
   Future<void> fetchReportData() async {
-    if (authController.userRole.value != 'finance' && authController.userRole.value != 'admin') {
+    if (authController.userRole.value != 'finance' &&
+        authController.userRole.value != 'admin') {
       reportItems.clear();
       Get.snackbar(
         'Permission Denied',

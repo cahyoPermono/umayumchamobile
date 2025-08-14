@@ -23,7 +23,7 @@ class DeliveryNoteReportController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    if (authController.userRole.value == 'finance') {
+    if (authController.userRole.value == 'finance' || authController.userRole.value == 'admin') {
       _initializeFiltersAndFetch();
       fetchDistinctToBranchNames();
       fetchDistinctProductConsumableNames();
