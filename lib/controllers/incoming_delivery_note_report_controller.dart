@@ -43,7 +43,7 @@ class IncomingDeliveryNoteReportController extends GetxController {
           .select('from_vendor_name');
       distinctFromBranchNames.value =
           (response as List)
-              .map((e) => e['from_vendor_name'] as String)
+              .map((e) => (e['from_vendor_name'] as String).trim()) // Trim here
               .toSet()
               .toList();
     } catch (e) {
@@ -91,19 +91,47 @@ class IncomingDeliveryNoteReportController extends GetxController {
       isLoading.value = true;
       List<Map<String, dynamic>> allItems = [];
 
+      List<String> incomingDeliveryNoteIds = [];
+      if (selectedFromBranchName.value != null) {
+        try {
+          final matchingNotes = await supabase
+              .from('incoming_delivery_notes')
+              .select('id')
+              .eq('from_vendor_name', selectedFromBranchName.value!.trim());
+          incomingDeliveryNoteIds =
+              (matchingNotes as List).map((e) => e['id'] as String).toList();
+
+          if (incomingDeliveryNoteIds.isEmpty) {
+            reportItems.clear();
+            isLoading(false);
+            return; // No matching notes, so no report items
+          }
+        } catch (e) {
+          debugPrint(
+            'Error fetching matching incoming delivery note IDs: ${e.toString()}',
+          );
+          Get.snackbar('Error', 'Failed to filter by vendor: ${e.toString()}');
+          isLoading(false);
+          return;
+        }
+      }
+
       // Fetch product transactions
       var productQuery = supabase
           .from('inventory_transactions')
           .select(
-            '*, incoming_delivery_note:incoming_delivery_notes(from_vendor_name, delivery_date), product:products(price)',
+            '*, incoming_delivery_note:incoming_delivery_notes(from_vendor_name), product:products(price)',
           )
           .not('incoming_delivery_note_id', 'is', null)
           .eq('type', 'in');
 
       if (selectedFromBranchName.value != null) {
-        productQuery = productQuery.eq(
-          'incoming_delivery_note.from_vendor_name',
-          selectedFromBranchName.value!,
+        debugPrint(
+          'Filtering productQuery by incomingDeliveryNoteIds: $incomingDeliveryNoteIds',
+        ); // Updated debugPrint
+        productQuery = productQuery.inFilter(
+          'incoming_delivery_note_id',
+          incomingDeliveryNoteIds,
         );
       }
       if (selectedItemName.value != null) {
@@ -153,15 +181,18 @@ class IncomingDeliveryNoteReportController extends GetxController {
       var consumableQuery = supabase
           .from('consumable_transactions')
           .select(
-            '*, incoming_delivery_note:incoming_delivery_notes(from_vendor_name, delivery_date), consumable:consumables(price)',
+            '*, incoming_delivery_note:incoming_delivery_notes(from_vendor_name), consumable:consumables(price)',
           )
           .not('incoming_delivery_note_id', 'is', null)
           .eq('type', 'in');
 
       if (selectedFromBranchName.value != null) {
-        consumableQuery = consumableQuery.eq(
-          'incoming_delivery_note.from_vendor_name',
-          selectedFromBranchName.value!,
+        debugPrint(
+          'Filtering consumableQuery by incomingDeliveryNoteIds: $incomingDeliveryNoteIds',
+        ); // Updated debugPrint
+        consumableQuery = consumableQuery.inFilter(
+          'incoming_delivery_note_id',
+          incomingDeliveryNoteIds,
         );
       }
       if (selectedItemName.value != null) {
