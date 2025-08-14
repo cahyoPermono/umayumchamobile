@@ -293,7 +293,7 @@ class IncomingDeliveryNoteReportScreen extends StatelessWidget {
                   final item = controller.reportItems[index];
                   return Card(
                     margin: const EdgeInsets.only(bottom: 16),
-                    elevation: 2,
+                    elevation: 4,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -302,35 +302,74 @@ class IncomingDeliveryNoteReportScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            '${item['item_name']} (${item['type'] == 'product' ? 'Product' : 'Consumable'})',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text('From: ${item['from_branch_name']}'),
-                          Text(
-                            'Delivery Date: ${DateFormat('dd-MMM-yyyy HH:mm').format(item['delivery_date'])}',
-                          ),
-                          Text('Quantity: ${item['quantity']}'),
-                          // Hide price information for admin
-                          if (authController.userRole.value != 'admin') ...[
-                            Text(
-                              'Price per Unit: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(item['price_per_unit'])}',
-                            ),
-                            Text(
-                              'Total Price: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(item['total_price'])}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green,
+                          Row(
+                            children: [
+                              Icon(
+                                item['type'] == 'product'
+                                    ? Icons.inventory
+                                    : Icons.fastfood,
+                                color: Theme.of(context).primaryColor,
+                                size: 28,
                               ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  '${item['item_name']} (${item['type'] == 'product' ? 'Product' : 'Consumable'})',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Divider(height: 20, thickness: 1),
+                          _buildInfoRow(
+                            'From Vendor',
+                            item['from_branch_name'],
+                            Icons.business,
+                          ),
+                          _buildInfoRow(
+                            'Delivery Date',
+                            DateFormat('dd-MMM-yyyy HH:mm')
+                                .format(item['delivery_date']),
+                            Icons.calendar_today,
+                          ),
+                          _buildInfoRow(
+                            'Quantity',
+                            item['quantity'].toString(),
+                            Icons.numbers,
+                          ),
+                          if (authController.userRole.value != 'admin') ...[
+                            _buildInfoRow(
+                              'Price per Unit',
+                              NumberFormat.currency(
+                                locale: 'id_ID',
+                                symbol: 'Rp ',
+                                decimalDigits: 0,
+                              ).format(item['price_per_unit']),
+                              Icons.attach_money,
+                            ),
+                            _buildInfoRow(
+                              'Total Price',
+                              NumberFormat.currency(
+                                locale: 'id_ID',
+                                symbol: 'Rp ',
+                                decimalDigits: 0,
+                              ).format(item['total_price']),
+                              Icons.money,
+                              valueColor: Colors.green,
+                              isBold: true,
                             ),
                           ],
                           if (item['keterangan'] != null &&
                               item['keterangan'].isNotEmpty)
-                            Text('Description: ${item['keterangan']}'),
+                            _buildInfoRow(
+                              'Description',
+                              item['keterangan'],
+                              Icons.description,
+                            ),
                         ],
                       ),
                     ),
@@ -343,51 +382,139 @@ class IncomingDeliveryNoteReportScreen extends StatelessWidget {
           Obx(() {
             // Hide summary section for admin
             if (authController.userRole.value == 'admin') {
-              return Padding(
+              return Card(
+                margin: const EdgeInsets.all(16.0),
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Summary',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const Divider(height: 20, thickness: 1),
+                      _buildSummaryRow(
+                        'Total Overall Quantity',
+                        controller.totalOverallQuantity.value.toInt().toString(),
+                        Icons.format_list_numbered,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+            return Card(
+              margin: const EdgeInsets.all(16.0),
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Divider(),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Total Overall Quantity: ${controller.totalOverallQuantity.value}',
-                      style: const TextStyle(
+                    const Text(
+                      'Summary',
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: 20,
+                        color: Colors.black87,
                       ),
+                    ),
+                    const Divider(height: 20, thickness: 1),
+                    _buildSummaryRow(
+                      'Total Overall Quantity',
+                      controller.totalOverallQuantity.value.toInt().toString(),
+                      Icons.format_list_numbered,
+                    ),
+                    _buildSummaryRow(
+                      'Total Overall Cost',
+                      NumberFormat.currency(
+                        locale: 'id_ID',
+                        symbol: 'Rp ',
+                        decimalDigits: 0,
+                      ).format(controller.totalOverallCost.value),
+                      Icons.monetization_on,
+                      valueColor: Colors.blue,
                     ),
                   ],
                 ),
-              );
-            }
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Divider(),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Total Overall Quantity: ${controller.totalOverallQuantity.value}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    'Total Overall Cost: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(controller.totalOverallCost.value)}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.blue,
-                    ),
-                  ),
-                ],
               ),
             );
           }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value, IconData icon,
+      {Color? valueColor, bool isBold = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 20, color: Colors.grey[600]),
+          const SizedBox(width: 12),
+          Text(
+            '$label: ',
+            style: const TextStyle(
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+                color: valueColor ?? Colors.black54,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(String label, String value, IconData icon,
+      {Color? valueColor}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        children: [
+          Icon(icon, size: 24, color: Colors.grey[700]),
+          const SizedBox(width: 12),
+          Text(
+            '$label: ',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Colors.black87,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: valueColor ?? Colors.black54,
+              ),
+            ),
+          ),
         ],
       ),
     );
