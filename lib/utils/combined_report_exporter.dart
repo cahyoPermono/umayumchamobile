@@ -18,79 +18,112 @@ class CombinedReportExporter {
     final pw.MemoryImage logoImage = pw.MemoryImage(logoBytes);
 
     // Calculate totals
-    final totalIn = data.where((d) => d.type == 'In').fold<num>(0, (sum, item) => sum + item.quantity);
-    final totalOut = data.where((d) => d.type == 'Out').fold<num>(0, (sum, item) => sum + item.quantity.abs());
+    final totalIn = data
+        .where((d) => d.type == 'In')
+        .fold<num>(0, (sum, item) => sum + item.quantity);
+    final totalOut = data
+        .where((d) => d.type == 'Out')
+        .fold<num>(0, (sum, item) => sum + item.quantity.abs());
 
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4.landscape,
-        footer: (context) => pw.Container(
-          alignment: pw.Alignment.centerLeft,
-          margin: const pw.EdgeInsets.only(top: 1.0 * PdfPageFormat.cm),
-          child: pw.Text(
-            'Page ${context.pageNumber} of ${context.pagesCount}',
-            style: pw.Theme.of(context)
-                .defaultTextStyle
-                .copyWith(color: PdfColors.grey),
-          ),
-        ),
-        build: (context) => [
-          pw.Row(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Image(logoImage, width: 80, height: 80),
-              pw.SizedBox(width: 20),
-              pw.Column(
+        footer:
+            (context) => pw.Container(
+              alignment: pw.Alignment.centerLeft,
+              margin: const pw.EdgeInsets.only(top: 1.0 * PdfPageFormat.cm),
+              child: pw.Text(
+                'Page ${context.pageNumber} of ${context.pagesCount}',
+                style: pw.Theme.of(
+                  context,
+                ).defaultTextStyle.copyWith(color: PdfColors.grey),
+              ),
+            ),
+        build:
+            (context) => [
+              pw.Row(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  pw.Text('REPORT DELIVERY NOTE(IN & OUT)', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
-                  pw.Text('HEADQUARTER', style: pw.TextStyle(fontSize: 12)),
-                  pw.Text('MALANG', style: pw.TextStyle(fontSize: 12)),
+                  pw.Image(logoImage, width: 80, height: 80),
+                  pw.SizedBox(width: 20),
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'REPORT DELIVERY NOTE(IN & OUT)',
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      pw.Text('HEADQUARTER', style: pw.TextStyle(fontSize: 12)),
+                      pw.Text('MALANG', style: pw.TextStyle(fontSize: 12)),
+                    ],
+                  ),
+                ],
+              ),
+              pw.SizedBox(height: 20),
+              pw.Divider(),
+              pw.SizedBox(height: 20),
+              pw.TableHelper.fromTextArray(
+                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                headers: [
+                  'Nama Barang',
+                  'From (Vendor)',
+                  'To (Cabang)',
+                  'Delivery Date',
+                  'Quantity',
+                  'Keterangan',
+                ],
+                data:
+                    data
+                        .map(
+                          (item) => [
+                            item.itemName,
+                            item.fromVendor ?? '',
+                            item.toBranch ?? '',
+                            DateFormat('dd-MMM-yyyy').format(item.date),
+                            item.quantity.toString(),
+                            item.keterangan ?? '',
+                          ],
+                        )
+                        .toList(),
+              ),
+              pw.SizedBox(height: 20),
+              pw.Divider(),
+              pw.SizedBox(height: 10),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.end,
+                children: [
+                  pw.Text(
+                    'Total Quantity In: ',
+                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                  ),
+                  pw.Text(totalIn.toString()),
+                ],
+              ),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.end,
+                children: [
+                  pw.Text(
+                    'Total Quantity Out: ',
+                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                  ),
+                  pw.Text(totalOut.toString()),
+                ],
+              ),
+              pw.SizedBox(height: 10),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.end,
+                children: [
+                  pw.Text(
+                    'Net Total (In - Out): ',
+                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                  ),
+                  pw.Text((totalIn - totalOut).toString()),
                 ],
               ),
             ],
-          ),
-          pw.SizedBox(height: 20),
-          pw.Divider(),
-          pw.SizedBox(height: 20),
-          pw.TableHelper.fromTextArray(
-            headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-            headers: ['Nama Barang', 'From (Vendor)', 'To (Cabang)', 'Delivery Date', 'Quantity', 'Keterangan'],
-            data: data.map((item) => [
-              item.itemName,
-              item.fromVendor ?? '',
-              item.toBranch ?? '',
-              DateFormat('dd-MMM-yyyy').format(item.date),
-              item.quantity.toString(),
-              item.keterangan ?? '',
-            ]).toList(),
-          ),
-          pw.SizedBox(height: 20),
-          pw.Divider(),
-          pw.SizedBox(height: 10),
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.end,
-            children: [
-              pw.Text('Total Quantity In: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-              pw.Text(totalIn.toString()),
-            ]
-          ),
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.end,
-            children: [
-              pw.Text('Total Quantity Out: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-              pw.Text(totalOut.toString()),
-            ]
-          ),
-          pw.SizedBox(height: 10),
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.end,
-            children: [
-              pw.Text('Net Total (In - Out): ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-              pw.Text((totalIn - totalOut).toString()),
-            ]
-          ),
-        ],
       ),
     );
 
@@ -105,9 +138,18 @@ class CombinedReportExporter {
     final xlsio_lib.Worksheet sheet = workbook.worksheets[0];
 
     // Headers
-    final headers = ['Nama Barang', 'From (Vendor)', 'To (Cabang)', 'Delivery Date', 'Quantity', 'Keterangan'];
+    final headers = [
+      'Nama Barang',
+      'From (Vendor)',
+      'To (Cabang)',
+      'Delivery Date',
+      'Quantity',
+      'Keterangan',
+    ];
     for (int i = 0; i < headers.length; i++) {
-      sheet.getRangeByIndex(5, i + 1).setText(headers[i]); // Start headers from row 5
+      sheet
+          .getRangeByIndex(5, i + 1)
+          .setText(headers[i]); // Start headers from row 5
     }
 
     // Data
@@ -116,14 +158,20 @@ class CombinedReportExporter {
       sheet.getRangeByIndex(i + 6, 1).setText(item.itemName);
       sheet.getRangeByIndex(i + 6, 2).setText(item.fromVendor ?? '');
       sheet.getRangeByIndex(i + 6, 3).setText(item.toBranch ?? '');
-      sheet.getRangeByIndex(i + 6, 4).setText(DateFormat('dd-MMM-yyyy').format(item.date));
+      sheet
+          .getRangeByIndex(i + 6, 4)
+          .setText(DateFormat('dd-MMM-yyyy').format(item.date));
       sheet.getRangeByIndex(i + 6, 5).setNumber(item.quantity.toDouble());
       sheet.getRangeByIndex(i + 6, 6).setText(item.keterangan ?? '');
     }
 
     // Totals
-    final totalIn = data.where((d) => d.type == 'In').fold<num>(0, (sum, item) => sum + item.quantity);
-    final totalOut = data.where((d) => d.type == 'Out').fold<num>(0, (sum, item) => sum + item.quantity.abs());
+    final totalIn = data
+        .where((d) => d.type == 'In')
+        .fold<num>(0, (sum, item) => sum + item.quantity);
+    final totalOut = data
+        .where((d) => d.type == 'Out')
+        .fold<num>(0, (sum, item) => sum + item.quantity.abs());
     final int lastRow = data.length + 8; // Adjust row for totals
 
     sheet.getRangeByIndex(lastRow, 4).setText('Total Quantity In:');
@@ -133,7 +181,9 @@ class CombinedReportExporter {
     sheet.getRangeByIndex(lastRow + 1, 5).setNumber(totalOut.toDouble());
 
     sheet.getRangeByIndex(lastRow + 2, 4).setText('Net Total (In - Out):');
-    sheet.getRangeByIndex(lastRow + 2, 5).setNumber((totalIn - totalOut).toDouble());
+    sheet
+        .getRangeByIndex(lastRow + 2, 5)
+        .setNumber((totalIn - totalOut).toDouble());
 
     // Auto-fit columns
     sheet.autoFitColumn(1);
