@@ -35,10 +35,10 @@ class PdfReportExporter {
                     children: [
                       pw.Text(
                         userRole == 'finance'
-                            ? 'REPORT FINANCE DELIVERY NOTE (OUT)'
-                            : 'REPORT DELIVERY NOTE (OUT)',
+                            ? 'REPORT FINANCE DELIVERY NOTES (OUT)'
+                            : 'REPORT DELIVERY NOTES (OUT)',
                         style: pw.TextStyle(
-                          fontSize: 20,
+                          fontSize: 18,
                           fontWeight: pw.FontWeight.bold,
                         ),
                       ),

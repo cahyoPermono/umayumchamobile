@@ -52,7 +52,7 @@ class CombinedReportExporter {
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Text(
-                        'REPORT DELIVERY NOTE(IN & OUT)',
+                        'REPORT DELIVERY NOTES (IN & OUT)',
                         style: pw.TextStyle(
                           fontWeight: pw.FontWeight.bold,
                           fontSize: 16,
