@@ -29,7 +29,11 @@ class ExcelReportExporter {
     picture.height = 75;
 
     // Header
-    sheet.getRangeByName('C2').setText('REPORT DELIVERY NOTE (OUT)');
+    final String reportTitle =
+        userRole == 'finance'
+            ? 'REPORT FINANCE DELIVERY NOTE (OUT)'
+            : 'REPORT DELIVERY NOTE (OUT)';
+    sheet.getRangeByName('C2').setText(reportTitle);
     sheet.getRangeByName('C2').cellStyle.bold = true;
     sheet.getRangeByName('C2').cellStyle.fontSize = 18;
 
