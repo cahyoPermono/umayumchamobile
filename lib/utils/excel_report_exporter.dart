@@ -119,7 +119,10 @@ class ExcelReportExporter {
     final List<int> bytes = workbook.saveAsStream();
     workbook.dispose();
 
-    await saveFile(fileBytes: bytes, fileName: 'delivery_note_report.xlsx');
+    await saveFile(
+      fileBytes: bytes,
+      fileName: 'Report Delivery Notes (Out).xlsx',
+    );
   }
 
   static Future<void> generateAndOpenExcelIncoming({
@@ -236,6 +239,9 @@ class ExcelReportExporter {
     final List<int> bytes = workbook.saveAsStream();
     workbook.dispose();
 
-    await saveFile(fileBytes: bytes, fileName: 'delivery_note_report.xlsx');
+    await saveFile(
+      fileBytes: bytes,
+      fileName: 'Report Delivery Notes (In).xlsx',
+    );
   }
 }

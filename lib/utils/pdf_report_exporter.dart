@@ -141,7 +141,10 @@ class PdfReportExporter {
     );
 
     final pdfBytes = await pdf.save();
-    await saveFile(fileBytes: pdfBytes, fileName: 'delivery_note_report.pdf');
+    await saveFile(
+      fileBytes: pdfBytes,
+      fileName: 'Report Finance Delivery Notes (Out).pdf',
+    );
   }
 
   static Future<void> generateAndOpenPdfIncoming({
@@ -279,7 +282,7 @@ class PdfReportExporter {
     final pdfBytes = await pdf.save();
     await saveFile(
       fileBytes: pdfBytes,
-      fileName: 'incoming_delivery_note_report.pdf',
+      fileName: 'Report Finance Delivery Notes (In).pdf',
     );
   }
 }

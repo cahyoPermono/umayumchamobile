@@ -130,7 +130,7 @@ class CombinedReportExporter {
     );
 
     final output = await getTemporaryDirectory();
-    final file = File('${output.path}/combined_report.pdf');
+    final file = File('${output.path}/Report Delivery Notes (In & Out).pdf');
     await file.writeAsBytes(await pdf.save());
     OpenFilex.open(file.path);
   }
@@ -218,7 +218,7 @@ class CombinedReportExporter {
 
     final directory = await getApplicationDocumentsDirectory();
     final path = directory.path;
-    final file = File('$path/CombinedDeliveryReport.xlsx');
+    final file = File('$path/Report Delivery Notes (In & Out).xlsx');
     await file.writeAsBytes(excelBytes, flush: true);
     OpenFilex.open(file.path);
   }
