@@ -21,14 +21,14 @@ class PdfReportExporter {
 
     pdf.addPage(
       pw.MultiPage(
-        pageFormat: PdfPageFormat.a4.landscape,
+        pageFormat: PdfPageFormat.a4.portrait,
         header: (pw.Context context) {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Row(
                 children: [
-                  pw.Image(pw.MemoryImage(logoBytes), width: 200, height: 150),
+                  pw.Image(pw.MemoryImage(logoBytes), width: 100, height: 50),
                   pw.SizedBox(width: 20),
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -36,12 +36,12 @@ class PdfReportExporter {
                       pw.Text(
                         'REPORT DELIVERY NOTE (OUT)',
                         style: pw.TextStyle(
-                          fontSize: 24,
+                          fontSize: 20,
                           fontWeight: pw.FontWeight.bold,
                         ),
                       ),
-                      pw.Text('HEADQUARTER', style: pw.TextStyle(fontSize: 18)),
-                      pw.Text('MALANG', style: pw.TextStyle(fontSize: 18)),
+                      pw.Text('HEADQUARTER', style: pw.TextStyle(fontSize: 14)),
+                      pw.Text('MALANG', style: pw.TextStyle(fontSize: 14)),
                     ],
                   ),
                 ],
@@ -50,79 +50,82 @@ class PdfReportExporter {
             ],
           );
         },
-        build: (pw.Context context) => [
-          pw.TableHelper.fromTextArray(
-            headers: userRole == 'admin'
-                ? [
-                    'Nama Barang',
-                    'To (Cabang)',
-                    'Delivery Date',
-                    'Quantity',
-                    'Keterangan',
-                  ]
-                : [
-                    'Nama Barang',
-                    'To (Cabang)',
-                    'Delivery Date',
-                    'Quantity',
-                    'Keterangan',
-                    'Harga',
-                    'Total',
-                  ],
-            data: reportItems.map((item) {
-              final List<String> rowData = [
-                item['item_name'],
-                item['to_branch_name'],
-                DateFormat(
-                  'dd-MM-yyyy HH:mm',
-                ).format(item['delivery_date']),
-                item['quantity'].toString(),
-                item['keterangan'],
-              ];
-              if (userRole != 'admin') {
-                rowData.add(
-                  NumberFormat.currency(
-                    locale: 'id_ID',
-                    symbol: 'Rp ',
-                    decimalDigits: 0,
-                  ).format(item['price_per_unit']),
-                );
-                rowData.add(
-                  NumberFormat.currency(
-                    locale: 'id_ID',
-                    symbol: 'Rp ',
-                    decimalDigits: 0,
-                  ).format(item['total_price']),
-                );
-              }
-              return rowData;
-            }).toList(),
-          ),
-          pw.SizedBox(height: 20),
-          pw.Align(
-            alignment: pw.Alignment.bottomRight,
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.end,
-              children: [
-                if (userRole != 'admin')
-                  pw.Text(
-                    'Total Keseluruhan: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(totalOverallCost)}',
-                    style: pw.TextStyle(
-                      fontWeight: pw.FontWeight.bold,
-                      fontSize: 14,
+        build:
+            (pw.Context context) => [
+              pw.TableHelper.fromTextArray(
+                headers:
+                    userRole == 'admin'
+                        ? [
+                          'Nama Barang',
+                          'To (Cabang)',
+                          'Delivery Date',
+                          'Quantity',
+                          'Keterangan',
+                        ]
+                        : [
+                          'Nama Barang',
+                          'To (Cabang)',
+                          'Delivery Date',
+                          'Quantity',
+                          'Keterangan',
+                          'Harga',
+                          'Total',
+                        ],
+                data:
+                    reportItems.map((item) {
+                      final List<String> rowData = [
+                        item['item_name'],
+                        item['to_branch_name'],
+                        DateFormat(
+                          'dd-MM-yyyy HH:mm',
+                        ).format(item['delivery_date']),
+                        item['quantity'].toString(),
+                        item['keterangan'],
+                      ];
+                      if (userRole != 'admin') {
+                        rowData.add(
+                          NumberFormat.currency(
+                            locale: 'id_ID',
+                            symbol: 'Rp ',
+                            decimalDigits: 0,
+                          ).format(item['price_per_unit']),
+                        );
+                        rowData.add(
+                          NumberFormat.currency(
+                            locale: 'id_ID',
+                            symbol: 'Rp ',
+                            decimalDigits: 0,
+                          ).format(item['total_price']),
+                        );
+                      }
+                      return rowData;
+                    }).toList(),
+              ),
+              pw.SizedBox(height: 20),
+              pw.Align(
+                alignment: pw.Alignment.bottomRight,
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.end,
+                  children: [
+                    if (userRole != 'admin')
+                      pw.Text(
+                        'Total Keseluruhan: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(totalOverallCost)}',
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    pw.Text(
+                      'Total Quantity: ${totalOverallQuantity.toInt()}',
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 14,
+                      ),
                     ),
-                  ),
-                pw.Text(
-                  'Total Quantity: ${totalOverallQuantity.toInt()}',
-                  style: pw.TextStyle(
-                    fontWeight: pw.FontWeight.bold,
-                    fontSize: 14,
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
         footer: (pw.Context context) {
           return pw.Container(
             alignment: pw.Alignment.centerLeft,
@@ -154,14 +157,14 @@ class PdfReportExporter {
 
     pdf.addPage(
       pw.MultiPage(
-        pageFormat: PdfPageFormat.a4.landscape,
+        pageFormat: PdfPageFormat.a4.portrait,
         header: (pw.Context context) {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Row(
                 children: [
-                  pw.Image(pw.MemoryImage(logoBytes), width: 200, height: 150),
+                  pw.Image(pw.MemoryImage(logoBytes), width: 100, height: 50),
                   pw.SizedBox(width: 20),
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -169,12 +172,12 @@ class PdfReportExporter {
                       pw.Text(
                         'REPORT DELIVERY NOTE (IN)',
                         style: pw.TextStyle(
-                          fontSize: 24,
+                          fontSize: 20,
                           fontWeight: pw.FontWeight.bold,
                         ),
                       ),
-                      pw.Text('HEADQUARTER', style: pw.TextStyle(fontSize: 18)),
-                      pw.Text('MALANG', style: pw.TextStyle(fontSize: 18)),
+                      pw.Text('HEADQUARTER', style: pw.TextStyle(fontSize: 14)),
+                      pw.Text('MALANG', style: pw.TextStyle(fontSize: 14)),
                     ],
                   ),
                 ],
@@ -183,79 +186,82 @@ class PdfReportExporter {
             ],
           );
         },
-        build: (pw.Context context) => [
-          pw.TableHelper.fromTextArray(
-            headers: userRole == 'admin'
-                ? [
-                    'Nama Barang',
-                    'From (Vendor)',
-                    'Delivery Date',
-                    'Quantity',
-                    'Keterangan',
-                  ]
-                : [
-                    'Nama Barang',
-                    'From (Vendor)',
-                    'Delivery Date',
-                    'Quantity',
-                    'Keterangan',
-                    'Harga',
-                    'Total',
-                  ],
-            data: reportItems.map((item) {
-              final List<String> rowData = [
-                item['item_name'],
-                item['from_branch_name'],
-                DateFormat(
-                  'dd-MM-yyyy HH:mm',
-                ).format(item['delivery_date']),
-                item['quantity'].toString(),
-                item['keterangan'],
-              ];
-              if (userRole != 'admin') {
-                rowData.add(
-                  NumberFormat.currency(
-                    locale: 'id_ID',
-                    symbol: 'Rp ',
-                    decimalDigits: 0,
-                  ).format(item['price_per_unit']),
-                );
-                rowData.add(
-                  NumberFormat.currency(
-                    locale: 'id_ID',
-                    symbol: 'Rp ',
-                    decimalDigits: 0,
-                  ).format(item['total_price']),
-                );
-              }
-              return rowData;
-            }).toList(),
-          ),
-          pw.SizedBox(height: 20),
-          pw.Align(
-            alignment: pw.Alignment.bottomRight,
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.end,
-              children: [
-                if (userRole != 'admin')
-                  pw.Text(
-                    'Total Keseluruhan: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(totalOverallCost)}',
-                    style: pw.TextStyle(
-                      fontWeight: pw.FontWeight.bold,
-                      fontSize: 14,
+        build:
+            (pw.Context context) => [
+              pw.TableHelper.fromTextArray(
+                headers:
+                    userRole == 'admin'
+                        ? [
+                          'Nama Barang',
+                          'From (Vendor)',
+                          'Delivery Date',
+                          'Quantity',
+                          'Keterangan',
+                        ]
+                        : [
+                          'Nama Barang',
+                          'From (Vendor)',
+                          'Delivery Date',
+                          'Quantity',
+                          'Keterangan',
+                          'Harga',
+                          'Total',
+                        ],
+                data:
+                    reportItems.map((item) {
+                      final List<String> rowData = [
+                        item['item_name'],
+                        item['from_branch_name'],
+                        DateFormat(
+                          'dd-MM-yyyy HH:mm',
+                        ).format(item['delivery_date']),
+                        item['quantity'].toString(),
+                        item['keterangan'],
+                      ];
+                      if (userRole != 'admin') {
+                        rowData.add(
+                          NumberFormat.currency(
+                            locale: 'id_ID',
+                            symbol: 'Rp ',
+                            decimalDigits: 0,
+                          ).format(item['price_per_unit']),
+                        );
+                        rowData.add(
+                          NumberFormat.currency(
+                            locale: 'id_ID',
+                            symbol: 'Rp ',
+                            decimalDigits: 0,
+                          ).format(item['total_price']),
+                        );
+                      }
+                      return rowData;
+                    }).toList(),
+              ),
+              pw.SizedBox(height: 20),
+              pw.Align(
+                alignment: pw.Alignment.bottomRight,
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.end,
+                  children: [
+                    if (userRole != 'admin')
+                      pw.Text(
+                        'Total Keseluruhan: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(totalOverallCost)}',
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    pw.Text(
+                      'Total Quantity: ${totalOverallQuantity.toInt()}',
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 14,
+                      ),
                     ),
-                  ),
-                pw.Text(
-                  'Total Quantity: ${totalOverallQuantity.toInt()}',
-                  style: pw.TextStyle(
-                    fontWeight: pw.FontWeight.bold,
-                    fontSize: 14,
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
         footer: (pw.Context context) {
           return pw.Container(
             alignment: pw.Alignment.centerLeft,

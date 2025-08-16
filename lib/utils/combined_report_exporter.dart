@@ -29,7 +29,7 @@ class CombinedReportExporter {
 
     pdf.addPage(
       pw.MultiPage(
-        pageFormat: PdfPageFormat.a4.landscape,
+        pageFormat: PdfPageFormat.a4.portrait,
         footer:
             (context) => pw.Container(
               alignment: pw.Alignment.centerLeft,
