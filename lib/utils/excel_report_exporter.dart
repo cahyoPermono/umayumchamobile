@@ -1,4 +1,6 @@
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+
 import 'package:syncfusion_flutter_xlsio/xlsio.dart';
 import 'package:umayumcha_ims/utils/file_exporter.dart'; // Import the new file_exporter
 
@@ -12,38 +14,53 @@ class ExcelReportExporter {
     final Workbook workbook = Workbook();
     final Worksheet sheet = workbook.worksheets[0];
 
+    // Load image
+    final List<int> logoBytes =
+        (await rootBundle.load(
+          'assets/images/logoprint.png',
+        )).buffer.asUint8List();
+
+    // Add image and set row height
+    final Picture picture = sheet.pictures.addStream(1, 1, logoBytes);
+
+    // Set width and calculate height to maintain aspect ratio
+    picture.width = 125;
+    // picture.height = (150 / aspectRatio).round();
+    picture.height = 75;
+
     // Header
-    sheet.getRangeByName('A1').setText('REPORT DELIVERY NOTE (OUT)');
-    sheet.getRangeByName('A1').cellStyle.bold = true;
-    sheet.getRangeByName('A1').cellStyle.fontSize = 18;
+    sheet.getRangeByName('C2').setText('REPORT DELIVERY NOTE (OUT)');
+    sheet.getRangeByName('C2').cellStyle.bold = true;
+    sheet.getRangeByName('C2').cellStyle.fontSize = 18;
 
-    sheet.getRangeByName('A2').setText('HEADQUARTER');
-    sheet.getRangeByName('A2').cellStyle.fontSize = 14;
+    sheet.getRangeByName('C3').setText('HEADQUARTER');
+    sheet.getRangeByName('C3').cellStyle.fontSize = 14;
 
-    sheet.getRangeByName('A3').setText('MALANG');
-    sheet.getRangeByName('A3').cellStyle.fontSize = 14;
+    sheet.getRangeByName('C4').setText('MALANG');
+    sheet.getRangeByName('C4').cellStyle.fontSize = 14;
 
     // Table Headers
-    sheet.getRangeByName('A5').setText('Nama Barang');
-    sheet.getRangeByName('B5').setText('To (Cabang)');
-    sheet.getRangeByName('C5').setText('Delivery Date');
-    sheet.getRangeByName('D5').setText('Quantity');
-    sheet.getRangeByName('E5').setText('Keterangan');
+    const int tableHeaderRow = 6;
+    sheet.getRangeByName('A$tableHeaderRow').setText('Nama Barang');
+    sheet.getRangeByName('B$tableHeaderRow').setText('To (Cabang)');
+    sheet.getRangeByName('C$tableHeaderRow').setText('Delivery Date');
+    sheet.getRangeByName('D$tableHeaderRow').setText('Quantity');
+    sheet.getRangeByName('E$tableHeaderRow').setText('Keterangan');
 
     if (userRole != 'admin') {
-      sheet.getRangeByName('F5').setText('Harga');
-      sheet.getRangeByName('G5').setText('Total');
+      sheet.getRangeByName('F$tableHeaderRow').setText('Harga');
+      sheet.getRangeByName('G$tableHeaderRow').setText('Total');
     }
 
     // Apply bold style to headers
-    if (userRole != 'admin') {
-      sheet.getRangeByName('A5:G5').cellStyle.bold = true;
-    } else {
-      sheet.getRangeByName('A5:E5').cellStyle.bold = true;
-    }
+    final String headerRange =
+        userRole != 'admin'
+            ? 'A$tableHeaderRow:G$tableHeaderRow'
+            : 'A$tableHeaderRow:E$tableHeaderRow';
+    sheet.getRangeByName(headerRange).cellStyle.bold = true;
 
     // Populate data
-    int rowIndex = 6;
+    int rowIndex = tableHeaderRow + 1;
     for (var item in reportItems) {
       sheet.getRangeByIndex(rowIndex, 1).setText(item['item_name']);
       sheet.getRangeByIndex(rowIndex, 2).setText(item['to_branch_name']);
@@ -66,11 +83,12 @@ class ExcelReportExporter {
     }
 
     // Totals
+    final int summaryRow = rowIndex + 2;
     if (userRole != 'admin') {
-      sheet.getRangeByIndex(rowIndex + 2, 6).setText('Total Keseluruhan:');
-      sheet.getRangeByIndex(rowIndex + 2, 7).setNumber(totalOverallCost);
+      sheet.getRangeByIndex(summaryRow, 6).setText('Total Keseluruhan:');
+      sheet.getRangeByIndex(summaryRow, 7).setNumber(totalOverallCost);
       sheet
-          .getRangeByIndex(rowIndex + 2, 7)
+          .getRangeByIndex(summaryRow, 7)
           .setText(
             NumberFormat.currency(
               locale: 'id_ID',
@@ -78,20 +96,24 @@ class ExcelReportExporter {
               decimalDigits: 0,
             ).format(totalOverallCost),
           );
-
-      sheet.getRangeByIndex(rowIndex + 3, 6).setText('Total Quantity:');
-      sheet.getRangeByIndex(rowIndex + 3, 7).setNumber(totalOverallQuantity);
     }
 
+    // Always show total quantity
+    final int quantitySummaryRow =
+        userRole != 'admin' ? summaryRow + 1 : summaryRow;
+    final int quantityLabelCol = userRole != 'admin' ? 6 : 3;
+    final int quantityValueCol = userRole != 'admin' ? 7 : 4;
+
+    sheet
+        .getRangeByIndex(quantitySummaryRow, quantityLabelCol)
+        .setText('Total Quantity:');
+    sheet
+        .getRangeByIndex(quantitySummaryRow, quantityValueCol)
+        .setNumber(totalOverallQuantity);
+
     // Auto-fit columns for better readability
-    sheet.autoFitColumn(1);
-    sheet.autoFitColumn(2);
-    sheet.autoFitColumn(3);
-    sheet.autoFitColumn(4);
-    sheet.autoFitColumn(5);
-    if (userRole != 'admin') {
-      sheet.autoFitColumn(6);
-      sheet.autoFitColumn(7);
+    for (int i = 1; i <= (userRole != 'admin' ? 7 : 5); i++) {
+      sheet.autoFitColumn(i);
     }
 
     final List<int> bytes = workbook.saveAsStream();
