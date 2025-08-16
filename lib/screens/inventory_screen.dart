@@ -412,33 +412,44 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                       },
                                     );
                                   }),
-                                  ElevatedButton.icon(
-                                    onPressed:
-                                        () => _showTransactionDialog(
-                                          context,
-                                          branchProduct,
-                                          'in',
+                                  Obx(() {
+                                    if (authController.userRole.value ==
+                                        'finance') {
+                                      return const SizedBox.shrink();
+                                    }
+                                    return Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        ElevatedButton.icon(
+                                          onPressed: () =>
+                                              _showTransactionDialog(
+                                            context,
+                                            branchProduct,
+                                            'in',
+                                          ),
+                                          icon: const Icon(Icons.add),
+                                          label: const Text('In'),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.green,
+                                          ),
                                         ),
-                                    icon: const Icon(Icons.add),
-                                    label: const Text('In'),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.green,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  ElevatedButton.icon(
-                                    onPressed:
-                                        () => _showTransactionDialog(
-                                          context,
-                                          branchProduct,
-                                          'out',
+                                        const SizedBox(width: 8),
+                                        ElevatedButton.icon(
+                                          onPressed: () =>
+                                              _showTransactionDialog(
+                                            context,
+                                            branchProduct,
+                                            'out',
+                                          ),
+                                          icon: const Icon(Icons.remove),
+                                          label: const Text('Out'),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.orange,
+                                          ),
                                         ),
-                                    icon: const Icon(Icons.remove),
-                                    label: const Text('Out'),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.orange,
-                                    ),
-                                  ),
+                                      ],
+                                    );
+                                  }),
                                 ],
                               ),
                             ],
@@ -453,13 +464,18 @@ class _InventoryScreenState extends State<InventoryScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.to(() => const ProductFormScreen());
-        },
-        tooltip: 'Add New Master Product',
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: Obx(() {
+        if (authController.userRole.value == 'finance') {
+          return const SizedBox.shrink();
+        }
+        return FloatingActionButton(
+          onPressed: () {
+            Get.to(() => const ProductFormScreen());
+          },
+          tooltip: 'Add New Master Product',
+          child: const Icon(Icons.add),
+        );
+      }),
     );
   }
 }

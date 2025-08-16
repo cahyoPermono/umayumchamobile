@@ -379,34 +379,44 @@ class _ConsumableListScreenState extends State<ConsumableListScreen> {
                                 },
                               );
                             }),
-                            const SizedBox(width: 8),
-                            ElevatedButton.icon(
-                              onPressed:
-                                  () => _showConsumableTransactionDialog(
-                                    context,
-                                    consumable,
-                                    'in',
+                            Obx(() {
+                              if (authController.userRole.value == 'finance') {
+                                return const SizedBox.shrink();
+                              }
+                              return Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const SizedBox(width: 8),
+                                  ElevatedButton.icon(
+                                    onPressed: () =>
+                                        _showConsumableTransactionDialog(
+                                      context,
+                                      consumable,
+                                      'in',
+                                    ),
+                                    icon: const Icon(Icons.add),
+                                    label: const Text('In'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green,
+                                    ),
                                   ),
-                              icon: const Icon(Icons.add),
-                              label: const Text('In'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            ElevatedButton.icon(
-                              onPressed:
-                                  () => _showConsumableTransactionDialog(
-                                    context,
-                                    consumable,
-                                    'out',
+                                  const SizedBox(width: 8),
+                                  ElevatedButton.icon(
+                                    onPressed: () =>
+                                        _showConsumableTransactionDialog(
+                                      context,
+                                      consumable,
+                                      'out',
+                                    ),
+                                    icon: const Icon(Icons.remove),
+                                    label: const Text('Out'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.orange,
+                                    ),
                                   ),
-                              icon: const Icon(Icons.remove),
-                              label: const Text('Out'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.orange,
-                              ),
-                            ),
+                                ],
+                              );
+                            }),
                           ],
                         ),
                       ],
