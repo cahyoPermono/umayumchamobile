@@ -239,7 +239,7 @@ class IncomingDeliveryNoteReportScreen extends StatelessWidget {
                       onPressed:
                           canExport
                               ? () {
-                                ExcelReportExporter.generateAndOpenExcel(
+                                ExcelReportExporter.generateAndOpenExcelIncoming(
                                   reportItems: controller.reportItems,
                                   totalOverallCost:
                                       controller.totalOverallCost.value,
@@ -332,8 +332,9 @@ class IncomingDeliveryNoteReportScreen extends StatelessWidget {
                           ),
                           _buildInfoRow(
                             'Delivery Date',
-                            DateFormat('dd-MMM-yyyy HH:mm')
-                                .format(item['delivery_date']),
+                            DateFormat(
+                              'dd-MMM-yyyy HH:mm',
+                            ).format(item['delivery_date']),
                             Icons.calendar_today,
                           ),
                           _buildInfoRow(
@@ -404,7 +405,9 @@ class IncomingDeliveryNoteReportScreen extends StatelessWidget {
                       const Divider(height: 20, thickness: 1),
                       _buildSummaryRow(
                         'Total Overall Quantity',
-                        controller.totalOverallQuantity.value.toInt().toString(),
+                        controller.totalOverallQuantity.value
+                            .toInt()
+                            .toString(),
                         Icons.format_list_numbered,
                       ),
                     ],
@@ -457,8 +460,13 @@ class IncomingDeliveryNoteReportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value, IconData icon,
-      {Color? valueColor, bool isBold = false}) {
+  Widget _buildInfoRow(
+    String label,
+    String value,
+    IconData icon, {
+    Color? valueColor,
+    bool isBold = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -488,8 +496,12 @@ class IncomingDeliveryNoteReportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryRow(String label, String value, IconData icon,
-      {Color? valueColor}) {
+  Widget _buildSummaryRow(
+    String label,
+    String value,
+    IconData icon, {
+    Color? valueColor,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
