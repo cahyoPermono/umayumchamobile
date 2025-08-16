@@ -306,20 +306,22 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _priceController,
-                decoration: const InputDecoration(
-                  labelText: 'Price',
-                  hintText: 'e.g., 25000',
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 12.0,
-                    horizontal: 15.0,
+              if (isFinanceUser) ...[
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _priceController,
+                  decoration: const InputDecoration(
+                    labelText: 'Price',
+                    hintText: 'e.g., 25000',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 12.0,
+                      horizontal: 15.0,
+                    ),
                   ),
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
                 ),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-              ),
+              ],
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed:
