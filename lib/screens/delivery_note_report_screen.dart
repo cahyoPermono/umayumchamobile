@@ -29,7 +29,7 @@ class DeliveryNoteReportScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Delivery Notes Report (Out)',
+          'Report Delivery Notes (Out)',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Theme.of(context).primaryColor,
@@ -338,8 +338,9 @@ class DeliveryNoteReportScreen extends StatelessWidget {
                           ),
                           _buildInfoRow(
                             'Delivery Date',
-                            DateFormat('dd-MMM-yyyy HH:mm')
-                                .format(item['delivery_date']),
+                            DateFormat(
+                              'dd-MMM-yyyy HH:mm',
+                            ).format(item['delivery_date']),
                             Icons.calendar_today,
                           ),
                           _buildInfoRow(
@@ -410,7 +411,9 @@ class DeliveryNoteReportScreen extends StatelessWidget {
                       const Divider(height: 20, thickness: 1),
                       _buildSummaryRow(
                         'Total Overall Quantity',
-                        controller.totalOverallQuantity.value.toInt().toString(),
+                        controller.totalOverallQuantity.value
+                            .toInt()
+                            .toString(),
                         Icons.format_list_numbered,
                       ),
                     ],
@@ -463,8 +466,13 @@ class DeliveryNoteReportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value, IconData icon,
-      {Color? valueColor, bool isBold = false}) {
+  Widget _buildInfoRow(
+    String label,
+    String value,
+    IconData icon, {
+    Color? valueColor,
+    bool isBold = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -494,8 +502,12 @@ class DeliveryNoteReportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryRow(String label, String value, IconData icon,
-      {Color? valueColor}) {
+  Widget _buildSummaryRow(
+    String label,
+    String value,
+    IconData icon, {
+    Color? valueColor,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(

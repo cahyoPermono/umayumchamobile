@@ -12,7 +12,6 @@ import 'package:umayumcha_ims/screens/delivery_note_report_screen.dart'; // New:
 import 'package:umayumcha_ims/screens/incoming_delivery_note_report_screen.dart'; // New: Import IncomingDeliveryNoteReportScreen
 import 'package:umayumcha_ims/screens/combined_delivery_note_report_screen.dart';
 
-
 import 'package:umayumcha_ims/screens/transaction_log_screen.dart';
 import 'package:umayumcha_ims/screens/consumable_transaction_log_screen.dart';
 import 'package:umayumcha_ims/screens/user_list_screen.dart';
@@ -154,33 +153,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             Obx(
               () =>
-                  authController.userRole.value == 'finance' ||
-                          authController.userRole.value == 'admin'
+                  authController.userRole.value == 'admin'
                       ? ListTile(
                         leading: const Icon(
                           Icons.bar_chart,
-                        ), // Or another suitable icon
-                        title: const Text('Delivery Notes Report (Out)'),
+                        ), // Using the same icon for now
+                        title: const Text('Report Delivery Notes (In)'),
                         onTap: () {
                           Get.back(); // Close the drawer
-                          Get.to(() => const DeliveryNoteReportScreen());
+                          Get.to(
+                            () => const IncomingDeliveryNoteReportScreen(),
+                          );
                         },
                       )
                       : const SizedBox.shrink(),
             ),
             Obx(
               () =>
-                  authController.userRole.value == 'admin'
+                  authController.userRole.value == 'finance' ||
+                          authController.userRole.value == 'admin'
                       ? ListTile(
                         leading: const Icon(
                           Icons.bar_chart,
-                        ), // Using the same icon for now
-                        title: const Text('Delivery Notes Report (In)'),
+                        ), // Or another suitable icon
+                        title: const Text('Report Delivery Notes (Out)'),
                         onTap: () {
                           Get.back(); // Close the drawer
-                          Get.to(
-                            () => const IncomingDeliveryNoteReportScreen(),
-                          );
+                          Get.to(() => const DeliveryNoteReportScreen());
                         },
                       )
                       : const SizedBox.shrink(),
@@ -195,9 +194,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         title: const Text('Report Delivery Note (In & Out)'),
                         onTap: () {
                           Get.back(); // Close the drawer
-                          Get.to(
-                            () => CombinedDeliveryNoteReportScreen(),
-                          );
+                          Get.to(() => CombinedDeliveryNoteReportScreen());
                         },
                       )
                       : const SizedBox.shrink(),
@@ -291,17 +288,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 Icon(
                                   Icons.warning_rounded,
                                   color:
-                                      Theme.of(context).colorScheme.onErrorContainer,
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.onErrorContainer,
                                   size: 28,
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
                                     'Low Stock Alert ${branch['name']}!',
-                                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleLarge?.copyWith(
                                       fontWeight: FontWeight.bold,
                                       color:
-                                          Theme.of(context).colorScheme.onErrorContainer,
+                                          Theme.of(
+                                            context,
+                                          ).colorScheme.onErrorContainer,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -338,7 +341,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             allLowStockItems[index],
                                             style: TextStyle(
                                               color:
-                                                  Theme.of(context).colorScheme.onErrorContainer,
+                                                  Theme.of(context)
+                                                      .colorScheme
+                                                      .onErrorContainer,
                                               fontSize: 15,
                                             ),
                                           ),
@@ -395,16 +400,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 Icon(
                                   Icons.calendar_today,
                                   color:
-                                      Theme.of(context).colorScheme.onTertiaryContainer,
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.onTertiaryContainer,
                                   size: 28,
                                 ),
                                 const SizedBox(width: 12),
                                 Text(
                                   'Expiring Consumables!',
-                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.titleLarge?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color:
-                                        Theme.of(context).colorScheme.onTertiaryContainer,
+                                        Theme.of(
+                                          context,
+                                        ).colorScheme.onTertiaryContainer,
                                   ),
                                 ),
                               ],
@@ -416,12 +427,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ), // Visual separator
                             const SizedBox(height: 12),
                             SizedBox(
-                              height: 120, // Fixed height for scrollable content
+                              height:
+                                  120, // Fixed height for scrollable content
                               child: ListView.builder(
                                 shrinkWrap: true,
                                 physics: const ClampingScrollPhysics(),
                                 itemCount:
-                                    consumableController.expiringConsumables.length,
+                                    consumableController
+                                        .expiringConsumables
+                                        .length,
                                 itemBuilder: (context, index) {
                                   final c =
                                       consumableController
@@ -446,7 +460,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             '${c.name} (Expires: ${c.expiredDate == null ? 'N/A' : DateFormat.yMd().format(c.expiredDate!)})',
                                             style: TextStyle(
                                               color:
-                                                  Theme.of(context).colorScheme.onTertiaryContainer,
+                                                  Theme.of(context)
+                                                      .colorScheme
+                                                      .onTertiaryContainer,
                                               fontSize: 15,
                                             ),
                                           ),
@@ -514,16 +530,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               children: [
                                 Icon(
                                   Icons.attach_money_rounded,
-                                  color: Colors.orange.shade900, // Warning icon color
+                                  color:
+                                      Colors
+                                          .orange
+                                          .shade900, // Warning icon color
                                   size: 28,
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
                                     'Items Without Price!',
-                                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleLarge?.copyWith(
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.orange.shade900, // Warning text color
+                                      color:
+                                          Colors
+                                              .orange
+                                              .shade900, // Warning text color
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -549,14 +573,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         Icon(
                                           Icons.circle,
                                           size: 10,
-                                          color: Colors.orange.shade700, // Warning circle color
+                                          color:
+                                              Colors
+                                                  .orange
+                                                  .shade700, // Warning circle color
                                         ),
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: Text(
                                             allItemsWithoutPrice[index],
                                             style: TextStyle(
-                                              color: Colors.orange.shade900, // Warning text color
+                                              color:
+                                                  Colors
+                                                      .orange
+                                                      .shade900, // Warning text color
                                               fontSize: 15,
                                             ),
                                           ),
@@ -571,7 +601,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             Text(
                               'Please input prices for these items.',
                               style: TextStyle(
-                                color: Colors.orange.shade800, // Warning text color
+                                color:
+                                    Colors
+                                        .orange
+                                        .shade800, // Warning text color
                                 fontStyle: FontStyle.italic,
                               ),
                             ),
