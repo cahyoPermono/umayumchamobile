@@ -396,7 +396,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 TextFormField(
                   controller: priceController,
                   decoration: const InputDecoration(
-                    labelText: 'Price (Optional)',
+                    labelText: 'Price',
                     hintText: 'e.g., 15000.00',
                     border: OutlineInputBorder(),
                     contentPadding: EdgeInsets.symmetric(
@@ -620,9 +620,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                         elevation: 5, // Add shadow
                       ),
                       child: Text(
-                        widget.product == null
-                            ? 'Save Product'
-                            : 'Update Product',
+                        widget.product == null ? 'Save' : 'Update',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

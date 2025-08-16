@@ -238,20 +238,6 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
               ),
               const SizedBox(height: 16),
               TextFormField(
-                controller: _priceController,
-                decoration: const InputDecoration(
-                  labelText: 'Price (Optional)',
-                  hintText: 'e.g., 25000',
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 12.0,
-                    horizontal: 15.0,
-                  ),
-                ),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
                 readOnly: isFinanceUser,
                 controller: _lowStockController,
                 decoration: const InputDecoration(
@@ -290,7 +276,12 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
               ),
               const SizedBox(height: 16),
               InkWell(
-                onTap: isFinanceUser ? null : () => _selectDate(context), // Make read-only for finance user
+                onTap:
+                    isFinanceUser
+                        ? null
+                        : () => _selectDate(
+                          context,
+                        ), // Make read-only for finance user
                 child: InputDecorator(
                   decoration: InputDecoration(
                     labelText: 'Expiration Date (Optional)',
@@ -314,6 +305,20 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
                     ),
                   ),
                 ),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _priceController,
+                decoration: const InputDecoration(
+                  labelText: 'Price',
+                  hintText: 'e.g., 25000',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 12.0,
+                    horizontal: 15.0,
+                  ),
+                ),
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
               ),
               const SizedBox(height: 32),
               ElevatedButton(
