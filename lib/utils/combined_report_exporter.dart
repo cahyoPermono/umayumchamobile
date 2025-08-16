@@ -8,6 +8,8 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio_lib;
 import '../models/combined_delivery_note_model.dart';
 
+import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio;
+
 class CombinedReportExporter {
   static Future<void> exportToPdf(List<CombinedDeliveryNote> data) async {
     final pdf = pw.Document();
@@ -136,6 +138,23 @@ class CombinedReportExporter {
   static Future<void> exportToExcel(List<CombinedDeliveryNote> data) async {
     final xlsio_lib.Workbook workbook = xlsio_lib.Workbook();
     final xlsio_lib.Worksheet sheet = workbook.worksheets[0];
+
+    // Add logo
+    final ByteData bytes = await rootBundle.load('assets/images/logoprint.png');
+    final Uint8List logoBytes = bytes.buffer.asUint8List();
+    final xlsio.Picture picture = sheet.pictures.addStream(1, 1, logoBytes);
+
+    // Set width and calculate height to maintain aspect ratio
+    picture.width = 125;
+    // picture.height = (150 / aspectRatio).round();
+    picture.height = 75;
+
+    // Add header texts
+    sheet.getRangeByName('C1').setText('REPORT DELIVERY NOTE(IN & OUT)');
+    sheet.getRangeByName('C1').cellStyle.fontSize = 16;
+    sheet.getRangeByName('C1').cellStyle.bold = true;
+    sheet.getRangeByName('C2').setText('HEADQUARTER');
+    sheet.getRangeByName('C3').setText('MALANG');
 
     // Headers
     final headers = [
