@@ -34,7 +34,9 @@ class PdfReportExporter {
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Text(
-                        'REPORT DELIVERY NOTE (OUT)',
+                        userRole == 'finance'
+                            ? 'REPORT FINANCE DELIVERY NOTE (OUT)'
+                            : 'REPORT DELIVERY NOTE (OUT)',
                         style: pw.TextStyle(
                           fontSize: 20,
                           fontWeight: pw.FontWeight.bold,
