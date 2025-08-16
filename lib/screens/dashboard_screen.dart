@@ -253,7 +253,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               // Combined Low Stock Warning Section
               Obx(() {
                 if (authController.userRole.value == 'finance') {
-                  return Container(); // Hide for finance role
+                  return const SizedBox.shrink();
                 }
 
                 final lowStockProducts =
@@ -262,8 +262,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     consumableController.globalLowStockConsumables;
 
                 if (lowStockProducts.isEmpty && lowStockConsumables.isEmpty) {
-                  debugPrint('No low stock inventory or consumables.');
-                  return Container();
+                  return const SizedBox.shrink();
                 }
 
                 final allLowStockItems = <String>[];
@@ -278,229 +277,210 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   );
                 }
 
-                debugPrint(
-                  'Combined low stock items: ${allLowStockItems.length}',
-                );
-
-                return Card(
-                  color: Theme.of(context).colorScheme.errorContainer,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                return Column(
+                  children: [
+                    Card(
+                      color: Theme.of(context).colorScheme.errorContainer,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(
-                              Icons.warning_rounded,
-                              color:
-                                  Theme.of(
-                                    context,
-                                  ).colorScheme.onErrorContainer,
-                              size: 28,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                'Low Stock Alert ${branch['name']}!',
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.warning_rounded,
                                   color:
-                                      Theme.of(
-                                        context,
-                                      ).colorScheme.onErrorContainer,
+                                      Theme.of(context).colorScheme.onErrorContainer,
+                                  size: 28,
                                 ),
-                                overflow: TextOverflow.ellipsis,
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Low Stock Alert ${branch['name']}!',
+                                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          Theme.of(context).colorScheme.onErrorContainer,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            const Divider(height: 1, thickness: 1),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              height: 120, // Dynamic height up to 120
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                physics: const ClampingScrollPhysics(),
+                                itemCount: allLowStockItems.length,
+                                itemBuilder: (context, index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 4.0,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.circle,
+                                          size: 10,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onErrorContainer
+                                              .withValues(alpha: 0.7),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            allLowStockItems[index],
+                                            style: TextStyle(
+                                              color:
+                                                  Theme.of(context).colorScheme.onErrorContainer,
+                                              fontSize: 15,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Please restock these items soon.',
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onErrorContainer
+                                    .withValues(alpha: 0.8),
+                                fontStyle: FontStyle.italic,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
-                        const Divider(height: 1, thickness: 1),
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          height: 120, // Dynamic height up to 120
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            physics: const ClampingScrollPhysics(),
-                            itemCount: allLowStockItems.length,
-                            itemBuilder: (context, index) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4.0,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.circle,
-                                      size: 10,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onErrorContainer
-                                          .withValues(alpha: 0.7),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        allLowStockItems[index],
-                                        style: TextStyle(
-                                          color:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.onErrorContainer,
-                                          fontSize: 15,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Please restock these items soon.',
-                          style: TextStyle(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onErrorContainer
-                                .withValues(alpha: 0.8),
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 24),
+                  ],
                 );
               }),
-              const SizedBox(height: 24),
 
               // Expiring Consumables Warning Section
               Obx(() {
                 if (authController.userRole.value == 'finance') {
-                  return Container(); // Hide for finance role
+                  return const SizedBox.shrink();
                 }
 
                 if (consumableController.isLoading.value) {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (consumableController.expiringConsumables.isEmpty) {
-                  debugPrint('No expiring consumables.');
-                  return Container(); // Changed from SizedBox.shrink()
+                  return const SizedBox.shrink();
                 }
-                debugPrint(
-                  'Expiring consumables: ${consumableController.expiringConsumables.length}',
-                );
-                return Card(
-                  color: Theme.of(context).colorScheme.tertiaryContainer,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                return Column(
+                  children: [
+                    Card(
+                      color: Theme.of(context).colorScheme.tertiaryContainer,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(
-                              Icons.calendar_today,
-                              color:
-                                  Theme.of(
-                                    context,
-                                  ).colorScheme.onTertiaryContainer,
-                              size: 28,
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.calendar_today,
+                                  color:
+                                      Theme.of(context).colorScheme.onTertiaryContainer,
+                                  size: 28,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Expiring Consumables!',
+                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        Theme.of(context).colorScheme.onTertiaryContainer,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(height: 12),
+                            const Divider(
+                              height: 1,
+                              thickness: 1,
+                            ), // Visual separator
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              height: 120, // Fixed height for scrollable content
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                physics: const ClampingScrollPhysics(),
+                                itemCount:
+                                    consumableController.expiringConsumables.length,
+                                itemBuilder: (context, index) {
+                                  final c =
+                                      consumableController
+                                          .expiringConsumables[index];
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 4.0,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.circle,
+                                          size: 10,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onTertiaryContainer
+                                              .withValues(alpha: 0.7),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            '${c.name} (Expires: ${c.expiredDate == null ? 'N/A' : DateFormat.yMd().format(c.expiredDate!)})',
+                                            style: TextStyle(
+                                              color:
+                                                  Theme.of(context).colorScheme.onTertiaryContainer,
+                                              fontSize: 15,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 16),
                             Text(
-                              'Expiring Consumables!',
-                              style: Theme.of(
-                                context,
-                              ).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color:
-                                    Theme.of(
-                                      context,
-                                    ).colorScheme.onTertiaryContainer,
+                              'These consumables will expire soon.',
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onTertiaryContainer
+                                    .withValues(alpha: 0.8),
+                                fontStyle: FontStyle.italic,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
-                        const Divider(
-                          height: 1,
-                          thickness: 1,
-                        ), // Visual separator
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          height: 120, // Fixed height for scrollable content
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            physics: const ClampingScrollPhysics(),
-                            itemCount:
-                                consumableController.expiringConsumables.length,
-                            itemBuilder: (context, index) {
-                              final c =
-                                  consumableController
-                                      .expiringConsumables[index];
-                              debugPrint(
-                                'Processing expiring consumable: ${c.name}',
-                              ); // Changed from SizedBox.shrink()
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4.0,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.circle,
-                                      size: 10,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onTertiaryContainer
-                                          .withValues(alpha: 0.7),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        '${c.name} (Expires: ${c.expiredDate == null ? 'N/A' : DateFormat.yMd().format(c.expiredDate!)})',
-                                        style: TextStyle(
-                                          color:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.onTertiaryContainer,
-                                          fontSize: 15,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'These consumables will expire soon.',
-                          style: TextStyle(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onTertiaryContainer
-                                .withValues(alpha: 0.8),
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 24),
+                  ],
                 );
               }),
-              const SizedBox(height: 24),
 
               // Products/Consumables Without Price Alert Section (for Finance Role)
               Obx(() {
                 if (authController.userRole.value != 'finance') {
-                  return Container(); // Only show for finance role
+                  return const SizedBox.shrink();
                 }
 
                 final productsWithoutPrice =
@@ -510,8 +490,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                 if (productsWithoutPrice.isEmpty &&
                     consumablesWithoutPrice.isEmpty) {
-                  debugPrint('No products or consumables without price.');
-                  return Container();
+                  return const SizedBox.shrink();
                 }
 
                 final allItemsWithoutPrice = <String>[];
@@ -522,90 +501,88 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   allItemsWithoutPrice.add('${c.name} (Consumable)');
                 }
 
-                debugPrint(
-                  'Items without price: ${allItemsWithoutPrice.length}',
-                );
-
-                return Card(
-                  color: Colors.orange.shade100, // Warning background color
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                return Column(
+                  children: [
+                    Card(
+                      color: Colors.orange.shade100, // Warning background color
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(
-                              Icons.attach_money_rounded,
-                              color: Colors.orange.shade900, // Warning icon color
-                              size: 28,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                'Items Without Price!',
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.orange.shade900, // Warning text color
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.attach_money_rounded,
+                                  color: Colors.orange.shade900, // Warning icon color
+                                  size: 28,
                                 ),
-                                overflow: TextOverflow.ellipsis,
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Items Without Price!',
+                                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.orange.shade900, // Warning text color
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            const Divider(height: 1, thickness: 1),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              height: 120, // Dynamic height up to 120
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                physics: const ClampingScrollPhysics(),
+                                itemCount: allItemsWithoutPrice.length,
+                                itemBuilder: (context, index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 4.0,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.circle,
+                                          size: 10,
+                                          color: Colors.orange.shade700, // Warning circle color
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            allItemsWithoutPrice[index],
+                                            style: TextStyle(
+                                              color: Colors.orange.shade900, // Warning text color
+                                              fontSize: 15,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Please input prices for these items.',
+                              style: TextStyle(
+                                color: Colors.orange.shade800, // Warning text color
+                                fontStyle: FontStyle.italic,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
-                        const Divider(height: 1, thickness: 1),
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          height: 120, // Dynamic height up to 120
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            physics: const ClampingScrollPhysics(),
-                            itemCount: allItemsWithoutPrice.length,
-                            itemBuilder: (context, index) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4.0,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.circle,
-                                      size: 10,
-                                      color: Colors.orange.shade700, // Warning circle color
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        allItemsWithoutPrice[index],
-                                        style: TextStyle(
-                                          color: Colors.orange.shade900, // Warning text color
-                                          fontSize: 15,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Please input prices for these items.',
-                          style: TextStyle(
-                            color: Colors.orange.shade800, // Warning text color
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 24),
+                  ],
                 );
               }),
-              const SizedBox(height: 24),
 
               // Quick Actions Section
               Text(
