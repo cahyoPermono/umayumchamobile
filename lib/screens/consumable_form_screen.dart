@@ -272,7 +272,7 @@ class _ConsumableFormScreenState extends State<ConsumableFormScreen> {
                     horizontal: 15.0,
                   ),
                 ),
-                enabled: false, // Disabled as requested
+                readOnly: true, // Disabled as requested
               ),
               const SizedBox(height: 16),
               InkWell(

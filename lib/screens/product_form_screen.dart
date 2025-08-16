@@ -280,7 +280,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                       horizontal: 15.0,
                     ),
                   ),
-                  enabled: false,
+                  readOnly: true,
                 ),
               ],
               const SizedBox(height: 16),
@@ -433,7 +433,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                         ),
                       ),
                       controller: TextEditingController(text: branchName),
-                      enabled: false,
+                      readOnly: true,
                     ),
                   );
                 }),
