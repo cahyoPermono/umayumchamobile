@@ -175,7 +175,7 @@ class PdfReportExporter {
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Text(
-                        'REPORT DELIVERY NOTE (IN)',
+                        'REPORT DELIVERY NOTES (IN)',
                         style: pw.TextStyle(
                           fontSize: 20,
                           fontWeight: pw.FontWeight.bold,
