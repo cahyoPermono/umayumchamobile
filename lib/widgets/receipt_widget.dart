@@ -30,16 +30,21 @@ class ReceiptWidget extends StatelessWidget {
             children: [
               // Header
               Center(
-                child: Image.asset('assets/images/logoprintthermal.png', width: 150, height: 60),
+                child: Image.asset(
+                  'assets/images/logoprintthermal.png',
+                  width: 150,
+                  height: 60,
+                ),
               ),
               const SizedBox(height: 16),
               const Center(
                 child: Text(
                   'Umayumcha',
                   style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
               ),
               const Center(
@@ -85,22 +90,47 @@ class ReceiptWidget extends StatelessWidget {
                   1: FlexColumnWidth(0.8),
                   2: FlexColumnWidth(2),
                 },
-                border: TableBorder.all(width: 0.5, color: Colors.white), // Hidden border
+                border: TableBorder.all(
+                  width: 0.5,
+                  color: Colors.white,
+                ), // Hidden border
                 children: [
                   // Table Header
                   const TableRow(
                     children: [
                       Padding(
                         padding: EdgeInsets.only(bottom: 4),
-                        child: Text('Barang', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black)),
+                        child: Text(
+                          'Barang',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
                       ),
                       Padding(
                         padding: EdgeInsets.only(bottom: 4),
-                        child: Text('Qty', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black)),
+                        child: Text(
+                          'Qty',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
                       ),
                       Padding(
                         padding: EdgeInsets.only(bottom: 4),
-                        child: Text('Keterangan', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black)),
+                        child: Text(
+                          'Keterangan',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -118,19 +148,38 @@ class ReceiptWidget extends StatelessWidget {
                       children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 2),
-                          child: Text(item['name'] ?? '', style: const TextStyle(fontSize: 12, color: Colors.black)),
+                          child: Text(
+                            item['name'] ?? '',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black,
+                            ),
+                          ),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 2),
-                          child: Text((item['quantity']?.abs() ?? 0).toString(), textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, color: Colors.black)),
+                          child: Text(
+                            (item['quantity']?.abs() ?? 0).toString(),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black,
+                            ),
+                          ),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 2),
-                          child: Text(item['description'] ?? '', style: const TextStyle(fontSize: 12, color: Colors.black)),
+                          child: Text(
+                            item['description'] ?? '',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black,
+                            ),
+                          ),
                         ),
                       ],
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
 
@@ -143,23 +192,41 @@ class ReceiptWidget extends StatelessWidget {
                 children: [
                   Column(
                     children: [
-                      Text('Pengirim', style: TextStyle(fontSize: 12, color: Colors.black)),
+                      Text(
+                        'Pengirim',
+                        style: TextStyle(fontSize: 12, color: Colors.black),
+                      ),
                       SizedBox(height: 40),
-                      Text('(____________)', style: TextStyle(fontSize: 12, color: Colors.black)),
-                    ],
-                  ),
-                   Column(
-                    children: [
-                      Text('Mengetahui', style: TextStyle(fontSize: 12, color: Colors.black)),
-                      SizedBox(height: 40),
-                      Text('(____________)', style: TextStyle(fontSize: 12, color: Colors.black)),
+                      Text(
+                        '(____________)',
+                        style: TextStyle(fontSize: 12, color: Colors.black),
+                      ),
                     ],
                   ),
                   Column(
                     children: [
-                      Text('Penerima', style: TextStyle(fontSize: 12, color: Colors.black)),
+                      Text(
+                        'Mengetahui',
+                        style: TextStyle(fontSize: 12, color: Colors.black),
+                      ),
                       SizedBox(height: 40),
-                      Text('(____________)', style: TextStyle(fontSize: 12, color: Colors.black)),
+                      Text(
+                        '(____________)',
+                        style: TextStyle(fontSize: 12, color: Colors.black),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Text(
+                        'Penerima',
+                        style: TextStyle(fontSize: 12, color: Colors.black),
+                      ),
+                      SizedBox(height: 40),
+                      Text(
+                        '(____________)',
+                        style: TextStyle(fontSize: 12, color: Colors.black),
+                      ),
                     ],
                   ),
                 ],

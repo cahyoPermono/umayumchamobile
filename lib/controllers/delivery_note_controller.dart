@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:umayumcha_ims/widgets/receipt_widget.dart';
 
@@ -653,24 +652,6 @@ class DeliveryNoteController extends GetxController {
   }
 
   // Helper function to wrap text for thermal printer
-  List<String> _wrapText(String text, int maxCharsPerLine) {
-    List<String> lines = [];
-    String currentLine = '';
-    List<String> words = text.split(' ');
-
-    for (String word in words) {
-      if ((currentLine + word).length <= maxCharsPerLine) {
-        currentLine += (currentLine.isEmpty ? '' : ' ') + word;
-      } else {
-        lines.add(currentLine);
-        currentLine = word;
-      }
-    }
-    if (currentLine.isNotEmpty) {
-      lines.add(currentLine);
-    }
-    return lines;
-  }
 
   Future<void> printDeliveryNote({
     required DeliveryNote deliveryNote,
