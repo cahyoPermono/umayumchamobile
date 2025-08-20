@@ -1,4 +1,9 @@
-import 'package:flutter/foundation.dart'; // For debugPrint
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:umayumcha_ims/widgets/receipt_widget.dart';
+
+// For debugPrint
 import 'package:flutter/services.dart'; // For rootBundle
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -22,6 +27,7 @@ class DeliveryNoteController extends GetxController {
   final ConsumableController consumableController =
       Get.find(); // New: Get ConsumableController
   final AuthController authController = Get.find();
+  final ScreenshotController screenshotController = ScreenshotController();
 
   var deliveryNotes = <DeliveryNote>[].obs;
   var isLoading = false.obs;
@@ -80,7 +86,7 @@ class DeliveryNoteController extends GetxController {
         query = query.lte(
           'delivery_date',
           selectedToDate.value!
-              .add(Duration(days: 1))
+              .add(const Duration(days: 1))
               .toIso8601String()
               .split('T')
               .first,
@@ -105,7 +111,10 @@ class DeliveryNoteController extends GetxController {
 
   Future<void> deleteDeliveryNote(String deliveryNoteId) async {
     if (authController.userRole.value == 'finance') {
-      Get.snackbar('Permission Denied', 'Finance role cannot delete delivery notes.');
+      Get.snackbar(
+        'Permission Denied',
+        'Finance role cannot delete delivery notes.',
+      );
       return;
     }
     try {
@@ -133,7 +142,10 @@ class DeliveryNoteController extends GetxController {
     String? keterangan,
   }) async {
     if (authController.userRole.value == 'finance') {
-      Get.snackbar('Permission Denied', 'Finance role cannot create delivery notes.');
+      Get.snackbar(
+        'Permission Denied',
+        'Finance role cannot create delivery notes.',
+      );
       return;
     }
     try {
@@ -238,7 +250,10 @@ class DeliveryNoteController extends GetxController {
     String? keterangan,
   }) async {
     if (authController.userRole.value == 'finance') {
-      Get.snackbar('Permission Denied', 'Finance role cannot update delivery notes.');
+      Get.snackbar(
+        'Permission Denied',
+        'Finance role cannot update delivery notes.',
+      );
       return;
     }
     try {
@@ -707,100 +722,18 @@ class DeliveryNoteController extends GetxController {
       }
 
       // 3. Format and print data
-      final ByteData logoBytes = await rootBundle.load(
-        'assets/images/logoprintthermal.png', // Corrected path
+      final imageBytes = await screenshotController.captureFromWidget(
+        ReceiptWidget(
+          deliveryNote: deliveryNote,
+          toBranchName: toBranchName,
+          items: items,
+        ),
+        delay: const Duration(milliseconds: 100),
       );
-      final Uint8List logoUint8List = logoBytes.buffer.asUint8List();
 
-      // --- Resize the image ---
-      final img.Image? originalImage = img.decodeImage(logoUint8List);
-      if (originalImage == null) {
-        Get.snackbar('Error', 'Failed to decode logo image.');
-        return;
-      }
-      final img.Image resizedImage = img.copyResize(
-        originalImage,
-        width: 200,
-        height: 150,
-      );
-      final Uint8List resizedLogoBytes = Uint8List.fromList(
-        img.encodePng(resizedImage),
-      );
-      // --- End of resize ---
-
-      await bluetooth.printImageBytes(
-        resizedLogoBytes,
-      ); // Print the resized image
-
-      // Add a small delay to allow the printer to process the image
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      bluetooth.printNewLine();
-      bluetooth.printCustom('HEADQUARTER', 1, 1);
-      bluetooth.printCustom('MALANG', 0, 1);
-      bluetooth.printNewLine();
-
-      bluetooth.printLeftRight(
-        'No. Surat Jalan:',
-        deliveryNote.dnNumber ?? deliveryNote.id,
-        0,
-      );
-      bluetooth.printLeftRight('Penerima:', 'Cabang $toBranchName', 0);
-      bluetooth.printLeftRight(
-        'Tanggal:',
-        DateFormat('dd-MM-yyyy HH:mm').format(deliveryNote.deliveryDate),
-        0,
-      );
-      bluetooth.printNewLine();
-
-      if (deliveryNote.keterangan != null &&
-          deliveryNote.keterangan!.isNotEmpty) {
-        bluetooth.printCustom('Catatan:', 0, 0);
-        List<String> wrappedKeterangan = _wrapText(
-          deliveryNote.keterangan!,
-          32,
-        ); // 32 chars per line for 54mm printer
-        for (String line in wrappedKeterangan) {
-          bluetooth.printCustom(line, 0, 0);
-        }
-        bluetooth.printNewLine(); // Add newline after notes
-      }
-
-      bluetooth.printCustom('--------------------------------', 0, 1);
-      bluetooth.printCustom('Nama Barang  Qty  Keterangan', 0, 0);
-      bluetooth.printCustom('--------------------------------', 0, 1);
-
-      for (var item in items) {
-        String itemName = item['name'];
-        int quantity = item['quantity'].abs();
-        String description = item['description'] ?? '';
-
-        bluetooth.printCustom(' $itemName  $quantity  $description', 0, 0);
-        // bluetooth.printLeftRight(itemName, 'x$quantity', 0);
-        // if (description.isNotEmpty) {
-        //   bluetooth.printCustom('  Keterangan: $description', 0, 0);
-        // }
-      }
-      bluetooth.printCustom('--------------------------------', 0, 1);
-      bluetooth.printNewLine();
-
-      bluetooth.printCustom('Pengirim', 0, 1);
-      bluetooth.printNewLine();
-      bluetooth.printNewLine();
-      bluetooth.printCustom('(____________)', 0, 1);
-      bluetooth.printNewLine();
-      bluetooth.printCustom('Mengetahui', 0, 1);
-      bluetooth.printNewLine();
-      bluetooth.printNewLine();
-      bluetooth.printCustom('(____________)', 0, 1);
-      bluetooth.printNewLine();
-      bluetooth.printCustom('Penerima', 0, 1);
-      bluetooth.printNewLine();
-      bluetooth.printNewLine();
-      bluetooth.printCustom('(____________)', 0, 1);
-      bluetooth.printNewLine();
-      bluetooth.printNewLine();
-      bluetooth.printNewLine();
+      await bluetooth.printImageBytes(imageBytes);
+      await bluetooth.printNewLine();
+      await bluetooth.printNewLine();
 
       await bluetooth.disconnect();
       Get.snackbar('Success', 'Delivery note sent to printer!');
