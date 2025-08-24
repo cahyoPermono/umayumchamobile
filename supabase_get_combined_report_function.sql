@@ -101,7 +101,8 @@ BEGIN
         AND ct.type = 'in'
         AND ct.created_at >= start_date::TIMESTAMPTZ
         AND ct.created_at <= end_date::TIMESTAMPTZ
-        AND (item_name_filter IS NULL OR c.name ILIKE '%' || item_name_filter || '%');
+        AND (item_name_filter IS NULL OR c.name ILIKE '%' || item_name_filter || '%')
+    ORDER BY "date" DESC;
 
 END;
 $$ LANGUAGE plpgsql;
