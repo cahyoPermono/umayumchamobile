@@ -76,19 +76,20 @@ class DeliveryNoteController extends GetxController {
         query = query.eq('to_branch_name', selectedToBranchName.value!);
       }
       if (selectedFromDate.value != null) {
+        final fromDate = selectedFromDate.value!;
+        final startOfDay = DateTime(fromDate.year, fromDate.month, fromDate.day);
         query = query.gte(
           'delivery_date',
-          selectedFromDate.value!.toIso8601String().split('T').first,
+          startOfDay.toUtc().toIso8601String(),
         );
       }
       if (selectedToDate.value != null) {
-        query = query.lte(
+        final toDate = selectedToDate.value!;
+        final startOfNextDay =
+            DateTime(toDate.year, toDate.month, toDate.day + 1);
+        query = query.lt(
           'delivery_date',
-          selectedToDate.value!
-              .add(const Duration(days: 1))
-              .toIso8601String()
-              .split('T')
-              .first,
+          startOfNextDay.toUtc().toIso8601String(),
         );
       }
 

@@ -49,11 +49,16 @@ class CombinedDeliveryNoteReportController extends GetxController {
     try {
       isLoading.value = true;
 
+      final startDate = DateTime(selectedFromDate.value!.year,
+          selectedFromDate.value!.month, selectedFromDate.value!.day);
+      final endDate = DateTime(selectedToDate.value!.year,
+          selectedToDate.value!.month, selectedToDate.value!.day + 1);
+
       final response = await _supabase.rpc(
         'get_combined_report',
         params: {
-          'start_date': selectedFromDate.value!.toIso8601String(),
-          'end_date': selectedToDate.value!.toIso8601String(),
+          'start_date': startDate.toUtc().toIso8601String(),
+          'end_date': endDate.toUtc().toIso8601String(),
           'item_name_filter': selectedItemName.value,
         },
       );
